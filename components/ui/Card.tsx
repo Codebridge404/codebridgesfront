@@ -9,8 +9,8 @@ export function Card({ className, hover = false, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'bg-white border border-slate-200/80 rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.03)] overflow-hidden transition-all duration-200',
-        hover && 'hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5',
+        'bg-transparent border border-slate-300/80 rounded-2xl overflow-hidden transition-all duration-200',
+        hover && 'hover:border-slate-400 hover:-translate-y-0.5',
         className
       )}
       {...props}
@@ -21,7 +21,7 @@ export function Card({ className, hover = false, ...props }: CardProps) {
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('p-5 border-b border-slate-100 flex flex-col gap-1', className)}
+      className={cn('p-5 border-b border-slate-300/60 flex flex-col gap-1', className)}
       {...props}
     />
   );
@@ -52,7 +52,7 @@ export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDi
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between', className)}
+      className={cn('p-4 border-t border-slate-300/60 bg-transparent flex items-center justify-between', className)}
       {...props}
     />
   );

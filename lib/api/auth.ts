@@ -160,17 +160,34 @@ export async function toggleApiKeyApi(id: string) {
   });
 }
 
-export async function getUsersApi(role?: string, search?: string) {
+export async function getUsersApi(role?: string, search?: string, scope: string = 'staff') {
   try {
     const params = new URLSearchParams();
     if (role && role !== 'all') params.append('role', role);
     if (search) params.append('search', search);
+    if (scope) params.append('scope', scope);
     const query = params.toString() ? `?${params.toString()}` : '';
     return await apiFetch(`/users${query}`);
   } catch (err) {
     console.warn('[Users API] Error fetching users:', err);
     return { status: 'success', data: [] };
   }
+}
+
+export async function lookupUsersApi(query: string) {
+  try {
+    return await apiFetch(`/users/lookup?q=${encodeURIComponent(query)}`);
+  } catch (err) {
+    console.warn('[Users Lookup API] Error:', err);
+    return { status: 'success', data: [] };
+  }
+}
+
+export async function attachUserApi(data: { user_id?: number | string; email?: string; role: string; outlet_id?: string; pin_code?: string }) {
+  return await apiFetch('/users/attach', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
 
 export async function createUserApi(data: any) {

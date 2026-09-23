@@ -167,7 +167,7 @@ export function HrmSidebar({ sidebarOpen }: HrmSidebarProps) {
   if (!sidebarOpen) return null;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col shrink-0 select-none z-20 overflow-hidden shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
+    <aside className="w-64 bg-transparent border-r border-slate-300/80 flex flex-col shrink-0 select-none z-20 overflow-hidden">
       <Suspense
         fallback={
           <div className="p-4 text-xs text-slate-400 flex items-center gap-2">

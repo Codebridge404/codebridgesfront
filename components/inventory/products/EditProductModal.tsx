@@ -9,6 +9,7 @@ interface EditProductModalProps {
   onClose: () => void;
   product: any;
   categories: any[];
+  brands?: any[];
   onProductUpdated: (productName: string) => void;
 }
 
@@ -17,6 +18,7 @@ export function EditProductModal({
   onClose,
   product,
   categories,
+  brands = [],
   onProductUpdated,
 }: EditProductModalProps) {
   const [formData, setFormData] = useState({
@@ -24,6 +26,8 @@ export function EditProductModal({
     sku: '',
     barcode: '',
     category_id: '',
+    brand_id: '',
+    expiry_date: '',
     selling_price: '',
     cost_price: '',
     min_reorder_point: '5',
@@ -39,6 +43,8 @@ export function EditProductModal({
         sku: product.sku || '',
         barcode: product.barcode || '',
         category_id: product.category_id ? String(product.category_id) : (categories[0]?.id ? String(categories[0].id) : ''),
+        brand_id: product.brand_id ? String(product.brand_id) : '',
+        expiry_date: product.expiry_date ? String(product.expiry_date).split('T')[0] : '',
         selling_price: product.selling_price ? String(product.selling_price) : (product.price ? String(product.price) : '0'),
         cost_price: product.cost_price ? String(product.cost_price) : '0',
         min_reorder_point: product.min_reorder_point ? String(product.min_reorder_point) : '5',
@@ -66,6 +72,8 @@ export function EditProductModal({
         sku: formData.sku.trim() || undefined,
         barcode: formData.barcode.trim() || undefined,
         category_id: formData.category_id || undefined,
+        brand_id: formData.brand_id || undefined,
+        expiry_date: formData.expiry_date || undefined,
         selling_price: parseFloat(formData.selling_price) || 0,
         cost_price: parseFloat(formData.cost_price) || 0,
         min_reorder_point: parseInt(formData.min_reorder_point, 10) || 5,
@@ -158,6 +166,32 @@ export function EditProductModal({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-bold mb-1">Brand</label>
+              <select
+                value={formData.brand_id}
+                onChange={(e) => setFormData({ ...formData, brand_id: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+              >
+                <option value="">No Brand / Generic</option>
+                {brands.map((b: any) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-bold mb-1">Expiry Date (Optional)</label>
+              <input
+                type="date"
+                value={formData.expiry_date}
+                onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+              />
             </div>
 
             <div>

@@ -13,6 +13,7 @@ import {
   fetchAndSyncModulesForOrg,
   enableModuleForOrg,
   disableModuleForOrg,
+  canonicalModuleId,
   getRoleDisplayName,
   getActiveShiftApi,
   OrgItem,
@@ -35,6 +36,17 @@ export function useLaunchpadState() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isTogglingModule, setIsTogglingModule] = useState<string | null>(null);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showStaffModal, setShowStaffModal] = useState(false);
+
+  const refreshStaff = async () => {
+    try {
+      const res = await getUsersApi('all', undefined, 'staff');
+      const list = Array.isArray(res) ? res : res?.data || [];
+      setStaffCount(list.length);
+    } catch {
+      setStaffCount(0);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -122,8 +134,9 @@ export function useLaunchpadState() {
     }
 
     try {
-      const res = await getUsersApi();
-      setStaffCount(Array.isArray(res) ? res.length : res?.data?.length || 0);
+      const res = await getUsersApi('all', undefined, 'staff');
+      const list = Array.isArray(res) ? res : res?.data || [];
+      setStaffCount(list.length);
     } catch { setStaffCount(0); }
 
     try {
@@ -222,31 +235,12 @@ export function useLaunchpadState() {
   };
 
   const isModuleEnabled = (modId: string) => {
-    if (user?.role === 'super_admin') {
-      return true;
-    }
-    if (modId === 'pos-management') {
-      return enabledModules.includes('pos-management') || enabledModules.includes('pos');
-    }
-    if (modId === 'inventory-suite' || modId === 'inventory') {
-      return (
-        enabledModules.includes('inventory-suite') ||
-        enabledModules.includes('inventory') ||
-        enabledModules.includes('pos-management') ||
-        enabledModules.includes('pos')
-      );
-    }
-    if (modId === 'financial-management' || modId === 'accounting-ledger') {
-      return (
-        enabledModules.includes('financial-management') ||
-        enabledModules.includes('financial') ||
-        enabledModules.includes('accounting-ledger') ||
-        enabledModules.includes('accounting') ||
-        enabledModules.includes('finance')
-      );
-    }
-    return enabledModules.includes(modId);
+    const targetCanonical = canonicalModuleId(modId);
+    if (!targetCanonical) return false;
+    const canonicalEnabled = enabledModules.map(canonicalModuleId);
+    return canonicalEnabled.includes(targetCanonical);
   };
+
 
   const roleTitle = getRoleDisplayName(user, activeOrg);
   const activeOrgItem = userOrganizations.find((o) => o.name === activeOrg);
@@ -285,5 +279,8 @@ export function useLaunchpadState() {
     enabledModules,
     showSubscriptionModal,
     setShowSubscriptionModal,
+    showStaffModal,
+    setShowStaffModal,
+    refreshStaff,
   };
 }

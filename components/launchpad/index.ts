@@ -1,9 +1,6 @@
 export * from './types';
 export * from './LaunchpadToast';
-export * from './LaunchpadHeroBanner';
-export * from './ManageModulesModal';
-export * from './ModuleConfirmDialog';
-export * from './RequireOrgModal';
+
 export * from './LaunchpadHeader';
 export * from './LaunchpadOrgBanner';
 export * from './LaunchpadStatsStrip';
@@ -13,3 +10,5 @@ export * from './CodeBridgesOnboardingLaunchpad';
 export * from './OrganizationManagerBar';
 export * from './useOrganizationSwitcher';
 export * from './useLaunchpadState';
+export * from './WorkspaceStaffModal';
+export * from './staff';

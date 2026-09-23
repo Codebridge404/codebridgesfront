@@ -16,6 +16,7 @@ interface LaunchpadOrgBannerProps {
   enabledModulesCount: number;
   staffCount: number;
   outletsCount: number;
+  onOpenManageStaff?: () => void;
 }
 
 export function LaunchpadOrgBanner({
@@ -28,6 +29,7 @@ export function LaunchpadOrgBanner({
   enabledModulesCount,
   staffCount,
   outletsCount,
+  onOpenManageStaff,
 }: LaunchpadOrgBannerProps) {
   const currentHour = new Date().getHours();
   const greeting =
@@ -94,13 +96,14 @@ export function LaunchpadOrgBanner({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href="/hrm"
+          <button
+            type="button"
+            onClick={onOpenManageStaff}
             className={buttonStyles.secondary}
           >
             <AppIcons.Staff className="w-4 h-4 text-slate-500" />
             <span>Manage Staff</span>
-          </Link>
+          </button>
           <Link
             href="/super-admin/platform/tenants"
             className={buttonStyles.icon}

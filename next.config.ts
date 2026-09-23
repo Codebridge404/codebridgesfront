@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/organization',
+        destination: '/organization/dashboard',
+        permanent: false,
+      },
+      {
         source: '/inventory',
         destination: '/inventory/dashboard',
         permanent: false,
@@ -25,7 +30,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/pos/access',
-        destination: '/pos/security',
+        destination: '/organization/security',
+        permanent: false,
+      },
+      {
+        source: '/pos/security',
+        destination: '/organization/security',
         permanent: false,
       },
       {
@@ -34,8 +44,28 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
+        source: '/kds',
+        destination: '/pos/kitchen-display',
+        permanent: false,
+      },
+      {
         source: '/pos/stock',
-        destination: '/pos/stock-warehouses',
+        destination: '/inventory/stock-warehouses',
+        permanent: false,
+      },
+      {
+        source: '/pos/stock-warehouses',
+        destination: '/inventory/stock-warehouses',
+        permanent: false,
+      },
+      {
+        source: '/pos/transfers',
+        destination: '/inventory/transfers',
+        permanent: false,
+      },
+      {
+        source: '/pos/purchase-orders',
+        destination: '/inventory/purchase-orders',
         permanent: false,
       },
       {
@@ -61,6 +91,31 @@ const nextConfig: NextConfig = {
       {
         source: '/CodeBridgesOnboardingLaunchpad',
         destination: '/launchpad',
+        permanent: false,
+      },
+      {
+        source: '/inventory/checkout-register',
+        destination: '/pos/pos-terminal',
+        permanent: false,
+      },
+      {
+        source: '/inventory/customer-display',
+        destination: '/pos/customer-display',
+        permanent: false,
+      },
+      {
+        source: '/inventory/kitchen-display',
+        destination: '/pos/kitchen-display',
+        permanent: false,
+      },
+      {
+        source: '/inventory/orders',
+        destination: '/pos/orders',
+        permanent: false,
+      },
+      {
+        source: '/inventory/shifts',
+        destination: '/pos/shifts',
         permanent: false,
       },
     ];

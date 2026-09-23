@@ -84,7 +84,7 @@ export function HrmTabPanels({
             <p className="text-xs text-slate-500 font-medium">Monthly staff disbursements, base salaries, and tax withholdings</p>
           </div>
           <Link
-            href="/super-admin/hrm/employees"
+            href="/hrm/employees"
             className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover active:bg-brand-active text-white rounded-xl font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
           >
             <span>Manage Compensation</span>
@@ -121,7 +121,7 @@ export function HrmTabPanels({
             <p className="text-xs text-slate-500 font-medium">Employment agreements, labor compliance attachments, and identification files</p>
           </div>
           <Link
-            href="/super-admin/hrm/employees"
+            href="/hrm/employees"
             className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover active:bg-brand-active text-white rounded-xl font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />

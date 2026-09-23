@@ -1,5 +1,5 @@
 import { PosAccessManagementView } from '@/components/pos';
 
-export default function PosSecurityPage() {
+export default function OrganizationSecurityPage() {
   return <PosAccessManagementView />;
 }

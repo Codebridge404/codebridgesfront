@@ -106,10 +106,14 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (
       response.status === 401 &&
       typeof window !== 'undefined' &&
-      (endpoint === '/me' || endpoint === '/auth/me')
+      !endpoint.startsWith('/auth/login') &&
+      !endpoint.startsWith('/auth/register')
     ) {
       removeAuthToken();
-      window.location.href = '/login';
+      if (!window.location.pathname.startsWith('/login')) {
+        const currentPath = window.location.pathname;
+        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      }
     }
     const errMsg = data?.message || data?.error || (data?.errors ? Object.values(data.errors).flat().join(', ') : `Request failed with status ${response.status}`);
     throw new Error(errMsg);

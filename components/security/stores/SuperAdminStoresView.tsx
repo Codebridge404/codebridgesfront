@@ -143,7 +143,7 @@ export const SuperAdminStoresView: React.FC = () => {
   const totalRegisters = stores.reduce((acc, curr) => acc + (curr.registers_count || 0), 0);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-3 w-full pb-6">
       {/* Header Bar */}
       <motion.div
         initial={{ opacity: 0, x: -15 }}

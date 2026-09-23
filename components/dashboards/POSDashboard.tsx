@@ -141,7 +141,7 @@ export function POSDashboard({
   const roleName = getRoleDisplayName(user || 'admin', orgName);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-10">
+    <div className="space-y-3 w-full font-sans pb-6">
       <DashboardOfflineBanner
         offlineQueueCount={offlineQueueCount}
         isSyncing={isSyncing}

@@ -1,103 +1,69 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { SortKey, SortOrder } from './types';
 
-interface ProductCatalogTableHeaderProps {
-  sortKey: SortKey;
-  sortOrder: SortOrder;
-  onSort: (key: SortKey) => void;
-}
-
-export function ProductCatalogTableHeader({
-  sortKey,
-  sortOrder,
-  onSort,
-}: ProductCatalogTableHeaderProps) {
-  const renderSortIcon = (key: SortKey) => {
-    if (sortKey === key) {
-      return sortOrder === 'asc' ? (
-        <ArrowUp className="w-3.5 h-3.5 text-brand" />
-      ) : (
-        <ArrowDown className="w-3.5 h-3.5 text-brand" />
-      );
-    }
-    return <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />;
-  };
-
+export function ProductCatalogTableHeader() {
   return (
-    <thead className="bg-slate-50 border-b border-slate-200 select-none">
+    <thead className="sticky top-0 z-40 bg-canvas border-b border-slate-300/80 select-none text-[11px]">
       <tr>
-        {/* Product & SKU */}
-        <th
-          onClick={() => onSort('name')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Product &amp; SKU</span>
-            {renderSortIcon('name')}
-          </div>
+        {/* Pinned Column 1: Product & SKU */}
+        <th className="sticky left-0 top-0 z-50 bg-canvas px-3 py-3 text-left font-extrabold text-slate-800 uppercase tracking-wider w-[190px] min-w-[190px] max-w-[190px]">
+          <span>Product &amp; SKU</span>
         </th>
 
-        {/* Category */}
-        <th
-          onClick={() => onSort('category')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Category</span>
-            {renderSortIcon('category')}
-          </div>
+        {/* Pinned Column 2: Category */}
+        <th className="sticky left-[190px] top-0 z-50 bg-canvas px-3 py-3 text-left font-extrabold text-slate-800 uppercase tracking-wider w-[120px] min-w-[120px] max-w-[120px]">
+          <span>Category</span>
         </th>
 
-        {/* Stock On Hand */}
-        <th
-          onClick={() => onSort('stock')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Stock On Hand</span>
-            {renderSortIcon('stock')}
-          </div>
+        {/* Pinned Column 3: Actions (stay with after category) */}
+        <th className="sticky left-[310px] top-0 z-50 bg-canvas px-2 py-3 text-center font-extrabold text-slate-800 uppercase tracking-wider w-[135px] min-w-[135px] max-w-[135px] border-r border-slate-300/80 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.04)]">
+          <span>Actions</span>
         </th>
 
-        {/* Cost Price */}
-        <th
-          onClick={() => onSort('cost_price')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Cost Price</span>
-            {renderSortIcon('cost_price')}
-          </div>
+        {/* Scrollable Column 4: Barcode */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[140px] min-w-[140px]">
+          <span>Barcode</span>
         </th>
 
-        {/* Selling Price */}
-        <th
-          onClick={() => onSort('selling_price')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Selling Price</span>
-            {renderSortIcon('selling_price')}
-          </div>
+        {/* Scrollable Column 5: Description */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[200px] min-w-[200px]">
+          <span>Description</span>
         </th>
 
-        {/* Min Buffer */}
-        <th
-          onClick={() => onSort('min_buffer')}
-          className="px-4 py-3 text-left font-extrabold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group"
-        >
-          <div className="flex items-center gap-1.5">
-            <span>Min Buffer</span>
-            {renderSortIcon('min_buffer')}
-          </div>
+        {/* Scrollable Column 6: Stock On Hand */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[150px] min-w-[150px]">
+          <span>Stock Level</span>
         </th>
 
-        {/* Action */}
-        <th className="px-4 py-3 text-right font-extrabold text-slate-600 uppercase tracking-wider">
-          Action
+        {/* Scrollable Column 7: Cost Price */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
+          <span>Cost Price</span>
+        </th>
+
+        {/* Scrollable Column 8: Selling Price */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
+          <span>Selling Price</span>
+        </th>
+
+        {/* Scrollable Column 9: Gross Margin */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[140px] min-w-[140px]">
+          <span>Margin ($/%)</span>
+        </th>
+
+        {/* Scrollable Column 10: Total Valuation */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
+          <span>Valuation</span>
+        </th>
+
+        {/* Scrollable Column 11: Min Buffer Threshold */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
+          <span>Min Buffer</span>
+        </th>
+
+        {/* Scrollable Column 12: Active Status */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
+          <span>Status</span>
         </th>
       </tr>
     </thead>

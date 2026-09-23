@@ -91,7 +91,7 @@ export function SuperAdminSidebar({
 
   return (
     <aside
-      className={`h-full bg-white border-r border-slate-200/90 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
+      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
         sidebarOpen ? 'w-64' : 'w-[72px]'
       }`}
     >

@@ -19,7 +19,7 @@ export function SidebarHeader({
   offlineCount,
 }: SidebarHeaderProps) {
   return (
-    <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+    <div className="p-4 border-b border-slate-300/60 bg-transparent">
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-2xl bg-brand text-white flex items-center justify-center font-black shadow-sm shrink-0">
           <AppIcons.Organization className="w-5 h-5" />
@@ -41,7 +41,7 @@ export function SidebarHeader({
       </div>
 
       {/* Context Pill */}
-      <div className="mt-3 flex items-center justify-between text-[11px] bg-white rounded-xl px-2.5 py-1.5 border border-slate-200/80 shadow-xs">
+      <div className="mt-3 flex items-center justify-between text-[11px] bg-transparent rounded-xl px-2.5 py-1.5 border border-slate-300/70">
         <span className="font-bold text-slate-600 truncate">{roleName}</span>
         {activeShift ? (
           <span className={badgeStyles.active}>

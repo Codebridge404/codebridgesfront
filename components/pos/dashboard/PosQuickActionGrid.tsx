@@ -76,7 +76,7 @@ export function PosQuickActionGrid({
     {
       title: 'Kitchen Display (KDS)',
       subtitle: 'Real-time order ticket bump screen',
-      href: '/kds',
+      href: '/pos/kitchen-display',
       icon: ChefHat,
       gradient: 'from-amber-500 to-brand',
       badge: 'Kitchen',

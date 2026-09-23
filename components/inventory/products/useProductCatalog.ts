@@ -79,7 +79,8 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortKey(key);
-      setSortOrder(key === 'stock' || key === 'cost_price' || key === 'selling_price' ? 'desc' : 'asc');
+      const isNumDesc = key === 'stock' || key === 'cost_price' || key === 'selling_price' || key === 'margin' || key === 'stock_value';
+      setSortOrder(isNumDesc ? 'desc' : 'asc');
     }
     setCurrentPage(1);
   };
@@ -137,6 +138,11 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
           valB = (b.category_name || b.category?.name || b.category || '').toLowerCase();
           return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
 
+        case 'barcode':
+          valA = (a.barcode || '').toLowerCase();
+          valB = (b.barcode || '').toLowerCase();
+          return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
         case 'stock':
           valA = parseFloat(a.stock_on_hand || '0');
           valB = parseFloat(b.stock_on_hand || '0');
@@ -152,10 +158,30 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
           valB = parseFloat(b.selling_price || b.price || '0');
           return sortOrder === 'asc' ? valA - valB : valB - valA;
 
+        case 'margin': {
+          const sellA = parseFloat(a.selling_price || a.price || '0');
+          const costA = parseFloat(a.cost_price || '0');
+          const sellB = parseFloat(b.selling_price || b.price || '0');
+          const costB = parseFloat(b.cost_price || '0');
+          return sortOrder === 'asc' ? (sellA - costA) - (sellB - costB) : (sellB - costB) - (sellA - costA);
+        }
+
+        case 'stock_value': {
+          const valA = parseFloat(a.stock_on_hand || '0') * parseFloat(a.cost_price || '0');
+          const valB = parseFloat(b.stock_on_hand || '0') * parseFloat(b.cost_price || '0');
+          return sortOrder === 'asc' ? valA - valB : valB - valA;
+        }
+
         case 'min_buffer':
           valA = parseInt(a.min_reorder_point || '5', 10);
           valB = parseInt(b.min_reorder_point || '5', 10);
           return sortOrder === 'asc' ? valA - valB : valB - valA;
+
+        case 'status': {
+          valA = a.is_active === false ? 0 : 1;
+          valB = b.is_active === false ? 0 : 1;
+          return sortOrder === 'asc' ? valA - valB : valB - valA;
+        }
 
         default:
           return 0;
@@ -186,45 +212,14 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
   const hasActiveFilters = search.trim() !== '' || selectedCategory !== 'all' || stockStatus !== 'all';
 
   const handleSortPresetChange = (preset: string) => {
-    switch (preset) {
-      case 'name_asc':
-        setSortKey('name');
-        setSortOrder('asc');
-        break;
-      case 'name_desc':
-        setSortKey('name');
-        setSortOrder('desc');
-        break;
-      case 'sku_asc':
-        setSortKey('sku');
-        setSortOrder('asc');
-        break;
-      case 'stock_asc':
-        setSortKey('stock');
-        setSortOrder('asc');
-        break;
-      case 'stock_desc':
-        setSortKey('stock');
-        setSortOrder('desc');
-        break;
-      case 'selling_price_desc':
-        setSortKey('selling_price');
-        setSortOrder('desc');
-        break;
-      case 'selling_price_asc':
-        setSortKey('selling_price');
-        setSortOrder('asc');
-        break;
-      case 'cost_price_desc':
-        setSortKey('cost_price');
-        setSortOrder('desc');
-        break;
-      case 'cost_price_asc':
-        setSortKey('cost_price');
-        setSortOrder('asc');
-        break;
+    const lastUnderscore = preset.lastIndexOf('_');
+    if (lastUnderscore !== -1) {
+      const key = preset.substring(0, lastUnderscore) as SortKey;
+      const order = preset.substring(lastUnderscore + 1) as SortOrder;
+      setSortKey(key);
+      setSortOrder(order);
+      setCurrentPage(1);
     }
-    setCurrentPage(1);
   };
 
   const currentSortPreset = `${sortKey}_${sortOrder}`;
@@ -253,5 +248,6 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
     validCurrentPage,
     paginatedProducts,
     currentSortPreset,
+    filteredProducts: filteredAndSortedProducts,
   };
 }

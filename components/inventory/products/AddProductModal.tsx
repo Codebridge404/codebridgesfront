@@ -8,6 +8,7 @@ interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   categories: any[];
+  brands?: any[];
   onProductCreated: (productName: string) => void;
 }
 
@@ -15,6 +16,7 @@ export function AddProductModal({
   isOpen,
   onClose,
   categories,
+  brands = [],
   onProductCreated,
 }: AddProductModalProps) {
   const [formData, setFormData] = useState({
@@ -22,6 +24,8 @@ export function AddProductModal({
     sku: '',
     barcode: '',
     category_id: categories[0]?.id ? String(categories[0].id) : '',
+    brand_id: '',
+    expiry_date: '',
     selling_price: '',
     cost_price: '',
     min_reorder_point: '10',
@@ -52,6 +56,8 @@ export function AddProductModal({
         sku: generatedSku,
         barcode: formData.barcode.trim() || undefined,
         category_id: formData.category_id || (categories[0]?.id ? String(categories[0].id) : undefined),
+        brand_id: formData.brand_id || undefined,
+        expiry_date: formData.expiry_date || undefined,
         selling_price: parseFloat(formData.selling_price) || 0,
         cost_price: parseFloat(formData.cost_price) || 0,
         min_reorder_point: parseInt(formData.min_reorder_point, 10) || 5,
@@ -69,6 +75,8 @@ export function AddProductModal({
         sku: '',
         barcode: '',
         category_id: categories[0]?.id ? String(categories[0].id) : '',
+        brand_id: '',
+        expiry_date: '',
         selling_price: '',
         cost_price: '',
         min_reorder_point: '10',
@@ -153,6 +161,34 @@ export function AddProductModal({
                 ))}
                 {categories.length === 0 && <option value="">General Goods</option>}
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Brand</label>
+              <select
+                value={formData.brand_id}
+                onChange={(e) => setFormData({ ...formData, brand_id: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-slate-50 focus:bg-white"
+              >
+                <option value="">No Brand / Generic</option>
+                {brands.map((b: any) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Expiry Date (Optional)</label>
+              <input
+                type="date"
+                value={formData.expiry_date}
+                onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-slate-50 focus:bg-white"
+              />
             </div>
           </div>
 

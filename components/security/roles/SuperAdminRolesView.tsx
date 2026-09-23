@@ -176,7 +176,7 @@ export const SuperAdminRolesView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 font-sans">
+    <div className="w-full space-y-3 font-sans pb-6">
       <AnimatePresence>
         {notification && (
           <motion.div

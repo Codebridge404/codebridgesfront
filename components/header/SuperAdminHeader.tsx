@@ -33,7 +33,7 @@ export function SuperAdminHeader({
   }, []);
 
   return (
-    <header className="h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+    <header className="h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
       {/* Left Header Elements */}
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Sidebar Toggle Button */}
@@ -111,14 +111,22 @@ export function SuperAdminHeader({
                 </span>
               </div>
 
-              {/* Switch to Onboarding Launchpad Action */}
-              <div className="p-1.5">
+              {/* Switch Actions (Launchpad & Organization Dashboard) */}
+              <div className="p-1.5 space-y-1">
                 <Link
-                  href="/launchpad"
+                  href="/organization/dashboard"
                   onClick={() => setShowProfileDropdown(false)}
                   className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
                 >
-                  <AppIcons.Compass className="w-4 h-4 text-brand" />
+                  <AppIcons.Organization className="w-4 h-4 text-brand" />
+                  <span>Organization Dashboard</span>
+                </Link>
+                <Link
+                  href="/launchpad"
+                  onClick={() => setShowProfileDropdown(false)}
+                  className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 font-bold text-xs transition-colors"
+                >
+                  <AppIcons.Compass className="w-4 h-4 text-slate-400" />
                   <span>Onboarding Launchpad</span>
                 </Link>
               </div>

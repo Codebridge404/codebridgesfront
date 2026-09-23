@@ -128,7 +128,7 @@ export function SuperAdminPlatformUsersView() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-12">
+    <div className="space-y-3 w-full font-sans pb-6">
       <AnimatePresence>
         {toastMessage && (
           <motion.div

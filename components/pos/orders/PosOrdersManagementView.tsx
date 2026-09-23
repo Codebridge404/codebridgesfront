@@ -86,7 +86,7 @@ export function PosOrdersManagementView() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans">
+    <div className="space-y-3 w-full font-sans">
       {/* Header Banner */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

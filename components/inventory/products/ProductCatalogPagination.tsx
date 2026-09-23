@@ -31,7 +31,7 @@ export function ProductCatalogPagination({
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="py-1 px-2 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand cursor-pointer"
+          className="py-1 px-2 rounded-lg bg-transparent border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand cursor-pointer"
         >
           <option value={10}>10</option>
           <option value={25}>25</option>
@@ -53,13 +53,13 @@ export function ProductCatalogPagination({
             type="button"
             disabled={currentPage <= 1}
             onClick={() => onPageChange(currentPage - 1)}
-            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-300/80 bg-transparent text-slate-600 hover:bg-slate-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             title="Previous Page"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <span className="px-3 py-1 text-xs font-bold text-slate-700 bg-slate-50 rounded-lg border border-slate-200">
+          <span className="px-3 py-1 text-xs font-bold text-slate-700 bg-transparent rounded-lg border border-slate-300/80">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -67,7 +67,7 @@ export function ProductCatalogPagination({
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => onPageChange(currentPage + 1)}
-            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-300/80 bg-transparent text-slate-600 hover:bg-slate-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             title="Next Page"
           >
             <ChevronRight className="w-4 h-4" />

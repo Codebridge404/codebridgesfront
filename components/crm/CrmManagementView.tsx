@@ -75,7 +75,7 @@ function CrmManagementViewContent() {
   }, [currentTab]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-16 text-slate-900">
+    <div className="space-y-3 w-full font-sans pb-6 text-slate-900">
       {/* 1. Header Banner */}
       <div className="bg-gradient-to-r from-brand via-brand-hover to-brand-active rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-brand/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 relative z-10">

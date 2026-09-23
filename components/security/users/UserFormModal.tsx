@@ -85,7 +85,7 @@ export function UserFormModal({
           </div>
 
           {/* Assigned Role & PIN Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid ${formData.role === 'cashier' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
             <div>
               <label className="block font-bold text-slate-700 mb-1">Assigned Role (RBAC) *</label>
               <select
@@ -101,31 +101,30 @@ export function UserFormModal({
                   ))
                 ) : (
                   <>
-                    <option value="super_admin">Super Admin</option>
-                    <option value="admin">Admin</option>
-                    <option value="outlet_manager">Outlet Manager</option>
-                    <option value="supervisor">Supervisor</option>
+                    <option value="outlet_manager">Store Manager</option>
+                    <option value="supervisor">Shift Supervisor</option>
                     <option value="cashier">Cashier</option>
                     <option value="inventory_clerk">Inventory Clerk</option>
                     <option value="accountant">Accountant</option>
-                    <option value="user">User</option>
-                    <option value="customer">Customer</option>
+                    <option value="admin">Workspace Admin</option>
                   </>
                 )}
               </select>
             </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Supervisor PIN (Optional)</label>
-              <input
-                type="password"
-                maxLength={6}
-                value={formData.pin_code}
-                onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })}
-                placeholder="e.g. 1234"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white font-mono transition-all"
-              />
-            </div>
+            {formData.role === 'cashier' && (
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">4-Digit POS PIN (Cashier)</label>
+                <input
+                  type="password"
+                  maxLength={6}
+                  value={formData.pin_code}
+                  onChange={(e) => setFormData({ ...formData, pin_code: e.target.value })}
+                  placeholder="e.g. 1234"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white font-mono transition-all"
+                />
+              </div>
+            )}
           </div>
 
           {/* Assigned Outlet */}

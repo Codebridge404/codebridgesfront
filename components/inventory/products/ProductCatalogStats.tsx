@@ -16,73 +16,81 @@ export function ProductCatalogStats({
   onSelectStatus,
 }: ProductCatalogStatsProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
       {/* Total SKUs */}
       <button
         type="button"
         onClick={() => onSelectStatus('all')}
-        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+        className={`px-2.5 py-1 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
           currentStatus === 'all'
-            ? 'bg-brand-subtle/80 border-brand/30 ring-2 ring-brand/20'
-            : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
+            ? 'bg-brand-subtle/90 border-brand/30 ring-2 ring-brand/20 shadow-2xs'
+            : 'bg-transparent border-slate-300/80 hover:bg-slate-200/40'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total SKUs</span>
-          <Boxes className={`w-3.5 h-3.5 ${currentStatus === 'all' ? 'text-brand' : 'text-slate-400'}`} />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Boxes className={`w-3.5 h-3.5 shrink-0 ${currentStatus === 'all' ? 'text-brand' : 'text-slate-400'}`} />
+          <span className="text-[11px] font-bold text-slate-600 truncate">Total SKUs</span>
         </div>
-        <div className="text-lg font-black text-slate-900 mt-0.5">{stats.total}</div>
+        <span className="text-xs font-black text-slate-900 bg-slate-200/50 px-1.5 py-0.2 rounded font-mono border border-slate-300/60 shrink-0">
+          {stats.total}
+        </span>
       </button>
 
       {/* In Stock */}
       <button
         type="button"
         onClick={() => onSelectStatus('in_stock')}
-        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+        className={`px-2.5 py-1 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
           currentStatus === 'in_stock'
-            ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20'
-            : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
+            ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-500/20 shadow-2xs'
+            : 'bg-transparent border-slate-300/80 hover:bg-slate-200/40'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">In Stock</span>
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+          <span className="text-[11px] font-bold text-emerald-700 truncate">In Stock</span>
         </div>
-        <div className="text-lg font-black text-emerald-900 mt-0.5">{stats.inStock}</div>
+        <span className="text-xs font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.2 rounded font-mono border border-emerald-200/60 shrink-0">
+          {stats.inStock}
+        </span>
       </button>
 
       {/* Low Stock Warning */}
       <button
         type="button"
         onClick={() => onSelectStatus('low_stock')}
-        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+        className={`px-2.5 py-1 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
           currentStatus === 'low_stock'
-            ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-500/20'
-            : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
+            ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-500/20 shadow-2xs'
+            : 'bg-transparent border-slate-300/80 hover:bg-slate-200/40'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Low Stock</span>
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+          <span className="text-[11px] font-bold text-amber-700 truncate">Low Stock</span>
         </div>
-        <div className="text-lg font-black text-amber-900 mt-0.5">{stats.lowStock}</div>
+        <span className="text-xs font-black text-amber-800 bg-amber-100/80 px-1.5 py-0.2 rounded font-mono border border-amber-200/60 shrink-0">
+          {stats.lowStock}
+        </span>
       </button>
 
       {/* Out of Stock */}
       <button
         type="button"
         onClick={() => onSelectStatus('out_of_stock')}
-        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+        className={`px-2.5 py-1 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
           currentStatus === 'out_of_stock'
-            ? 'bg-rose-50/80 border-rose-300 ring-2 ring-rose-500/20'
-            : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
+            ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-500/20 shadow-2xs'
+            : 'bg-transparent border-slate-300/80 hover:bg-slate-200/40'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Out of Stock</span>
-          <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+          <span className="text-[11px] font-bold text-rose-700 truncate">Out of Stock</span>
         </div>
-        <div className="text-lg font-black text-rose-900 mt-0.5">{stats.outOfStock}</div>
+        <span className="text-xs font-black text-rose-800 bg-rose-100/80 px-1.5 py-0.2 rounded font-mono border border-rose-200/60 shrink-0">
+          {stats.outOfStock}
+        </span>
       </button>
     </div>
   );

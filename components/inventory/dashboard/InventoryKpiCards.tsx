@@ -122,11 +122,11 @@ export function InventoryKpiCards() {
         return (
           <div
             key={idx}
-            className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="bg-white p-5 rounded-2xl flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{c.title}</span>
-              <div className={`w-9 h-9 rounded-xl ${c.bg} ${c.color} flex items-center justify-center`}>
+              <span className="text-xs font-bold uppercase tracking-wider">{c.title}</span>
+              <div className={`w-9 h-9 rounded-full ${c.bg} ${c.color} flex items-center justify-center shrink-0`}>
                 <IconComp className="w-5 h-5" />
               </div>
             </div>
@@ -134,9 +134,9 @@ export function InventoryKpiCards() {
               {loading ? (
                 <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse" />
               ) : (
-                <p className="text-2xl font-black text-slate-900 font-mono tracking-tight">{c.value}</p>
+                <p className="text-2xl font-black font-mono tracking-tight">{c.value}</p>
               )}
-              <p className="text-xs text-slate-400 font-medium mt-0.5">{c.subtitle}</p>
+              <p className="text-xs font-medium mt-0.5">{c.subtitle}</p>
             </div>
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
               <span className={`font-extrabold ${c.isPositive ? 'text-emerald-700' : 'text-rose-700'}`}>

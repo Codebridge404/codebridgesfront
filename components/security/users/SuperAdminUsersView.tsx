@@ -145,7 +145,7 @@ export function SuperAdminUsersView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans">
+    <div className="space-y-3 w-full pb-6 font-sans">
       <UserStatsHeader
         totalUsers={totalUsers}
         activeUsersCount={activeUsersCount}

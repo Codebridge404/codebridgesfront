@@ -8,16 +8,9 @@ import {
   Warehouse,
   Truck,
   ShoppingCart,
-  Building2,
-  SlidersHorizontal,
   BarChart3,
   ShieldCheck,
   Settings,
-  Monitor,
-  Clock,
-  Receipt,
-  Tv,
-  ChefHat,
 } from 'lucide-react';
 import { UniversalModuleLayout } from '@/components/module-shell';
 import { getOutletsApi, getTransfersApi, getPurchaseOrdersApi } from '@/lib/api';
@@ -80,22 +73,12 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
   const inventorySidebarSections = [
     {
       items: [
-        { label: 'Organization Dashboard', href: '/inventory/dashboard', icon: LayoutDashboard },
+        { label: 'Inventory Dashboard', href: '/inventory/dashboard', icon: LayoutDashboard },
         { label: 'Products & SKUs', href: '/inventory/products', icon: Package, badge: 'Live Catalog' },
       ],
     },
     {
-      title: 'POS Register & Front-Desk',
-      items: [
-        { label: 'Checkout Register', href: '/inventory/checkout-register', icon: Monitor, badge: 'Terminal' },
-        { label: 'Shifts & Till Float', href: '/inventory/shifts', icon: Clock },
-        { label: 'Orders & Receipts', href: '/inventory/orders', icon: Receipt },
-        { label: 'Customer Display (CFD)', href: '/inventory/customer-display', icon: Tv },
-        { label: 'Kitchen Display (KDS)', href: '/inventory/kitchen-display', icon: ChefHat },
-      ],
-    },
-    {
-      title: 'Stock & Multi-Warehouse',
+      title: 'Warehousing & Supply Chain',
       items: [
         {
           label: 'Warehouse Stock Levels',
@@ -120,11 +103,11 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
       ],
     },
     {
-      title: 'Operations & Hardware',
+      title: 'Governance & Intelligence',
       items: [
-        { label: 'Cashier PINs & Security', href: '/inventory/security', icon: ShieldCheck },
-        { label: 'POS Analytics & Reports', href: '/inventory/reports', icon: BarChart3 },
-        { label: 'Store & Hardware Settings', href: '/inventory/settings', icon: Settings },
+        { label: 'Stock Valuation & Reports', href: '/inventory/reports', icon: BarChart3 },
+        { label: 'Warehouse Access & RBAC', href: '/inventory/security', icon: ShieldCheck },
+        { label: 'Inventory & Store Settings', href: '/inventory/settings', icon: Settings },
       ],
     },
   ];
@@ -135,7 +118,7 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
       moduleTitle="Inventory & Supply Chain"
       moduleIcon={Boxes}
       moduleBadge="CORE"
-      moduleBadgeColor="bg-amber-100 text-amber-800"
+      moduleBadgeColor="bg-emerald-100 text-emerald-800"
       sidebarSections={inventorySidebarSections}
     >
       {children}

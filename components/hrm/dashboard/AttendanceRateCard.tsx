@@ -70,11 +70,11 @@ export function AttendanceRateCard() {
   const absentPct = Math.max(0, 100 - onTimePct);
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+    <div className="bg-white p-5 rounded-2xl space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
-          <h3 className="font-extrabold text-sm text-slate-900">Attendance &amp; Clock-In</h3>
-          <p className="text-xs text-slate-500 font-medium">Real-time biometric &amp; POS PIN timesheets</p>
+          <h3 className="font-extrabold text-sm">Attendance &amp; Clock-In</h3>
+          <p className="text-xs text-text-secondary font-medium">Real-time biometric &amp; POS PIN timesheets</p>
         </div>
         <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
           {attendance.onTime > 0 ? 'Active Shift Underway' : 'Standby / Ready'}

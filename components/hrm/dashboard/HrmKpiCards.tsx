@@ -81,8 +81,8 @@ export function HrmKpiCards() {
       subtitle: `Across ${metrics.outletsCount || 1} Store Outlet${metrics.outletsCount === 1 ? '' : 's'}`,
       change: 'Verified registered personnel',
       icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
+      color: 'text-brand',
+      bg: 'bg-icon-bg-blue',
     },
     {
       title: "Today's Attendance Rate",
@@ -90,8 +90,8 @@ export function HrmKpiCards() {
       subtitle: `${metrics.clockedInCount} Active Shift Register${metrics.clockedInCount === 1 ? '' : 's'}`,
       change: 'Biometric & POS PIN verified',
       icon: Clock,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-100',
+      color: 'text-semantic-emerald',
+      bg: 'bg-icon-bg-teal',
     },
     {
       title: 'Pending Leave Approvals',
@@ -100,7 +100,7 @@ export function HrmKpiCards() {
       change: 'All schedules reviewed',
       icon: Calendar,
       color: 'text-amber-600',
-      bg: 'bg-amber-100',
+      bg: 'bg-amber-50',
     },
     {
       title: 'Estimated Monthly Payroll',
@@ -108,8 +108,8 @@ export function HrmKpiCards() {
       subtitle: 'Active Staff Base Salaries',
       change: 'Calculated from staff profiles',
       icon: DollarSign,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-100',
+      color: 'text-brand',
+      bg: 'bg-brand-subtle',
     },
   ];
 
@@ -120,21 +120,21 @@ export function HrmKpiCards() {
         return (
           <div
             key={idx}
-            className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="bg-white p-5 rounded-2xl flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{c.title}</span>
-              <div className={`w-9 h-9 rounded-xl ${c.bg} ${c.color} flex items-center justify-center`}>
+              <span className="text-xs font-bold uppercase tracking-wider">{c.title}</span>
+              <div className={`w-9 h-9 rounded-full ${c.bg} ${c.color} flex items-center justify-center shrink-0`}>
                 <IconComp className="w-4 h-4" />
               </div>
             </div>
 
             <div className="my-3">
-              <p className="text-2xl font-black text-slate-900 tracking-tight font-mono">{c.value}</p>
-              <p className="text-xs text-slate-400 font-semibold">{c.subtitle}</p>
+              <p className="text-2xl font-black tracking-tight font-mono">{c.value}</p>
+              <p className="text-xs font-semibold">{c.subtitle}</p>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-1 text-[11px] font-extrabold text-blue-600">
+            <div className="pt-2 border-t border-slate-100 flex items-center gap-1 text-[11px] font-extrabold text-brand">
               {loading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
               ) : (

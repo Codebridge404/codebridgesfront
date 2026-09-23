@@ -116,14 +116,26 @@ export function LaunchpadHeader({
                   </span>
                 </div>
 
+                {/* Switch Action: Organization Dashboard */}
+                <div className="py-1">
+                  <Link
+                    href="/organization/dashboard"
+                    onClick={() => setShowUserMenu(false)}
+                    className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
+                  >
+                    <AppIcons.Organization className="w-4 h-4 text-brand" />
+                    <span>Organization Dashboard</span>
+                  </Link>
+                </div>
+
                 {user.role === 'super_admin' && (
                   <Link
                     href="/super-admin/dashboard"
                     onClick={() => setShowUserMenu(false)}
-                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-brand hover:bg-brand-subtle flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-brand hover:bg-brand-subtle flex items-center gap-2.5 transition-colors"
                   >
                     <AppIcons.Security className="w-3.5 h-3.5" />
-                    <span>Super Admin Hub</span>
+                    <span>Super Admin Console</span>
                   </Link>
                 )}
 

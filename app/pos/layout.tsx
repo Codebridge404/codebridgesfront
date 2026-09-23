@@ -44,6 +44,7 @@ export default function PosLayout({ children }: { children: React.ReactNode }) {
           onToggleSidebar={onToggleSidebar}
         />
       )}
+      mainClassName="p-1 sm:p-1.5 lg:p-2 h-full flex flex-col overflow-hidden"
     >
       {children}
     </UniversalModuleLayout>

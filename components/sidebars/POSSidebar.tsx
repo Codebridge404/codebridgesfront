@@ -28,7 +28,6 @@ function SidebarNavContent() {
   const [orgName, setOrgName] = useState<string>('My Store Organization');
   const [activeShift, setActiveShift] = useState<any>(null);
   const [offlineCount, setOfflineCount] = useState<number>(0);
-  const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   useEffect(() => {
     const authUser = getAuthUser();
@@ -46,19 +45,11 @@ function SidebarNavContent() {
 
     async function loadDynamicStatus() {
       try {
-        const [shiftRes, summaryRes] = await Promise.allSettled([
-          getActiveShiftApi(),
-          getDashboardSummaryApi(),
-        ]);
-
-        if (shiftRes.status === 'fulfilled' && shiftRes.value?.data?.shift) {
-          setActiveShift(shiftRes.value.data.shift);
+        const shiftRes = await getActiveShiftApi();
+        if (shiftRes?.data?.shift) {
+          setActiveShift(shiftRes.data.shift);
         } else {
           setActiveShift(null);
-        }
-
-        if (summaryRes.status === 'fulfilled' && summaryRes.value?.data?.counts) {
-          setLowStockCount(summaryRes.value.data.counts.low_stock || 0);
         }
       } catch (err) {
         console.warn('Could not load sidebar status:', err);
@@ -97,7 +88,7 @@ function SidebarNavContent() {
         offlineCount={offlineCount}
       />
 
-      <SidebarNavList activeShift={activeShift} lowStockCount={lowStockCount} />
+      <SidebarNavList activeShift={activeShift} />
 
       <div className="p-3 border-t border-slate-100 bg-slate-50/40 text-[11px] text-slate-400 flex items-center justify-between">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -123,7 +114,7 @@ export function POSSidebar({ sidebarOpen }: POSSidebarProps) {
   if (!sidebarOpen) return null;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col shrink-0 select-none z-20 overflow-hidden shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
+    <aside className="w-64 bg-transparent border-r border-slate-300/80 flex flex-col shrink-0 select-none z-20 overflow-hidden">
       <Suspense
         fallback={
           <div className="p-4 text-xs text-slate-400 flex items-center gap-2">

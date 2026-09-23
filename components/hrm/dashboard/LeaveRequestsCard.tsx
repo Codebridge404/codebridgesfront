@@ -23,7 +23,7 @@ export function LeaveRequestsCard() {
   };
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3 relative">
+    <div className="bg-white p-5 rounded-2xl space-y-3 relative">
       {toastMessage && (
         <div className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-bold shadow-lg flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -33,8 +33,8 @@ export function LeaveRequestsCard() {
 
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
-          <h3 className="font-extrabold text-sm text-slate-900">Leave Management</h3>
-          <p className="text-xs text-slate-500 font-medium">Employee vacation requests, sick notes, and manager approvals</p>
+          <h3 className="font-extrabold text-sm">Leave Management</h3>
+          <p className="text-xs text-text-secondary font-medium">Employee vacation requests, sick notes, and manager approvals</p>
         </div>
         <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700">
           {requests.length} Pending

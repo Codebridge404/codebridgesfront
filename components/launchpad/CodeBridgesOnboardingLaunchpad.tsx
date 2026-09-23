@@ -10,6 +10,7 @@ import { LaunchpadCatalogGrid } from './LaunchpadCatalogGrid';
 import { LaunchpadToast } from './LaunchpadToast';
 import { useLaunchpadState } from './useLaunchpadState';
 import { SubscriptionHubModal } from '@/components/ui';
+import { WorkspaceStaffModal } from './WorkspaceStaffModal';
 
 export function CodeBridgesOnboardingLaunchpad() {
   const {
@@ -38,10 +39,13 @@ export function CodeBridgesOnboardingLaunchpad() {
     enabledModules,
     showSubscriptionModal,
     setShowSubscriptionModal,
+    showStaffModal,
+    setShowStaffModal,
+    refreshStaff,
   } = useLaunchpadState();
 
   const totalEffectiveModules =
-    user?.role === 'super_admin' ? CATALOG_MODULES.length : enabledModules.length;
+    user?.role === 'super_admin' ? CATALOG_MODULES.length : activeRunningModules.length;
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-slate-900 selection:bg-brand selection:text-white pb-20">
@@ -54,6 +58,15 @@ export function CodeBridgesOnboardingLaunchpad() {
         onClose={() => setShowSubscriptionModal(false)}
         user={user}
         activeOrgName={displayOrgName}
+      />
+
+      {/* Universal Workspace Staff & Access Management Modal */}
+      <WorkspaceStaffModal
+        isOpen={showStaffModal}
+        onClose={() => setShowStaffModal(false)}
+        activeOrgName={displayOrgName}
+        isHrmEnabled={isModuleEnabled('hrm')}
+        onStaffUpdated={refreshStaff}
       />
 
       {/* 1. Top Global Navigation Bar */}
@@ -80,6 +93,7 @@ export function CodeBridgesOnboardingLaunchpad() {
           enabledModulesCount={totalEffectiveModules}
           staffCount={staffCount}
           outletsCount={outletsCount}
+          onOpenManageStaff={() => setShowStaffModal(true)}
         />
 
         {/* C. 4-Column Micro-Stats Strip */}

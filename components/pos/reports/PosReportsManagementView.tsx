@@ -120,7 +120,7 @@ export function PosReportsManagementView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans text-slate-900 pb-16">
+    <div className="space-y-3 w-full font-sans text-slate-900 pb-6">
       {/* 1. Header Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
         <div>

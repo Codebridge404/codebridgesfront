@@ -118,7 +118,7 @@ export function WarehouseLevelsMatrix({
           <h3 className="font-extrabold text-sm text-slate-900">Warehouse Stock Levels</h3>
           <p className="text-xs text-slate-500 font-medium">Real-time capacity, active SKU counts, and live location valuations</p>
         </div>
-        <Link href="/pos/transfers" className="text-xs font-bold text-brand hover:underline flex items-center gap-1">
+        <Link href="/inventory/transfers" className="text-xs font-bold text-brand hover:underline flex items-center gap-1">
           <span>Transfer Stock</span>
           <ArrowRight className="w-3 h-3" />
         </Link>
@@ -151,7 +151,7 @@ export function WarehouseLevelsMatrix({
             </button>
           ) : (
             <Link
-              href="/pos/stock-warehouses"
+              href="/inventory/stock-warehouses"
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand hover:bg-brand-hover text-white rounded-xl font-bold text-xs shadow-sm transition-all"
             >
               <span>Register First Warehouse Outlet</span>

@@ -4,7 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { ProductCatalogTable } from './ProductCatalogTable';
 import { AddProductModal } from './AddProductModal';
 import { EditProductModal } from './EditProductModal';
-import { getProductsApi, getCategoriesApi, deleteProductApi } from '@/lib/api';
+import { ProductImportModal } from './ProductImportModal';
+import { ProductStockAdjustModal } from './ProductStockAdjustModal';
+import { ProductMovementsModal } from './ProductMovementsModal';
+import { getProductsApi, getCategoriesApi, getBrandsApi, deleteProductApi } from '@/lib/api';
 import { useToast, useConfirm } from '@/components/common';
 
 export function ProductsCatalogView() {
@@ -12,11 +15,15 @@ export function ProductsCatalogView() {
   const confirm = useConfirm();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // In-Page Modals State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [adjustingProduct, setAdjustingProduct] = useState<any | null>(null);
+  const [viewingMovementsProduct, setViewingMovementsProduct] = useState<any | null>(null);
 
   async function loadProductsData() {
     try {
@@ -42,9 +49,20 @@ export function ProductsCatalogView() {
     }
   }
 
+  async function loadBrandsData() {
+    try {
+      const res = await getBrandsApi();
+      const list = Array.isArray(res) ? res : res?.data || [];
+      setBrands(list);
+    } catch (err) {
+      console.warn('Failed to load brands:', err);
+    }
+  }
+
   useEffect(() => {
     loadProductsData();
     loadCategoriesData();
+    loadBrandsData();
   }, []);
 
   const handleDeleteProduct = async (product: any) => {
@@ -74,21 +92,27 @@ export function ProductsCatalogView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans text-slate-900 pb-16">
+    <div className="h-full flex flex-col w-full font-sans text-slate-900 overflow-hidden">
       {/* 1. Interactive Product Catalog Table */}
       <ProductCatalogTable
         products={products}
         categories={categories}
+        brands={brands}
         loading={loading}
         onOpenAddModal={() => {
           loadCategoriesData();
+          loadBrandsData();
           setIsAddModalOpen(true);
         }}
+        onOpenImportModal={() => setIsImportModalOpen(true)}
         onEditProduct={(p) => {
           loadCategoriesData();
+          loadBrandsData();
           setEditingProduct(p);
         }}
         onDeleteProduct={handleDeleteProduct}
+        onAdjustStock={(p) => setAdjustingProduct(p)}
+        onViewMovements={(p) => setViewingMovementsProduct(p)}
       />
 
       {/* 2. Reusable In-Page Dynamic Add Product Modal */}
@@ -96,6 +120,7 @@ export function ProductsCatalogView() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         categories={categories}
+        brands={brands}
         onProductCreated={(productName) => {
           toast.success(`Product "${productName}" successfully created & added to inventory!`);
           loadProductsData();
@@ -108,10 +133,39 @@ export function ProductsCatalogView() {
         onClose={() => setEditingProduct(null)}
         product={editingProduct}
         categories={categories}
+        brands={brands}
         onProductUpdated={(productName) => {
           toast.success(`Product "${productName}" details updated successfully!`);
           loadProductsData();
         }}
+      />
+
+      {/* 4. In-Page Dynamic Bulk Import Products Modal */}
+      <ProductImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={(count) => {
+          toast.success(`Successfully imported ${count} products into catalog & inventory!`);
+          loadProductsData();
+        }}
+      />
+
+      {/* 5. In-Page Dynamic Quick Stock Adjustment Modal */}
+      <ProductStockAdjustModal
+        isOpen={Boolean(adjustingProduct)}
+        onClose={() => setAdjustingProduct(null)}
+        product={adjustingProduct}
+        onAdjustSuccess={(name, newQty) => {
+          toast.success(`Stock adjusted for "${name}" (New balance: ${newQty} units).`);
+          loadProductsData();
+        }}
+      />
+
+      {/* 6. In-Page Dynamic Product Movement Audit Ledger Modal */}
+      <ProductMovementsModal
+        isOpen={Boolean(viewingMovementsProduct)}
+        onClose={() => setViewingMovementsProduct(null)}
+        product={viewingMovementsProduct}
       />
     </div>
   );

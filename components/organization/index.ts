@@ -1,9 +1,3 @@
-export {
-  POSDashboard,
-  OrganizationDashboard,
-  OrganizationSidebar,
-  POSSidebar,
-} from '../pos';
-
-export * from '../pos/dashboard';
-export * from '../pos/sidebar';
+export { OrganizationDashboard } from '@/components/dashboards/OrganizationDashboard';
+export { OrganizationSidebar } from '@/components/sidebars/OrganizationSidebar';
+export * from './dashboard';

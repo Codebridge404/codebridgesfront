@@ -9,26 +9,26 @@ export interface OrgItem {
 
 const STORAGE_KEY_PREFIX = 'cb_enabled_modules_';
 
-export const DEFAULT_ENTERPRISE_MODULES: string[] = ['pos', 'pos-management'];
-
 /**
- * Read enabled modules from local fast cache or default set.
- * By default, every organization starts with the Core POS Management System enabled.
+ * Read enabled modules from local fast cache.
+ * Returns empty array if not yet cached or if organization has no active modules.
  */
 export function getEnabledModulesForOrg(orgName: string): string[] {
   if (typeof window === 'undefined' || !orgName || orgName === 'No Organization Yet! Please Create') {
-    return ['pos', 'pos-management'];
+    return [];
   }
   try {
     const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${orgName}`);
     if (!raw) {
-      return ['pos', 'pos-management'];
+      // Trigger immediate background sync from cloud database
+      fetchAndSyncModulesForOrg(orgName).catch(() => {});
+      return [];
     }
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     console.warn('[modules] Failed to read enabled modules from cache:', e);
-    return ['pos', 'pos-management'];
+    return [];
   }
 }
 
@@ -67,26 +67,64 @@ export async function fetchAndSyncModulesForOrg(orgName: string): Promise<string
   return inFlightModuleSync[orgName];
 }
 
+export const MODULE_ALIASES: Record<string, string> = {
+  // POS Suite (Unified: Management, Terminal, KDS, CFD)
+  'pos': 'pos',
+  'pos-management': 'pos',
+  'pos-terminal': 'pos',
+  'pos-dashboard': 'pos',
+  'kds': 'pos',
+  'kds-kitchen': 'pos',
+  'kds-service': 'pos',
+  'cfd': 'pos',
+  'cfd-display': 'pos',
+  'cfd-service': 'pos',
+
+  // Inventory
+  'inventory': 'inventory',
+  'inventory-suite': 'inventory',
+  'inventory-service': 'inventory',
+
+  // HRM
+  'hrm': 'hrm',
+  'staff-hrm': 'hrm',
+  'hrm-service': 'hrm',
+
+  // CRM
+  'crm': 'crm',
+  'crm-loyalty': 'crm',
+  'crm-service': 'crm',
+
+  // Finance / Accounting
+  'finance': 'finance',
+  'accounting': 'finance',
+  'financial': 'finance',
+  'financial-management': 'finance',
+  'accounting-ledger': 'finance',
+  'finance-service': 'finance',
+  'bill-subscription': 'finance',
+
+  // Online Storefront
+  'shop': 'shop',
+
+  // Platform Telemetry
+  'telemetry-hub': 'telemetry-hub',
+};
+
+export function canonicalModuleId(id: string): string {
+  if (!id) return '';
+  const key = id.toLowerCase().trim();
+  return MODULE_ALIASES[key] || key;
+}
+
 export function isModuleEnabledForOrg(orgName: string, moduleId: string): boolean {
   if (!orgName || orgName === 'No Organization Yet! Please Create') return false;
+  const targetCanonical = canonicalModuleId(moduleId);
+  if (!targetCanonical) return false;
+
   const enabled = getEnabledModulesForOrg(orgName);
-  if (
-    moduleId === 'inventory-suite' ||
-    moduleId === 'inventory' ||
-    moduleId === 'kds-kitchen' ||
-    moduleId === 'kds' ||
-    moduleId === 'cfd-display' ||
-    moduleId === 'cfd'
-  ) {
-    return (
-      enabled.includes('pos-management') ||
-      enabled.includes('pos') ||
-      enabled.includes('inventory-suite') ||
-      enabled.includes('kds-kitchen') ||
-      enabled.includes('cfd-display')
-    );
-  }
-  return enabled.includes(moduleId);
+  const canonicalEnabled = enabled.map(canonicalModuleId);
+  return canonicalEnabled.includes(targetCanonical);
 }
 
 /**
@@ -94,13 +132,14 @@ export function isModuleEnabledForOrg(orgName: string, moduleId: string): boolea
  */
 export function enableModuleForOrg(orgName: string, moduleId: string): string[] {
   if (typeof window === 'undefined' || !orgName || orgName === 'No Organization Yet! Please Create') return [];
+  const targetCanonical = canonicalModuleId(moduleId);
+  if (!targetCanonical) return [];
+
   const current = getEnabledModulesForOrg(orgName);
-  if (!current.includes(moduleId)) {
-    const toAdd =
-      moduleId === 'pos-management'
-        ? ['pos-management', 'pos', 'inventory-suite', 'kds-kitchen', 'cfd-display']
-        : [moduleId];
-    const updated = Array.from(new Set([...current, ...toAdd]));
+  const canonicalList = current.map(canonicalModuleId);
+
+  if (!canonicalList.includes(targetCanonical)) {
+    const updated = Array.from(new Set([...current, targetCanonical, moduleId]));
     localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated } }));
 
@@ -119,12 +158,12 @@ export function enableModuleForOrg(orgName: string, moduleId: string): string[] 
  */
 export function disableModuleForOrg(orgName: string, moduleId: string): string[] {
   if (typeof window === 'undefined' || !orgName) return [];
+  const targetCanonical = canonicalModuleId(moduleId);
+  if (!targetCanonical) return [];
+
   const current = getEnabledModulesForOrg(orgName);
-  const toRemove =
-    moduleId === 'pos-management'
-      ? ['pos-management', 'pos', 'inventory-suite', 'kds-kitchen', 'cfd-display']
-      : [moduleId];
-  const updated = current.filter((id) => !toRemove.includes(id));
+  const updated = current.filter((id) => canonicalModuleId(id) !== targetCanonical);
+
   localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated } }));
 
@@ -165,3 +204,4 @@ export function disableAllModulesForOrg(orgName: string): void {
     console.warn('[modules] Failed to persist empty modules to cloud DB:', err)
   );
 }
+

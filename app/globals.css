@@ -2,23 +2,52 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1E293B;
 
-  /* Global Platform Color System */
-  --color-brand: #5B4DFB;
-  --color-brand-hover: #4E3FE3;
-  --color-brand-subtle: #F5F3FF;
-  --color-brand-border: #DDD6FE;
+  /* 1. Primary / Brand Colors (New Palette: #E3F2FD, #90CAF9, #2196F3, #0D47A1) */
+  --color-brand: #2196F3;
+  --color-brand-hover: #0D47A1;
+  --color-brand-subtle: #E3F2FD;
+  --color-brand-border: #90CAF9;
+  --color-brand-dark: #0D47A1;
+  --color-primary-navy: #0D47A1;
 
-  --color-canvas: #F0F4F8;
+  /* 2. Background Colors */
+  --color-canvas: #E3F2FD;
+  --color-canvas-end: #F0F7FF;
+  --color-canvas-gradient: linear-gradient(135deg, #E3F2FD 0%, #F0F7FF 100%);
   --color-surface: #FFFFFF;
-  --color-surface-subtle: #F8FAFC;
   --color-card-border: #E2E8F0;
 
-  --color-accent-cyan: #06B6D4;
-  --color-accent-amber: #F59E0B;
-  --color-accent-emerald: #10B981;
-  --color-accent-rose: #F43F5E;
+  /* 3. Accent & Status Colors (Donut charts, tags, badges) */
+  --color-status-paid: #2196F3;
+  --color-status-processing: #F59E0B;
+  --color-status-processing-light: #FBBF24;
+  --color-status-pending: #EF4444;
+  --color-status-pending-light: #F87171;
+  --color-status-hold: #9CA3AF;
+  --color-status-hold-light: #D1D5DB;
+
+  /* 4. Semantic Colors */
+  --color-semantic-green: #22C55E;
+  --color-semantic-emerald: #10B981;
+  --color-icon-bg-blue: #E3F2FD;
+  --color-icon-bg-teal: #CCFBF1;
+
+  /* 5. Text Colors */
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #94A3B8;
+
+  /* 6. Sidebar Tokens */
+  --color-sidebar-bg: #FFFFFF;
+  --color-sidebar-active: #E3F2FD;
+  --color-sidebar-active-text: #0D47A1;
+
+  /* Global Sleek Radius Tokens */
+  --radius-3xl: 0.75rem; /* 12px */
+  --radius-2xl: 0.625rem; /* 10px */
+  --radius-xl: 0.5rem; /* 8px */
 }
 
 @theme inline {
@@ -31,16 +60,36 @@
   --color-brand-hover: var(--color-brand-hover);
   --color-brand-subtle: var(--color-brand-subtle);
   --color-brand-border: var(--color-brand-border);
+  --color-primary-navy: var(--color-primary-navy);
 
   --color-canvas: var(--color-canvas);
   --color-surface: var(--color-surface);
-  --color-surface-subtle: var(--color-surface-subtle);
   --color-card-border: var(--color-card-border);
 
-  --color-accent-cyan: var(--color-accent-cyan);
-  --color-accent-amber: var(--color-accent-amber);
-  --color-accent-emerald: var(--color-accent-emerald);
-  --color-accent-rose: var(--color-accent-rose);
+  --color-status-paid: var(--color-status-paid);
+  --color-status-processing: var(--color-status-processing);
+  --color-status-processing-light: var(--color-status-processing-light);
+  --color-status-pending: var(--color-status-pending);
+  --color-status-pending-light: var(--color-status-pending-light);
+  --color-status-hold: var(--color-status-hold);
+  --color-status-hold-light: var(--color-status-hold-light);
+
+  --color-semantic-green: var(--color-semantic-green);
+  --color-semantic-emerald: var(--color-semantic-emerald);
+  --color-icon-bg-blue: var(--color-icon-bg-blue);
+  --color-icon-bg-teal: var(--color-icon-bg-teal);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-sidebar-bg: var(--color-sidebar-bg);
+  --color-sidebar-active: var(--color-sidebar-active);
+  --color-sidebar-active-text: var(--color-sidebar-active-text);
+
+  --radius-3xl: var(--radius-3xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-xl: var(--radius-xl);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,7 +100,154 @@
 }
 
 body {
-  background: var(--color-canvas);
-  color: var(--foreground);
+  background: linear-gradient(135deg, #E3F2FD 0%, #F0F7FF 100%);
+  background-attachment: fixed;
+  color: var(--color-text-primary);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Headings default to Deep Navy/Slate */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary);
+}
+
+/* Global High-Density Viewport & Compact Padding Standardization */
+main {
+  padding: 0.375rem 0.5rem !important; /* Compact 6px-8px margin/padding globally */
+}
+
+/* Allow all views in main to utilize the full screen width without 1280px bottleneck */
+main > div {
+  width: 100%;
+  max-width: 100% !important;
+}
+
+/* Compact vertical spacing between page sections globally (tightens legacy space-y-6) */
+main > div[class*="space-y-"] > :not(:first-child) {
+  margin-top: 0.625rem !important; /* Compact 10px vertical gap between sections */
+}
+
+/* Normalize legacy p-8 / p-6 page wrappers to compact padding */
+main > div.p-8,
+main > div.p-6 {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Normalize card internal vertical spacing */
+main .bg-white[class*="space-y-6"] > :not(:first-child) {
+  margin-top: 0.625rem !important;
+}
+
+/* Ensure the page background gradient shines through all module shell canvases */
+.bg-canvas {
+  background-color: transparent !important;
+}
+
+/* Card Surface & Hover Micro-Interactions (Clean Modern SaaS: Pure White + Soft Brand Border & Lift) */
+main .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not([role="tooltip"]):not(button):not(input) {
+  background-color: var(--color-surface, #FFFFFF) !important;
+  border-color: var(--color-card-border, #E2E8F0);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+main .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not([role="tooltip"]):not(button):not(input):hover {
+  border-color: var(--color-brand-border, #90CAF9) !important;
+  box-shadow: 0 4px 16px -2px rgba(33, 150, 243, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Stat & KPI Cards subtle elevation lift on hover */
+main [class*="grid"] > .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not(button):hover {
+  transform: translateY(-1.5px);
+}
+
+/* Card Titles & Headings default to Deep Navy/Slate (#1E293B) */
+main .bg-white[class*="rounded-"] h1,
+main .bg-white[class*="rounded-"] h2,
+main .bg-white[class*="rounded-"] h3,
+main .bg-white[class*="rounded-"] h4 {
+  color: var(--color-primary-navy, #1E293B) !important;
+}
+
+/* Stat Card numbers default to Deep Navy/Slate */
+main .bg-white[class*="rounded-"] p[class*="text-2xl"],
+main .bg-white[class*="rounded-"] span[class*="text-2xl"],
+main .bg-white[class*="rounded-"] p[class*="text-3xl"],
+main .bg-white[class*="rounded-"] span[class*="text-3xl"] {
+  color: var(--color-primary-navy, #1E293B) !important;
+}
+
+/* Active Sidebar Navigation Item highlight token */
+.sidebar-active-item,
+[data-active="true"] {
+  background-color: var(--color-sidebar-active) !important;
+  color: var(--color-sidebar-active-text) !important;
+}
+
+/* ==========================================================================
+   Header & Search Bar Global Design System
+   ========================================================================== */
+header {
+  background-color: var(--color-surface, #FFFFFF) !important;
+  border-bottom: 1px solid var(--color-card-border, #E2E8F0) !important;
+}
+
+/* Header Headings & Brand Titles in Deep Navy/Slate (#1E293B) */
+header h1,
+header h2,
+header h3,
+header .font-black,
+header span.font-extrabold {
+  color: var(--color-primary-navy, #1E293B);
+}
+
+/* Header Search Bar: Pure White Surface (#FFFFFF) with Brand Focus Ring */
+header input[type="text"],
+header input[type="search"],
+.header-search-bar {
+  background-color: #FFFFFF !important;
+  border: 1px solid var(--color-card-border, #E2E8F0) !important;
+  color: var(--color-text-primary, #1E293B) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+header input[type="text"]:focus,
+header input[type="search"]:focus,
+.header-search-bar:focus {
+  border-color: var(--color-brand, #2196F3) !important;
+  box-shadow: 0 0 0 3px var(--color-brand-subtle, #E3F2FD) !important;
+  outline: none !important;
+}
+
+header input[type="text"]::placeholder,
+header input[type="search"]::placeholder {
+  color: var(--color-text-muted, #94A3B8) !important;
+}
+
+/* Header Action & Navigation Icon Buttons Hover Micro-Interactions */
+header button:hover:not([class*="bg-brand"]):not([class*="bg-rose"]):not([class*="bg-emerald"]) {
+  background-color: var(--color-brand-subtle, #E3F2FD) !important;
+  color: var(--color-brand, #2196F3) !important;
+}
+
+/* Sticky Table Cells: Solid Canvas Fill to match background and prevent scroll collision */
+main table th[class*="sticky"],
+main table td[class*="sticky"],
+.sticky-canvas-cell {
+  background-color: var(--color-canvas, #E3F2FD) !important;
+}
+
+main table tr:hover td[class*="sticky"] {
+  background-color: #d6e9fa !important;
+}
+
+/* Ensure all modals, dialogs, drawers, dropdowns, and popovers maintain crisp white surfaces */
+.fixed .bg-white,
+[class*="fixed"] .bg-white,
+[role="dialog"] .bg-white,
+[role="dialog"],
+[role="menu"] .bg-white,
+[role="tooltip"] .bg-white,
+.opaque-surface {
+  background-color: #ffffff !important;
 }

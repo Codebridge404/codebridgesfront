@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SuperAdminSidebar sidebarOpen={sidebarOpen} userRole="super_admin" />
         </Suspense>
 
-        <main className="flex-1 overflow-y-auto bg-canvas p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-canvas p-1 sm:p-1.5 lg:p-2">
           {children}
         </main>
       </div>

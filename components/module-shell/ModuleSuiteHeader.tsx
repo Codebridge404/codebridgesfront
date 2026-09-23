@@ -9,14 +9,14 @@ import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 
 interface ModuleSuiteHeaderProps {
-  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory';
+  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization';
   moduleTitle: string;
   moduleIcon: any;
   onToggleSidebar?: () => void;
 }
 
 export function ModuleSuiteHeader({
-  currentModuleId: _currentModuleId,
+  currentModuleId,
   moduleTitle,
   moduleIcon: ModuleIcon,
   onToggleSidebar,
@@ -70,7 +70,7 @@ export function ModuleSuiteHeader({
   };
 
   return (
-    <header className="h-14 bg-white border-b border-slate-200 px-4 flex items-center justify-between z-30 shrink-0 select-none">
+    <header className="h-14 px-4 flex items-center justify-between z-30 shrink-0 select-none">
       {/* Left: Sidebar Toggle + Active Module Branding */}
       <div className="flex items-center gap-3">
         {onToggleSidebar && (
@@ -133,25 +133,60 @@ export function ModuleSuiteHeader({
                 </span>
               </div>
 
+              {/* Switch Action Block (Go / Switch Back) */}
+              <div className="p-1.5 space-y-1">
+                {currentModuleId === 'organization' ? (
+                  <Link
+                    href="/launchpad"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
+                  >
+                    <AppIcons.Compass className="w-4 h-4 text-brand" />
+                    <span>Switch to Launchpad</span>
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/organization/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
+                    >
+                      <AppIcons.Organization className="w-4 h-4 text-brand" />
+                      <span>Organization Dashboard</span>
+                    </Link>
+                    <Link
+                      href="/launchpad"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 font-bold text-xs transition-colors"
+                    >
+                      <AppIcons.Compass className="w-4 h-4 text-slate-400" />
+                      <span>All Apps Launchpad</span>
+                    </Link>
+                  </>
+                )}
+
+                {user?.role === 'super_admin' && (
+                  <Link
+                    href="/super-admin/dashboard"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full px-3 py-2 rounded-xl text-xs font-bold text-brand hover:bg-brand-subtle flex items-center gap-2.5 transition-colors"
+                  >
+                    <AppIcons.Security className="w-4 h-4 text-brand" />
+                    <span>Super Admin Console</span>
+                  </Link>
+                )}
+              </div>
+
+              {/* Standard Links */}
               <div className="py-1">
                 <Link
                   href="/super-admin/security/profile"
                   onClick={() => setUserMenuOpen(false)}
                   className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 font-semibold text-slate-700 flex items-center gap-2 transition-colors"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-4 h-4 text-slate-400" />
                   <span>Profile Settings</span>
                 </Link>
-                {user?.role === 'super_admin' && (
-                  <Link
-                    href="/super-admin/dashboard"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-brand-subtle font-semibold text-brand flex items-center gap-2 transition-colors"
-                  >
-                    <AppIcons.Security className="w-4 h-4 text-brand" />
-                    <span>Super Admin Console</span>
-                  </Link>
-                )}
               </div>
 
               <div className="pt-1 border-t border-slate-100">

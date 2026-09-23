@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, getApiUrl, getAuthToken } from './client';
 
 export async function getProductsApi(
   outletId?: string | number,
@@ -18,6 +18,45 @@ export async function getProductsApi(
   if (sortOrder) params.push(`sort_order=${sortOrder}`);
   if (params.length > 0) url += `?${params.join('&')}`;
   return await apiFetch(url);
+}
+
+export async function exportProductsCsvApi(filters?: {
+  outletId?: string | number;
+  categoryId?: string;
+  brandId?: string;
+  search?: string;
+  stockStatus?: string;
+}) {
+  const params: string[] = [];
+  if (filters?.outletId) params.push(`outlet_id=${filters.outletId}`);
+  if (filters?.categoryId && filters.categoryId !== 'all') params.push(`category_id=${filters.categoryId}`);
+  if (filters?.brandId && filters.brandId !== 'all') params.push(`brand_id=${filters.brandId}`);
+  if (filters?.search) params.push(`q=${encodeURIComponent(filters.search)}`);
+  if (filters?.stockStatus && filters.stockStatus !== 'all') params.push(`stock_status=${filters.stockStatus}`);
+
+  const queryStr = params.length > 0 ? `?${params.join('&')}` : '';
+  const token = getAuthToken();
+  const activeOrg = typeof window !== 'undefined' ? localStorage.getItem('active_org') : null;
+
+  const res = await fetch(`${getApiUrl()}/products/export${queryStr}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(activeOrg ? { 'X-Tenant-Id': activeOrg } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to export products from server.');
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `products_catalog_export_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 export async function getBarcodeProductApi(code: string) {

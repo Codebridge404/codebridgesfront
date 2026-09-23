@@ -63,7 +63,7 @@ function SidebarNavList({
   return (
     <>
       {/* Module Title Header */}
-      <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="p-4 border-b border-slate-300/60 flex items-center justify-between">
         <span className="font-extrabold text-xs text-slate-900 tracking-tight">{moduleName}</span>
         {moduleBadge && (
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${moduleBadgeColor}`}>
@@ -138,7 +138,7 @@ export function UniversalModuleSidebar({
   if (!sidebarOpen) return null;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 select-none z-20 overflow-y-auto">
+    <aside className="w-64 bg-transparent border-r border-slate-300/80 flex flex-col shrink-0 select-none z-20 overflow-y-auto">
       <Suspense fallback={<div className="p-4 text-xs text-slate-400">Loading navigation...</div>}>
         <SidebarNavList
           sections={sections}

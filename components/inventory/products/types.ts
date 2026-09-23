@@ -1,4 +1,15 @@
-export type SortKey = 'name' | 'sku' | 'category' | 'stock' | 'cost_price' | 'selling_price' | 'min_buffer';
+export type SortKey =
+  | 'name'
+  | 'sku'
+  | 'category'
+  | 'barcode'
+  | 'stock'
+  | 'cost_price'
+  | 'selling_price'
+  | 'margin'
+  | 'stock_value'
+  | 'min_buffer'
+  | 'status';
 
 export type SortOrder = 'asc' | 'desc';
 

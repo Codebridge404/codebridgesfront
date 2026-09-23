@@ -67,9 +67,9 @@ export function PosCartPanel({
   };
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-3xl shadow-xs flex flex-col h-full overflow-hidden">
+    <div className="bg-transparent border border-slate-300/80 rounded-2xl flex flex-col h-full overflow-hidden">
       {/* Cart Header */}
-      <div className="p-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+      <div className="p-4 border-b border-slate-300/60 flex items-center justify-between shrink-0 bg-transparent">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-brand text-white flex items-center justify-center font-bold shadow-xs shadow-brand/20">
             <ShoppingBag className="w-4 h-4" />
@@ -126,7 +126,7 @@ export function PosCartPanel({
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between gap-3 group hover:bg-slate-100/70 transition-colors"
+                className="p-3 rounded-xl bg-transparent border border-slate-300/70 flex items-center justify-between gap-3 group hover:bg-slate-200/30 transition-colors"
               >
                 <div className="min-w-0 flex-1">
                   <h4 className="font-extrabold text-xs text-slate-900 truncate">
@@ -180,7 +180,7 @@ export function PosCartPanel({
 
       {/* Cart Footer: Discount, Totals & Checkout */}
       {cart.length > 0 && (
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0 space-y-3">
+        <div className="p-4 border-t border-slate-300/60 bg-transparent shrink-0 space-y-3">
           {/* Coupon Input */}
           {appliedCoupon ? (
             <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">

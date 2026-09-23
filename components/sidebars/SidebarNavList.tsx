@@ -10,11 +10,7 @@ import {
   Receipt,
   Tv,
   ChefHat,
-  Boxes,
-  Truck,
-  ShoppingCart,
   Package,
-  ShieldCheck,
   BarChart3,
   Settings,
   LucideIcon,
@@ -34,7 +30,7 @@ export interface OrgNavSection {
   items: OrgNavItem[];
 }
 
-export function getSidebarNavSections(activeShift: any, lowStockCount: number = 0): OrgNavSection[] {
+export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
   return [
     {
       title: 'Executive Command',
@@ -83,39 +79,12 @@ export function getSidebarNavSections(activeShift: any, lowStockCount: number = 
       ],
     },
     {
-      title: 'Multi-Warehouse Inventory',
+      title: 'Items & Catalog',
       items: [
         {
-          label: 'Stock & Warehouses',
-          href: '/pos/stock-warehouses',
-          icon: Boxes,
-          badge: lowStockCount > 0 ? `${lowStockCount} Low` : undefined,
-          badgeColor: 'bg-rose-100 text-rose-800',
-        },
-        {
-          label: 'Transfers & Shipments',
-          href: '/pos/transfers',
-          icon: Truck,
-        },
-        {
-          label: 'Products & SKUs',
+          label: 'Products & Pricing',
           href: '/pos/products',
           icon: Package,
-        },
-        {
-          label: 'Purchase Orders',
-          href: '/pos/purchase-orders',
-          icon: ShoppingCart,
-        },
-      ],
-    },
-    {
-      title: 'Access & Security',
-      items: [
-        {
-          label: 'Cashier PINs & Security',
-          href: '/pos/security',
-          icon: ShieldCheck,
         },
       ],
     },
@@ -148,7 +117,7 @@ export function SidebarNavList({ sections, activeShift, lowStockCount }: Sidebar
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get('tab');
 
-  const navSections = sections || getSidebarNavSections(activeShift, lowStockCount);
+  const navSections = sections || getSidebarNavSections(activeShift);
 
   const checkIsActive = (href: string) => {
     const [itemPath, itemQuery] = href.split('?');

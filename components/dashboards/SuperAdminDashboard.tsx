@@ -52,7 +52,7 @@ function SuperAdminDashboardContent() {
   }, [searchParams]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-3 w-full pb-6">
       {/* 1. OONE Royal Iris Purple Hero Banner */}
       <div className="bg-gradient-to-r from-brand via-brand-hover to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-[0_10px_30px_rgba(91,77,251,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         {/* Soft Ambient Blur Glows */}
