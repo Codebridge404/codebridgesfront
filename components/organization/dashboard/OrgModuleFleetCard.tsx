@@ -12,9 +12,11 @@ import {
   ExternalLink,
   CheckCircle2,
   Power,
+  Calendar,
 } from 'lucide-react';
 import { updateTenantModulesApi } from '@/lib/api/tenants';
 import { cardStyles, badgeStyles, buttonStyles } from '@/lib/theme';
+import { useConfirm } from '@/components/common';
 
 interface OrgModuleFleetCardProps {
   orgName: string;
@@ -29,10 +31,10 @@ interface ServiceModuleConfig {
   description: string;
   href: string;
   icon: any;
+  logoUrl: string;
   accent: string;
 }
 
-// OONE Design Standard Pastel Monogram Badges (from unique.md Section 5)
 const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
   {
     id: 'pos',
@@ -41,6 +43,7 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'Cloud cashier registers, shifts & till float, customer display, and kitchen display (KDS).',
     href: '/pos/dashboard',
     icon: Store,
+    logoUrl: '/module/pos.svg',
     accent: 'border-[#DDD6FE] bg-[#F5F3FF] text-[#7C3AED]',
   },
   {
@@ -50,7 +53,18 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'Multi-hub stock levels, purchase orders, vendor catalogs, and inter-branch transfers.',
     href: '/inventory/dashboard',
     icon: Boxes,
+    logoUrl: '/module/invetory.svg',
     accent: 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]',
+  },
+  {
+    id: 'meeting-management',
+    name: 'Meeting System (MMS)',
+    category: 'Workplace & Operations',
+    description: 'Conference room booking, digital door signage kiosks, minute logging, and Telegram alerts.',
+    href: '/meetings',
+    icon: Calendar,
+    logoUrl: '/module/meeting-time.svg',
+    accent: 'border-[#E9D5FF] bg-[#FAF5FF] text-[#9333EA]',
   },
   {
     id: 'hrm',
@@ -59,6 +73,7 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'Employee rostering, biometric clock-in attendance, leave requests, and payroll.',
     href: '/hrm/dashboard',
     icon: Briefcase,
+    logoUrl: '/module/hr.svg',
     accent: 'border-[#FECDD3] bg-[#FFF1F2] text-[#E11D48]',
   },
   {
@@ -68,6 +83,7 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'General ledger, charts of accounts, tax reporting, journal entries, and reconciliation.',
     href: '/financial/dashboard',
     icon: DollarSign,
+    logoUrl: '/module/financial.svg',
     accent: 'border-[#A7F3D0] bg-[#ECFDF5] text-[#059669]',
   },
   {
@@ -77,6 +93,7 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'Lead tracking, customer conversion history, store credit, and loyalty points rewards.',
     href: '/crm',
     icon: UserCheck,
+    logoUrl: '/module/management.svg',
     accent: 'border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]',
   },
   {
@@ -86,6 +103,7 @@ const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
     description: 'Online web shop, digital order fulfillment, synchronized catalog, and payment gateways.',
     href: '/shop',
     icon: ShoppingBag,
+    logoUrl: '/module/pos.svg',
     accent: 'border-[#FED7AA] bg-[#FFF7ED] text-[#EA580C]',
   },
 ];
@@ -95,12 +113,34 @@ export function OrgModuleFleetCard({
   enabledModules,
   onModulesUpdated,
 }: OrgModuleFleetCardProps) {
+  const confirm = useConfirm();
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const handleToggleModule = async (moduleId: string) => {
+    const isCurrentlyEnabled = enabledModules.includes(moduleId);
+    const targetModule = MODULE_DEFINITIONS.find((m) => m.id === moduleId);
+    const moduleName = targetModule?.name || moduleId;
+    const willEnable = !isCurrentlyEnabled;
+
+    const confirmed = await confirm({
+      title: willEnable ? `Subscribe to ${moduleName}?` : `Unsubscribe from ${moduleName}?`,
+      description: willEnable
+        ? `Are you sure you want to enable ${moduleName} for "${orgName}"? Authorized team members will gain immediate access to this business service suite.`
+        : `Are you sure you want to deactivate ${moduleName} for "${orgName}"? Active sessions and navigation for this module will be suspended.`,
+      variant: willEnable ? 'brand' : 'warning',
+      logoUrl: targetModule?.logoUrl || '/module/Workspace.svg',
+      confirmText: willEnable ? 'Confirm & Subscribe' : 'Confirm & Unsubscribe',
+      cancelText: 'Cancel',
+      details: [
+        { label: 'Business Suite', value: moduleName },
+        { label: 'Workspace Organization', value: orgName },
+        { label: 'Target Status', value: willEnable ? 'Active / Subscribed' : 'Deactivated' },
+      ],
+    });
+    if (!confirmed) return;
+
     setTogglingId(moduleId);
     try {
-      const isCurrentlyEnabled = enabledModules.includes(moduleId);
       const updated = isCurrentlyEnabled
         ? enabledModules.filter((m) => m !== moduleId)
         : [...enabledModules, moduleId];
@@ -158,8 +198,8 @@ export function OrgModuleFleetCard({
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${module.accent}`}>
-                    <Icon className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 p-1.5 flex items-center justify-center shrink-0 shadow-2xs">
+                    <img src={module.logoUrl} alt={module.name} className="w-7 h-7 object-contain" />
                   </div>
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 ${

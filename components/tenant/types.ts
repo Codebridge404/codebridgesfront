@@ -35,6 +35,7 @@ export interface Tenant {
     status: string;
     expires_at: string | null;
   };
+  enabled_modules?: string[] | string | null;
 }
 
 export const TIER_CONFIG = {

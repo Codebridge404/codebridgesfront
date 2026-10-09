@@ -107,6 +107,7 @@ export function SuperAdminTenantsView() {
         tenant={m.drawerTenant}
         onEditQuotas={(tenant: any) => m.handleOpenEditModal(tenant)}
         onImpersonate={(tenant: any) => m.setImpersonateTenant(tenant)}
+        onToggleModule={() => m.loadTenants()}
       />
 
       {/* Impersonate Modal */}

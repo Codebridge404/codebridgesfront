@@ -18,7 +18,7 @@ export const InventoryBalancesTable: React.FC<InventoryBalancesTableProps> = ({
   cardVariants,
 }) => {
   return (
-    <div className="rounded-2xl bg-white border border-slate-200 shadow-xs overflow-hidden">
+    <div className="rounded-2xl bg-transparent border border-slate-300/80 overflow-hidden">
       {loading ? (
         <div className="p-12 text-center text-xs text-slate-400 font-medium">
           Loading stock balances...
@@ -30,8 +30,8 @@ export const InventoryBalancesTable: React.FC<InventoryBalancesTableProps> = ({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <table className="w-full text-left text-xs bg-transparent">
+            <thead className="bg-transparent border-b border-slate-300/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               <tr>
                 <th className="py-3.5 px-4">Product</th>
                 <th className="py-3.5 px-4">SKU / Barcode</th>
@@ -43,7 +43,7 @@ export const InventoryBalancesTable: React.FC<InventoryBalancesTableProps> = ({
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+            <tbody className="divide-y divide-slate-300/60 font-medium text-slate-700 bg-transparent">
               {balances.map((item, idx) => {
                 const isOut = item.on_hand <= 0;
                 const isLow = item.is_low_stock && !isOut;
@@ -55,11 +55,11 @@ export const InventoryBalancesTable: React.FC<InventoryBalancesTableProps> = ({
                     initial="hidden"
                     animate="visible"
                     variants={cardVariants}
-                    className="hover:bg-brand-subtle/50 transition-colors"
+                    className="hover:bg-slate-200/40 transition-colors"
                   >
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-slate-200/40 border border-slate-300/60 overflow-hidden flex items-center justify-center shrink-0">
                           {item.image ? (
                             <img
                               src={item.image}
@@ -85,7 +85,7 @@ export const InventoryBalancesTable: React.FC<InventoryBalancesTableProps> = ({
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold text-[10px]">
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-200/50 text-slate-700 border border-slate-300/60 font-semibold text-[10px]">
                         {item.category_name || 'General'}
                       </span>
                     </td>

@@ -3,9 +3,9 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthUser, logoutApi } from '@/lib/api';
-import { SuperAdminHeader } from '@/components/header/SuperAdminHeader';
+import { AppHeader } from '@/components/header/AppHeader';
 import { SuperAdminSidebar } from '@/components/sidebars/SuperAdminSidebar';
-import { ImpersonationBanner } from '@/components/ui/ImpersonationBanner';
+import { ImpersonationBanner, PlatformAnnouncementBanner } from '@/components/ui';
 import { Loader2 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Enforce strict platform isolation: Only super_admin can access /super-admin/*
     if (currentUser.role !== 'super_admin') {
       if (currentUser.role === 'cashier') {
-        router.push('/pos/pos-terminal');
+        router.push('/cashier/pos-terminal');
       } else {
         router.push('/launchpad');
       }
@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     await logoutApi();
-    router.push('/login');
+    router.push('/launchpad');
   };
 
   if (!isAuthorized) {
@@ -61,8 +61,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen w-screen overflow-hidden bg-canvas text-slate-800 flex flex-col font-sans">
       <ImpersonationBanner />
+      <PlatformAnnouncementBanner />
 
-      <SuperAdminHeader
+      <AppHeader
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         user={user}
@@ -74,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SuperAdminSidebar sidebarOpen={sidebarOpen} userRole="super_admin" />
         </Suspense>
 
-        <main className="flex-1 overflow-y-auto bg-canvas p-1 sm:p-1.5 lg:p-2">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden bg-canvas p-1 sm:p-1.5 lg:p-2">
           {children}
         </main>
       </div>

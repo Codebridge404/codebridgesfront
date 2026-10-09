@@ -38,6 +38,7 @@ export { Tabs } from './Tabs';
 export type { TabsProps, TabItem } from './Tabs';
 
 export { ImpersonationBanner, SecurityAlertBar } from './ImpersonationBanner';
+export { PlatformAnnouncementBanner } from './PlatformAnnouncementBanner';
 
 export { ModuleCard } from './ModuleCard';
 export type { ModuleCardProps } from './ModuleCard';

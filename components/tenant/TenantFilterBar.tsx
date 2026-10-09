@@ -31,7 +31,7 @@ export function TenantFilterBar({
   return (
     <div className="space-y-4 font-sans">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-transparent p-4 sm:p-5 rounded-2xl border border-slate-300/80">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-brand-subtle text-brand">
@@ -49,7 +49,7 @@ export function TenantFilterBar({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+            className="p-2.5 rounded-xl border border-slate-300/80 bg-transparent text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
             title="Refresh tenants"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -69,7 +69,7 @@ export function TenantFilterBar({
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           {[
-            { key: 'all', statusFilter: '', tierFilter: '', label: 'Total Clients', value: stats.total, color: 'text-slate-900', bg: 'bg-white' },
+            { key: 'all', statusFilter: '', tierFilter: '', label: 'Total Clients', value: stats.total, color: 'text-slate-900', bg: 'bg-transparent' },
             { key: 'active', statusFilter: 'active', tierFilter: '', label: 'Active', value: stats.active, color: 'text-emerald-700', bg: 'bg-emerald-50' },
             { key: 'trial', statusFilter: 'trial', tierFilter: '', label: 'On Trial', value: stats.trial, color: 'text-brand', bg: 'bg-brand-subtle' },
             { key: 'suspended', statusFilter: 'suspended', tierFilter: '', label: 'Suspended', value: stats.suspended, color: 'text-rose-700', bg: 'bg-rose-50' },
@@ -86,8 +86,8 @@ export function TenantFilterBar({
                   setFilterStatus(s.statusFilter);
                   setFilterTier(s.tierFilter);
                 }}
-                className={`p-4 rounded-2xl border text-left flex flex-col gap-1 shadow-2xs transition-all cursor-pointer ${s.bg} ${
-                  isCurrent ? 'ring-2 ring-brand border-brand shadow-sm' : 'border-slate-200 hover:border-slate-300'
+                className={`p-4 rounded-2xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${s.bg} ${
+                  isCurrent ? 'ring-2 ring-brand border-brand shadow-sm' : 'border-slate-300/80 hover:border-slate-400'
                 }`}
               >
                 <span className={`text-2xl font-black ${s.color}`}>{s.value}</span>
@@ -99,9 +99,9 @@ export function TenantFilterBar({
       )}
 
       {/* Filters & Search */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-transparent p-4 rounded-2xl border border-slate-300/80">
         {/* Quick Status Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-xs font-bold">
+        <div className="flex items-center gap-1.5 p-1 bg-transparent border border-slate-300/80 rounded-xl text-xs font-bold">
           <button
             type="button"
             onClick={() => setFilterStatus('')}
@@ -151,14 +151,14 @@ export function TenantFilterBar({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onRefresh()}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand font-medium"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-transparent border border-slate-300/80 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand font-medium"
             />
           </div>
 
           <select
             value={filterTier}
             onChange={(e) => setFilterTier(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-transparent border border-slate-300/80 text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer"
           >
             <option value="">All Tiers</option>
             <option value="enterprise_org">Enterprise Org</option>

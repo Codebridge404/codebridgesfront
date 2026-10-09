@@ -150,7 +150,7 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
       <QuotaUsageCard quotaData={quotaData} />
 
       {/* 2. Store Configuration Form */}
-      <form onSubmit={handleSave} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-6">
+      <form onSubmit={handleSave} className="bg-transparent border border-slate-300/80 rounded-3xl p-6 space-y-6">
         <div className="space-y-4 text-xs">
           <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <Store className="w-4 h-4 text-brand" />
@@ -163,7 +163,7 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
               type="text"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+              className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
             />
           </div>
 
@@ -174,7 +174,7 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
                 type="number"
                 value={vatTaxRate}
                 onChange={(e) => setVatTaxRate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
               />
             </div>
 
@@ -183,7 +183,7 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
               <select
                 value={currencyMode}
                 onChange={(e) => setCurrencyMode(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand cursor-pointer"
               >
                 <option value="USD_KHR">Dual Currency ($ USD & ៛ KHR NBC Exchange)</option>
                 <option value="USD">Single Currency ($ USD)</option>
@@ -204,10 +204,10 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
       </form>
 
       {/* 3. Account Hardening & Two-Factor Authentication */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+      <div className="bg-transparent border border-slate-300/80 rounded-3xl p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-subtle text-brand flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-brand-subtle text-brand flex items-center justify-center border border-brand/20">
               <Lock className="w-5 h-5" />
             </div>
             <div>

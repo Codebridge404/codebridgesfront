@@ -202,7 +202,7 @@ export const SuperAdminStoresView: React.FC = () => {
       )}
 
       {/* Search Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="p-4 rounded-2xl bg-transparent border border-slate-300/80 flex items-center justify-between">
         <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
           <input
@@ -210,7 +210,7 @@ export const SuperAdminStoresView: React.FC = () => {
             placeholder="Search store name or code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand font-medium"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-transparent border border-slate-300/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand font-medium"
           />
         </form>
       </div>

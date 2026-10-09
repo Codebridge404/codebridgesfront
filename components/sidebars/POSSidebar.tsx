@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { RefreshCw, LayoutGrid } from 'lucide-react';
+import { RefreshCw, Building2 } from 'lucide-react';
 import {
   getAuthUser,
   getActiveShiftApi,
@@ -98,12 +98,12 @@ function SidebarNavContent() {
           </span>
         </div>
         <Link
-          href="/launchpad"
+          href="/organization/dashboard"
           className="text-[11px] font-bold text-slate-500 hover:text-brand flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
-          title="Return to Launchpad"
+          title="Return to Organization Dashboard"
         >
-          <LayoutGrid className="w-3.5 h-3.5" />
-          <span>Launchpad</span>
+          <Building2 className="w-3.5 h-3.5" />
+          <span>Workspace</span>
         </Link>
       </div>
     </div>

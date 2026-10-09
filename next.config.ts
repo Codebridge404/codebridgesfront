@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/storage/:path*',
+        destination: 'http://localhost:8080/storage/:path*',
+      },
+    ];
+  },
   async redirects() {
     return [
       {
@@ -11,6 +19,16 @@ const nextConfig: NextConfig = {
       {
         source: '/inventory',
         destination: '/inventory/dashboard',
+        permanent: false,
+      },
+      {
+        source: '/cashier',
+        destination: '/cashier/pos-terminal',
+        permanent: false,
+      },
+      {
+        source: '/cashier/terminal',
+        destination: '/cashier/pos-terminal',
         permanent: false,
       },
       {
@@ -29,13 +47,13 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
-        source: '/pos/access',
-        destination: '/organization/security',
+        source: '/organization/security',
+        destination: '/pos/security',
         permanent: false,
       },
       {
-        source: '/pos/security',
-        destination: '/organization/security',
+        source: '/pos/access',
+        destination: '/pos/security',
         permanent: false,
       },
       {

@@ -11,3 +11,4 @@ export * from './customer-display';
 export * from './settings';
 export * from './header/PosSuiteHeader';
 export * from './kds/KitchenDisplayView';
+export * from './tables/PosTablesFloorPlanView';

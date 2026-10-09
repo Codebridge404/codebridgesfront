@@ -101,12 +101,13 @@ export function UserFormModal({
                   ))
                 ) : (
                   <>
-                    <option value="outlet_manager">Store Manager</option>
-                    <option value="supervisor">Shift Supervisor</option>
+                    <option value="organization">Organization Admin</option>
+                    <option value="employee">General Employee</option>
                     <option value="cashier">Cashier</option>
-                    <option value="inventory_clerk">Inventory Clerk</option>
+                    <option value="inventory_clerk">Stock Clerk</option>
                     <option value="accountant">Accountant</option>
-                    <option value="admin">Workspace Admin</option>
+                    <option value="meeting_organizer">Meeting Coordinator</option>
+                    <option value="outlet_manager">Store Manager</option>
                   </>
                 )}
               </select>

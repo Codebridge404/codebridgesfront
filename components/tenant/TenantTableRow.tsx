@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ShieldOff,
   Trash2,
+  Layers,
 } from 'lucide-react';
 import { Tenant, TIER_CONFIG, STATUS_CONFIG } from './types';
 
@@ -40,10 +41,16 @@ export function TenantTableRow({
   const statusConf = STATUS_CONFIG[tenant.status] || STATUS_CONFIG.active;
   const TierIcon = tierConf.icon;
 
+  let rawMods = tenant.enabled_modules;
+  if (typeof rawMods === 'string') {
+    try { rawMods = JSON.parse(rawMods); } catch { rawMods = []; }
+  }
+  const enabledCount = Array.isArray(rawMods) ? rawMods.length : 0;
+
   return (
     <tr
       onClick={() => onOpenDrawer(tenant)}
-      className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 cursor-pointer"
+      className="hover:bg-slate-200/40 transition-colors border-b border-slate-300/60 cursor-pointer"
     >
       {/* Company Column */}
       <td className="px-5 py-3.5">
@@ -93,18 +100,32 @@ export function TenantTableRow({
         </span>
       </td>
 
-      {/* Subscription Plan */}
+      {/* Subscription Plan & Licensed Modules */}
       <td className="px-4 py-3.5">
-        {tenant.subscription ? (
-          <div>
-            <div className="font-semibold text-slate-800 text-xs">{tenant.subscription.plan_name}</div>
-            <div className="text-slate-400 font-mono text-[11px]">
-              ${tenant.subscription.price}/{tenant.subscription.billing_cycle.slice(0, 2)}
+        <div>
+          {tenant.subscription ? (
+            <div>
+              <div className="font-semibold text-slate-800 text-xs">{tenant.subscription.plan_name}</div>
+              <div className="text-slate-400 font-mono text-[10px]">
+                ${tenant.subscription.price}/{tenant.subscription.billing_cycle.slice(0, 2)}
+              </div>
             </div>
-          </div>
-        ) : (
-          <span className="text-slate-400 text-xs">No plan</span>
-        )}
+          ) : (
+            <span className="text-slate-400 text-xs">Standard Tier</span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDrawer(tenant);
+            }}
+            className="mt-1 px-2 py-0.5 rounded-md bg-brand-subtle text-brand border border-brand/20 text-[10px] font-black flex items-center gap-1 hover:bg-brand hover:text-white transition-all cursor-pointer w-fit"
+            title="Configure Licensed Modules"
+          >
+            <Layers className="w-2.5 h-2.5" />
+            <span>{enabledCount > 0 ? `${enabledCount} Modules` : 'License Modules'}</span>
+          </button>
+        </div>
       </td>
 
       {/* Quotas */}
@@ -135,9 +156,9 @@ export function TenantTableRow({
               onOpenDrawer(tenant);
             }}
             className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-            title="View Details Drawer"
+            title="License Modules & Details"
           >
-            <Eye className="w-4 h-4" />
+            <Layers className="w-4 h-4 text-brand" />
           </button>
 
           <button

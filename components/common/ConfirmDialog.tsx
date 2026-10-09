@@ -7,12 +7,13 @@ import {
   AlertCircle,
   CheckCircle2,
   HelpCircle,
+  Sparkles,
   Trash2,
   X,
   Loader2,
 } from 'lucide-react';
 
-export type ConfirmVariant = 'danger' | 'warning' | 'info' | 'success';
+export type ConfirmVariant = 'danger' | 'warning' | 'info' | 'success' | 'brand';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export interface ConfirmDialogProps {
   cancelText?: string;
   loading?: boolean;
   icon?: React.ReactNode;
+  logoUrl?: string;
   details?: { label: string; value: React.ReactNode }[];
   requireTypingMatch?: string; // e.g. must type item name to enable confirm button
   requireTypingPlaceholder?: string;
@@ -63,6 +65,14 @@ const VARIANT_STYLES = {
     badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     accentColor: 'text-emerald-600',
   },
+  brand: {
+    bgIcon: 'bg-purple-100 text-brand ring-8 ring-purple-50',
+    defaultIcon: <Sparkles className="w-6 h-6" />,
+    confirmBtn:
+      'bg-brand hover:bg-brand-hover text-white shadow-md shadow-brand/20 focus:ring-brand',
+    badge: 'bg-purple-50 text-brand border-purple-200',
+    accentColor: 'text-brand',
+  },
 };
 
 export function ConfirmDialog({
@@ -76,6 +86,7 @@ export function ConfirmDialog({
   cancelText = 'Cancel',
   loading = false,
   icon,
+  logoUrl,
   details,
   requireTypingMatch,
   requireTypingPlaceholder,
@@ -136,11 +147,21 @@ export function ConfirmDialog({
 
             {/* Header / Icon */}
             <div className="flex items-start gap-4">
-              <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${style.bgIcon}`}
-              >
-                {icon || style.defaultIcon}
-              </div>
+              {logoUrl ? (
+                <div className="w-13 h-13 rounded-2xl bg-white border border-slate-200/90 p-2 flex items-center justify-center shrink-0 shadow-sm">
+                  <img
+                    src={logoUrl}
+                    alt="Module Logo"
+                    className="w-9 h-9 object-contain"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${style.bgIcon}`}
+                >
+                  {icon || style.defaultIcon}
+                </div>
+              )}
               <div className="space-y-1 pr-6">
                 <h3 className="text-base font-extrabold text-slate-900 leading-snug">{title}</h3>
                 <div className="text-xs text-slate-500 font-medium leading-relaxed">

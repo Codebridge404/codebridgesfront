@@ -34,7 +34,7 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
 }) => {
   if (!selectedRole) {
     return (
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-2xs p-12 text-center text-slate-400">
+      <div className="flex-1 min-w-0 w-full bg-transparent rounded-2xl border border-slate-300/80 p-12 text-center text-slate-400">
         <Key className="w-12 h-12 mx-auto text-slate-300 mb-3" />
         <p className="text-sm font-bold text-slate-700">Select a role to inspect permissions</p>
         <p className="text-xs text-slate-400 mt-1">
@@ -53,9 +53,9 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
       : permissionGroups.filter((g) => g.toLowerCase() === activeTab.toLowerCase());
 
   return (
-    <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 flex flex-col space-y-6">
+    <div className="flex-1 min-w-0 w-full bg-transparent rounded-2xl border border-slate-300/80 p-4 sm:p-5 flex flex-col space-y-5">
       {/* Role Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-300/60">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-black text-slate-900 tracking-tight">
@@ -64,7 +64,7 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
             <span
               className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
                 selectedRole.is_system
-                  ? 'bg-slate-100 text-slate-700'
+                  ? 'bg-slate-200/70 text-slate-700'
                   : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               }`}
             >
@@ -91,13 +91,13 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
       </div>
 
       {/* Category Filter Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="w-full min-w-0 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
             activeTab === 'all'
               ? 'bg-slate-900 text-white shadow-xs'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              : 'bg-transparent border border-slate-300/80 text-slate-600 hover:bg-slate-200/50'
           }`}
         >
           All Modules ({permissions.length})
@@ -109,7 +109,7 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap capitalize ${
               activeTab === grp
                 ? 'bg-slate-900 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-transparent border border-slate-300/80 text-slate-600 hover:bg-slate-200/50'
             }`}
           >
             {grp} ({groupedPermissions[grp]?.length || 0})
@@ -123,14 +123,14 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
           const pList = groupedPermissions[grp] || [];
           return (
             <div key={grp} className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <div className="flex items-center gap-2 border-b border-slate-300/60 pb-2">
                 <span className="w-2 h-2 rounded-full bg-brand" />
                 <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
                   {grp} Module
                 </h4>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                 {pList.map((p) => {
                   const isChecked = currentRolePerms.includes(p.id);
                   return (
@@ -140,8 +140,8 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
                       onClick={() => onTogglePermission(p.id)}
                       className={`p-3.5 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all cursor-pointer ${
                         isChecked
-                          ? 'bg-brand-subtle/60 border-brand/30 text-brand font-bold'
-                          : 'bg-white border-slate-200/80 text-slate-600 hover:border-slate-300'
+                          ? 'bg-brand/10 border-brand/40 text-brand font-bold shadow-2xs backdrop-blur-sm'
+                          : 'bg-transparent border-slate-300/80 text-slate-600 hover:border-slate-400 hover:bg-slate-200/40 backdrop-blur-sm'
                       }`}
                     >
                       <div>
@@ -157,7 +157,7 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
                         className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                           isChecked
                             ? 'bg-brand text-white shadow-xs'
-                            : 'border-2 border-slate-200 bg-white'
+                            : 'border-2 border-slate-300 bg-transparent'
                         }`}
                       >
                         {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}

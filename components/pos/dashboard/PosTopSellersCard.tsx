@@ -21,7 +21,7 @@ export function PosTopSellersCard({ items = [] }: PosTopSellersCardProps) {
   const topList = items || [];
 
   return (
-    <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+    <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 flex flex-col justify-between space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -51,12 +51,12 @@ export function PosTopSellersCard({ items = [] }: PosTopSellersCardProps) {
           <span className="text-[11px] text-slate-400">Products sold at the checkout terminal will appear here in real time.</span>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-300/60">
           {topList.map((item, idx) => (
             <div key={item.id} className="py-3 flex items-center justify-between gap-3 first:pt-1 last:pb-1">
               <div className="flex items-center gap-3 min-w-0">
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
-                  idx === 0 ? 'bg-amber-100 text-amber-800' : idx === 1 ? 'bg-slate-200 text-slate-700' : 'bg-slate-100 text-slate-500'
+                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border ${
+                  idx === 0 ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-200/50 text-slate-700 border-slate-300/60'
                 }`}>
                   {idx + 1}
                 </span>

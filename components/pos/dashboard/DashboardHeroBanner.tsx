@@ -30,7 +30,7 @@ export function DashboardHeroBanner({
     currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening';
 
   return (
-    <div className="relative rounded-3xl bg-white text-slate-800 p-6 sm:p-8 shadow-[0_2px_12px_rgba(15,23,42,0.03)] border border-slate-200/80 overflow-hidden">
+    <div className="relative rounded-3xl bg-transparent text-slate-800 p-6 sm:p-8 border border-slate-300/80 overflow-hidden">
       <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -70,7 +70,7 @@ export function DashboardHeroBanner({
             <button
               type="button"
               onClick={onOpenShift}
-              className="px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer"
+              className="px-4 py-2.5 rounded-2xl bg-slate-200/50 hover:bg-slate-200 text-slate-700 border border-slate-300/60 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer"
             >
               <Clock className="w-4 h-4 text-brand" />
               <span>Open Shift Float</span>
@@ -81,7 +81,7 @@ export function DashboardHeroBanner({
             type="button"
             onClick={onRefreshData}
             title="Refresh Live Data"
-            className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer transition-all"
+            className="p-2.5 rounded-2xl bg-slate-200/50 hover:bg-slate-200 text-slate-600 border border-slate-300/60 cursor-pointer transition-all"
           >
             <RefreshCw
               className={`w-4 h-4 ${loading ? 'animate-spin text-brand' : ''}`}

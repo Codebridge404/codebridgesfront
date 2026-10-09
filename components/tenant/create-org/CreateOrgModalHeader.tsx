@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface CreateOrgModalHeaderProps {
   onClose: () => void;
@@ -11,9 +11,11 @@ export function CreateOrgModalHeader({ onClose }: CreateOrgModalHeaderProps) {
   return (
     <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-white to-brand-subtle/60 shrink-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand to-brand-hover text-white flex items-center justify-center shadow-md shadow-brand/25 shrink-0">
-          <Sparkles className="w-5 h-5" />
-        </div>
+        <img
+          src="/module/Workspace.svg"
+          alt="Workspace"
+          className="w-10 h-10 object-contain shrink-0"
+        />
         <div>
           <h3 className="text-lg font-black text-slate-900 tracking-tight">
             Create New Workspace

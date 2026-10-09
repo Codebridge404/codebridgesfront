@@ -21,6 +21,7 @@ export function PermissionsMatrixModal({
     switch (role) {
       case 'super_admin':
         return 'bg-brand-subtle text-brand border-brand/30';
+      case 'organization':
       case 'admin':
       case 'administrator':
       case 'owner':
@@ -36,8 +37,9 @@ export function PermissionsMatrixModal({
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'accountant':
         return 'bg-sky-50 text-sky-700 border-sky-200';
-      case 'user':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'meeting_organizer':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'employee':
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }

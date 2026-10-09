@@ -14,6 +14,7 @@ export interface ModuleCardProps {
   logoUrl?: string;
   color?: string;
   bgColor?: string;
+  cardBg?: string;
   description?: string;
   actionSlot?: React.ReactNode;
   footerSlot?: React.ReactNode;
@@ -31,6 +32,7 @@ export function ModuleCard({
   logoUrl,
   color = 'text-brand',
   bgColor = 'bg-brand-subtle',
+  cardBg,
   description,
   actionSlot,
   footerSlot,
@@ -101,8 +103,9 @@ export function ModuleCard({
       onClick={onClick}
       className={cn(
         cardStyles.base,
-        'p-5 flex flex-col justify-between h-[195px] select-none hover:shadow-md transition-shadow',
-        isSelected ? 'border-emerald-200/90' : 'border-slate-200/80',
+        cardBg,
+        'p-5 flex flex-col justify-between h-[195px] select-none hover:shadow-md transition-all',
+        isSelected ? 'border-emerald-300' : 'border-slate-300/80',
         isClickable && 'cursor-pointer',
         className
       )}
@@ -143,7 +146,7 @@ export function ModuleCard({
 
       {/* Footer: Live State & Dynamic Actions */}
       {footerSlot && (
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
           {footerSlot}
         </div>
       )}

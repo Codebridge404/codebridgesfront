@@ -54,11 +54,11 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
     let outOfStock = 0;
 
     products.forEach((p: any) => {
-      const stock = parseFloat(p.stock_on_hand || '0');
-      const minBuffer = parseInt(p.min_reorder_point || '5', 10);
+      const stock = parseFloat(p.stock_on_hand ?? p.quantity ?? '0');
+      const minBuffer = Number(p.min_reorder_point ?? 0);
       if (stock <= 0) {
         outOfStock++;
-      } else if (stock <= minBuffer) {
+      } else if (minBuffer > 0 && stock <= minBuffer) {
         lowStock++;
       } else {
         inStock++;
@@ -108,11 +108,11 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
       }
 
       if (stockStatus !== 'all') {
-        const stock = parseFloat(p.stock_on_hand || '0');
-        const minBuffer = parseInt(p.min_reorder_point || '5', 10);
+        const stock = parseFloat(p.stock_on_hand ?? p.quantity ?? '0');
+        const minBuffer = Number(p.min_reorder_point ?? 0);
         if (stockStatus === 'out_of_stock' && stock > 0) return false;
-        if (stockStatus === 'low_stock' && (stock <= 0 || stock > minBuffer)) return false;
-        if (stockStatus === 'in_stock' && stock <= minBuffer) return false;
+        if (stockStatus === 'low_stock' && (stock <= 0 || minBuffer <= 0 || stock > minBuffer)) return false;
+        if (stockStatus === 'in_stock' && (stock <= 0 || (minBuffer > 0 && stock <= minBuffer))) return false;
       }
 
       return true;
@@ -173,8 +173,8 @@ export function useProductCatalog(products: any[], categories: any[] = []) {
         }
 
         case 'min_buffer':
-          valA = parseInt(a.min_reorder_point || '5', 10);
-          valB = parseInt(b.min_reorder_point || '5', 10);
+          valA = Number(a.min_reorder_point ?? 0);
+          valB = Number(b.min_reorder_point ?? 0);
           return sortOrder === 'asc' ? valA - valB : valB - valA;
 
         case 'status': {

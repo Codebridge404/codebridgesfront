@@ -114,6 +114,27 @@ export async function getTaxReportApi(startDate?: string, endDate?: string) {
   return await apiFetch(`/reports/tax?${query.toString()}`);
 }
 
+export async function downloadReportCsvApi(type: 'sales' | 'shifts' | 'tax' = 'sales') {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const res = await fetch(`${baseUrl}/reports/export?type=${type}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Accept: 'text/csv',
+    },
+  });
+  if (!res.ok) throw new Error('Failed to download server report');
+  const blob = await res.blob();
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = `pos_report_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
 // Dashboard Analytics
 export async function getDashboardSummaryApi() {
   try {

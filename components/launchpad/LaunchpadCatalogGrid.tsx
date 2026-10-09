@@ -2,12 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Search, CheckCircle2, ArrowRight, Power, Plus, RefreshCw } from 'lucide-react';
-import { CatalogModule } from './types';
+import { Search, CheckCircle2, ArrowRight, Power, Plus, RefreshCw, X } from 'lucide-react';
+import { CatalogModule } from './CodeBridgesOnboardingLaunchpad';
 import { ModuleCard } from '@/components/ui';
 
 interface LaunchpadCatalogGridProps {
   catalogModules: CatalogModule[];
+  loading?: boolean;
   searchTerm: string;
   onSearchChange: (val: string) => void;
   isModuleEnabled: (id: string) => boolean;
@@ -19,6 +20,7 @@ interface LaunchpadCatalogGridProps {
 
 export function LaunchpadCatalogGrid({
   catalogModules,
+  loading = false,
   searchTerm,
   onSearchChange,
   isModuleEnabled,
@@ -48,28 +50,49 @@ export function LaunchpadCatalogGrid({
 
         {/* Search Input */}
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search module..."
-              className="pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand shadow-2xs"
-            />
+          <div className="relative group w-full sm:w-64">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:border-slate-300 border border-slate-200/90 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 shadow-2xs transition-all duration-200">
+              <Search className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-brand transition-colors shrink-0" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search modules & services..."
+                className="w-full bg-transparent border-0 border-none outline-none focus:outline-none ring-0 focus:ring-0 shadow-none p-0 text-xs font-semibold text-slate-900 placeholder:text-slate-400"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange('')}
+                  className="p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 3-Column Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {loading ? (
+        <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400 bg-white/60 rounded-3xl border border-slate-200/60">
+          <RefreshCw className="w-6 h-6 animate-spin text-brand" />
+          <span className="text-xs font-bold text-slate-600">Loading ecosystem modules from cloud database...</span>
+        </div>
+      ) : filteredCatalog.length === 0 ? (
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl border border-slate-200/80 p-8 text-center shadow-2xs space-y-2">
+          <p className="text-xs text-slate-500 font-medium">No services found matching &quot;{searchTerm}&quot;.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCatalog.map((mod) => {
           const isEnabled = isModuleEnabled(mod.id);
           const isProcessing = isTogglingModule === mod.id;
           const isSubscription = mod.id === 'bill-subscription';
           const isTenantUser = userRole !== 'super_admin';
           const launchHref =
-            mod.id === 'pos-management' && userRole === 'cashier' ? '/pos/pos-terminal' : mod.href;
+            mod.id === 'pos-management' && userRole === 'cashier' ? '/cashier/pos-terminal' : mod.href;
 
           return (
             <ModuleCard
@@ -79,6 +102,7 @@ export function LaunchpadCatalogGrid({
               icon={mod.icon}
               logoUrl={mod.logoUrl}
               description={mod.description}
+              cardBg={mod.cardBg}
               size="standard"
               statusDot={isEnabled}
               isSelected={isEnabled}
@@ -154,7 +178,8 @@ export function LaunchpadCatalogGrid({
             />
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

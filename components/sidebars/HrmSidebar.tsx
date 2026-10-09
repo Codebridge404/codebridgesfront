@@ -13,7 +13,7 @@ import {
   BarChart3,
   ShieldCheck,
   Settings,
-  LayoutGrid,
+  Building2,
   RefreshCw,
   LucideIcon,
 } from 'lucide-react';
@@ -151,12 +151,12 @@ function HrmSidebarContent() {
           </span>
         </div>
         <Link
-          href="/launchpad"
+          href="/organization/dashboard"
           className="text-[11px] font-bold text-slate-500 hover:text-brand flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
-          title="Return to Launchpad"
+          title="Return to Organization Dashboard"
         >
-          <LayoutGrid className="w-3.5 h-3.5" />
-          <span>Launchpad</span>
+          <Building2 className="w-3.5 h-3.5" />
+          <span>Workspace</span>
         </Link>
       </div>
     </div>

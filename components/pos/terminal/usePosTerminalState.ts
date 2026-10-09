@@ -45,7 +45,7 @@ export function usePosTerminalState() {
   const [activeShift, setActiveShift] = useState<any>(null);
   const [heldCarts, setHeldCarts] = useState<any[]>([]);
   const [completedSale, setCompletedSale] = useState<any>(null);
-  const [defaultTender, setDefaultTender] = useState<'cash' | 'khqr' | 'card'>('cash');
+  const [defaultTender, setDefaultTender] = useState<'cash' | 'khqr' | 'card' | 'store_credit'>('cash');
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -63,7 +63,7 @@ export function usePosTerminalState() {
         sku: p.sku || `SKU-${p.id}`,
         price: Number(p.price || p.selling_price || 0),
         category: p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || 'General',
-        stock: p.stock_quantity !== undefined ? p.stock_quantity : (p.stock !== undefined ? p.stock : 99),
+        stock: p.stock_quantity ?? p.stock ?? 99,
         barcode: p.barcode || '',
       }));
 
@@ -147,16 +147,17 @@ export function usePosTerminalState() {
     }
   }, []);
 
-  const handleOpenCheckout = (tender: 'cash' | 'khqr' | 'card') => {
+  const handleOpenCheckout = (tender: 'cash' | 'khqr' | 'card' | 'store_credit') => {
     if (cartState.cart.length === 0) return;
     setDefaultTender(tender);
     setShowCheckoutModal(true);
   };
 
   const handleCompleteSale = async (
-    tenderType: 'cash' | 'khqr' | 'card',
+    tenderType: 'cash' | 'khqr' | 'card' | 'store_credit',
     cashTendered: number,
-    printReceipt: boolean = true
+    printReceipt: boolean = true,
+    extra?: { customer_id?: any; customer_name?: string; table_id?: any; table_name?: string; order_type?: string }
   ) => {
     const subtotal = cartState.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
     const discount = cartState.appliedCoupon
@@ -171,21 +172,17 @@ export function usePosTerminalState() {
       outlet_id: activeOutletId || user?.outlet_id || '0d612401-62c2-4e9e-9857-69e40f24c86d',
       register_id: '9cd597e1-d134-4a91-b5e1-3dfd72c63554',
       idempotency_key: `pos-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      items: cartState.cart.map((i) => ({
-        product_id: i.product_id || i.product?.id,
-        name: i.name,
-        quantity: i.qty,
-        price: i.price,
-      })),
+      items: cartState.cart.map((i) => ({ product_id: i.product_id || i.product?.id, name: i.name, quantity: i.qty, price: i.price })),
       tender_type: tenderType,
       subtotal,
-      discount_total: discount,
-      discount_amount: discount,
-      tax_total: tax,
-      tax_amount: tax,
+      discount_total: discount, discount_amount: discount,
+      tax_total: tax, tax_amount: tax,
       grand_total: grandTotal,
       cash_tendered: tenderType === 'cash' ? cashTendered : grandTotal,
       shift_id: activeShift?.id || null,
+      customer_id: extra?.customer_id || null, customer_name: extra?.customer_name || null,
+      table_id: extra?.table_id || null, table_name: extra?.table_name || null,
+      order_type: extra?.order_type || 'dine_in',
     };
 
     if (!isOnline) {

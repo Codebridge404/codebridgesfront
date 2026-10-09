@@ -28,7 +28,7 @@ export function AddProductModal({
     expiry_date: '',
     selling_price: '',
     cost_price: '',
-    min_reorder_point: '10',
+    min_reorder_point: '0',
     description: '',
   });
   const [saving, setSaving] = useState(false);
@@ -60,7 +60,7 @@ export function AddProductModal({
         expiry_date: formData.expiry_date || undefined,
         selling_price: parseFloat(formData.selling_price) || 0,
         cost_price: parseFloat(formData.cost_price) || 0,
-        min_reorder_point: parseInt(formData.min_reorder_point, 10) || 5,
+        min_reorder_point: isNaN(parseInt(formData.min_reorder_point, 10)) ? 0 : Math.max(0, parseInt(formData.min_reorder_point, 10)),
         description: formData.description.trim() || undefined,
       };
 
@@ -79,7 +79,7 @@ export function AddProductModal({
         expiry_date: '',
         selling_price: '',
         cost_price: '',
-        min_reorder_point: '10',
+        min_reorder_point: '0',
         description: '',
       });
     } catch (err: any) {
@@ -159,7 +159,7 @@ export function AddProductModal({
                     {c.name}
                   </option>
                 ))}
-                {categories.length === 0 && <option value="">General Goods</option>}
+                {categories.length === 0 && <option value="">Uncategorized</option>}
               </select>
             </div>
           </div>
@@ -226,7 +226,8 @@ export function AddProductModal({
               <label className="block text-xs font-bold text-slate-700 mb-1">Min Safety Buffer</label>
               <input
                 type="number"
-                min="1"
+                min="0"
+                placeholder="0"
                 value={formData.min_reorder_point}
                 onChange={(e) => setFormData({ ...formData, min_reorder_point: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-slate-50 focus:bg-white"

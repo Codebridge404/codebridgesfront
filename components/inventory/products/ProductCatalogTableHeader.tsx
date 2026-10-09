@@ -21,44 +21,44 @@ export function ProductCatalogTableHeader() {
           <span>Actions</span>
         </th>
 
-        {/* Scrollable Column 4: Barcode */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[140px] min-w-[140px]">
-          <span>Barcode</span>
-        </th>
-
-        {/* Scrollable Column 5: Description */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[200px] min-w-[200px]">
-          <span>Description</span>
-        </th>
-
-        {/* Scrollable Column 6: Stock On Hand */}
+        {/* Scrollable Column 4: Quantity (Stock) */}
         <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[150px] min-w-[150px]">
-          <span>Stock Level</span>
+          <span>Quantity (Stock)</span>
         </th>
 
-        {/* Scrollable Column 7: Cost Price */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
-          <span>Cost Price</span>
-        </th>
-
-        {/* Scrollable Column 8: Selling Price */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
+        {/* Scrollable Column 5: Selling Price */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
           <span>Selling Price</span>
         </th>
 
-        {/* Scrollable Column 9: Gross Margin */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[140px] min-w-[140px]">
+        {/* Scrollable Column 6: Cost Price */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
+          <span>Cost Price</span>
+        </th>
+
+        {/* Scrollable Column 7: Gross Margin */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
           <span>Margin ($/%)</span>
         </th>
 
-        {/* Scrollable Column 10: Total Valuation */}
+        {/* Scrollable Column 8: Min Buffer Threshold */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
+          <span>Min Buffer</span>
+        </th>
+
+        {/* Scrollable Column 9: Total Valuation */}
         <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[130px] min-w-[130px]">
           <span>Valuation</span>
         </th>
 
-        {/* Scrollable Column 11: Min Buffer Threshold */}
-        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[120px] min-w-[120px]">
-          <span>Min Buffer</span>
+        {/* Scrollable Column 10: Barcode */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[140px] min-w-[140px]">
+          <span>Barcode</span>
+        </th>
+
+        {/* Scrollable Column 11: Description */}
+        <th className="sticky top-0 z-40 bg-canvas px-3.5 py-3 text-left font-extrabold text-slate-700 uppercase tracking-wider w-[180px] min-w-[180px]">
+          <span>Description</span>
         </th>
 
         {/* Scrollable Column 12: Active Status */}

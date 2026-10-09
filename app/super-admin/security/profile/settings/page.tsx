@@ -1,5 +1,5 @@
-import { SuperAdminProfileSettingsView } from '@/components/security/profile';
+import { redirect } from 'next/navigation';
 
 export default function AdminProfileSettingsPage() {
-  return <SuperAdminProfileSettingsView />;
+  redirect('/profile');
 }

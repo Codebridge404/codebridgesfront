@@ -28,9 +28,9 @@ export function InventoryKpiCards() {
           prodList.forEach((p: any) => {
             const stock = parseFloat(p.stock_on_hand || '0');
             const cost = parseFloat(p.cost_price || '0');
-            const minBuffer = parseInt(p.min_reorder_point || '5', 10);
+            const minBuffer = Number(p.min_reorder_point ?? 0);
             valuation += stock * cost;
-            if (stock <= minBuffer) {
+            if (minBuffer > 0 && stock <= minBuffer) {
               lowStock += 1;
             }
           });

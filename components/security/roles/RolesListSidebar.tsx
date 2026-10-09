@@ -43,7 +43,7 @@ export const RolesListSidebar: React.FC<RolesListSidebarProps> = ({
   );
 
   return (
-    <div className="w-full lg:w-80 bg-white rounded-3xl border border-slate-200 shadow-2xs p-5 flex flex-col space-y-4 shrink-0">
+    <div className="w-full lg:w-72 xl:w-80 bg-transparent rounded-2xl border border-slate-300/80 p-4 sm:p-5 flex flex-col space-y-4 shrink-0">
       <div className="flex items-center justify-between">
         <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
           Roles Directory
@@ -67,7 +67,7 @@ export const RolesListSidebar: React.FC<RolesListSidebarProps> = ({
           placeholder="Filter roles by title..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand"
+          className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-semibold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand"
         />
       </div>
 
@@ -84,7 +84,7 @@ export const RolesListSidebar: React.FC<RolesListSidebarProps> = ({
                 className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2 ${
                   isSelected
                     ? 'bg-brand text-white border-brand shadow-md shadow-brand/20'
-                    : 'bg-white border-slate-200/80 hover:border-slate-300 text-slate-700'
+                    : 'bg-transparent border-slate-300/80 hover:bg-slate-200/50 hover:border-slate-400 text-slate-700 backdrop-blur-sm'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -99,7 +99,7 @@ export const RolesListSidebar: React.FC<RolesListSidebarProps> = ({
 
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                      isSelected ? 'bg-brand-hover text-white' : 'bg-slate-100 text-slate-600'
+                      isSelected ? 'bg-brand-hover text-white' : 'bg-slate-200/70 text-slate-700'
                     }`}
                   >
                     {r.permission_ids?.length ?? r.permissions_count ?? 0} perms

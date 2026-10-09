@@ -27,7 +27,7 @@ export function Tabs({
 }: TabsProps) {
   if (variant === 'underline') {
     return (
-      <div className={cn('flex items-center gap-6 border-b border-slate-200/80 overflow-x-auto select-none', className)}>
+      <div className={cn('flex items-center gap-6 border-b border-slate-300/60 overflow-x-auto select-none', className)}>
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
@@ -66,7 +66,7 @@ export function Tabs({
 
   // Default: 'pills'
   return (
-    <div className={cn('inline-flex items-center p-1 bg-slate-100/90 rounded-xl gap-1 overflow-x-auto select-none', className)}>
+    <div className={cn('inline-flex items-center p-1 bg-transparent border border-slate-300/80 rounded-xl gap-1 overflow-x-auto select-none', className)}>
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
         return (
@@ -77,8 +77,8 @@ export function Tabs({
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer',
               isActive
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             )}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}

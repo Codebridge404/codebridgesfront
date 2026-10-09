@@ -109,12 +109,52 @@ export const MODULE_ALIASES: Record<string, string> = {
 
   // Platform Telemetry
   'telemetry-hub': 'telemetry-hub',
+
+  // Meeting Management Systems (MMS)
+  'meetings': 'meeting-management',
+  'meeting': 'meeting-management',
+  'meeting-management': 'meeting-management',
+  'mms': 'meeting-management',
+  'meeting-systems': 'meeting-management',
 };
 
 export function canonicalModuleId(id: string): string {
   if (!id) return '';
   const key = id.toLowerCase().trim();
   return MODULE_ALIASES[key] || key;
+}
+
+/**
+ * Resolves official SVG logo from /module/ directory for a given module ID.
+ */
+export function getModuleDefaultLogo(moduleId: string): string {
+  const canonical = canonicalModuleId(moduleId);
+  switch (canonical) {
+    case 'pos':
+      return '/module/pos.svg';
+    case 'inventory':
+      return '/module/invetory.svg';
+    case 'finance':
+    case 'accounting':
+    case 'financial':
+      return '/module/financial.svg';
+    case 'hrm':
+    case 'hr':
+      return '/module/hr.svg';
+    case 'crm':
+      return '/module/management.svg';
+    case 'subscription':
+    case 'bill-subscription':
+      return '/module/subscription.svg';
+    case 'meeting-management':
+    case 'meetings':
+    case 'mms':
+      return '/module/meeting-time.svg';
+    case 'organization':
+    case 'workspace':
+    default:
+      return '/module/Workspace.svg';
+  }
 }
 
 export function isModuleEnabledForOrg(orgName: string, moduleId: string): boolean {

@@ -40,7 +40,7 @@ export function parseProductImportCsv(csvText: string) {
         selling_price: parseFloat(rowData.selling_price) || 0,
         cost_price: parseFloat(rowData.cost_price || '0'),
         category_name: rowData.category_name || rowData.category || 'General',
-        min_reorder_point: parseInt(rowData.min_reorder_point || '5', 10),
+        min_reorder_point: parseInt(rowData.min_reorder_point || '0', 10),
         initial_stock: parseInt(rowData.initial_stock || '0', 10),
         description: rowData.description || undefined,
       });
@@ -80,7 +80,7 @@ export async function exportProductsToCsv(
         parseFloat(p.selling_price || p.price || '0').toFixed(2),
         parseFloat(p.cost_price || '0').toFixed(2),
         parseFloat(p.stock_on_hand || '0'),
-        parseInt(p.min_reorder_point || '5', 10),
+        Number(p.min_reorder_point ?? 0),
         p.expiry_date ? String(p.expiry_date).split('T')[0] : '',
         p.is_active !== false ? 'Active' : 'Inactive',
       ].join(','));

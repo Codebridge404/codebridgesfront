@@ -39,12 +39,8 @@ export function LoginForm() {
       const res = await loginApi(identifier, password);
       const user = res?.user;
 
-      if (redirectUrl) {
+      if (redirectUrl && redirectUrl !== '/login') {
         router.push(redirectUrl);
-      } else if (user?.role === 'super_admin') {
-        router.push('/super-admin/dashboard');
-      } else if (user?.role === 'cashier') {
-        router.push('/pos/pos-terminal');
       } else {
         router.push('/launchpad');
       }
@@ -70,7 +66,7 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full max-w-md bg-white border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/5 space-y-6 relative overflow-hidden"
+      className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden"
     >
       {/* Top Back Link */}
       <div className="flex items-center justify-between">

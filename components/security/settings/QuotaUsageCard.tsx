@@ -11,8 +11,8 @@ export const QuotaUsageCard: React.FC<QuotaUsageCardProps> = ({ quotaData }) => 
   if (!quotaData) return null;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+    <div className="bg-transparent border border-slate-300/80 rounded-3xl p-6 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-300/60 pb-4">
         <div>
           <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <Layers className="w-4 h-4 text-brand" />
@@ -32,14 +32,14 @@ export const QuotaUsageCard: React.FC<QuotaUsageCardProps> = ({ quotaData }) => 
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Users */}
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+        <div className="p-4 bg-transparent rounded-2xl border border-slate-300/80 space-y-2">
           <div className="flex justify-between text-xs font-extrabold text-slate-700">
             <span>Staff Accounts</span>
             <span className="text-brand">
               {quotaData.quotas?.users?.used} / {quotaData.quotas?.users?.limit}
             </span>
           </div>
-          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-slate-200/70 rounded-full overflow-hidden border border-slate-300/40">
             <div
               className={`h-full transition-all ${
                 quotaData.quotas?.users?.is_exceeded ? 'bg-red-500' : 'bg-brand'
@@ -53,14 +53,14 @@ export const QuotaUsageCard: React.FC<QuotaUsageCardProps> = ({ quotaData }) => 
         </div>
 
         {/* Outlets */}
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+        <div className="p-4 bg-transparent rounded-2xl border border-slate-300/80 space-y-2">
           <div className="flex justify-between text-xs font-extrabold text-slate-700">
             <span>Store Outlets</span>
             <span className="text-emerald-600">
               {quotaData.quotas?.outlets?.used} / {quotaData.quotas?.outlets?.limit}
             </span>
           </div>
-          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-slate-200/70 rounded-full overflow-hidden border border-slate-300/40">
             <div
               className={`h-full transition-all ${
                 quotaData.quotas?.outlets?.is_exceeded ? 'bg-red-500' : 'bg-emerald-500'
@@ -74,14 +74,14 @@ export const QuotaUsageCard: React.FC<QuotaUsageCardProps> = ({ quotaData }) => 
         </div>
 
         {/* Registers */}
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+        <div className="p-4 bg-transparent rounded-2xl border border-slate-300/80 space-y-2">
           <div className="flex justify-between text-xs font-extrabold text-slate-700">
             <span>POS Registers</span>
             <span className="text-blue-600">
               {quotaData.quotas?.registers?.used} / {quotaData.quotas?.registers?.limit}
             </span>
           </div>
-          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-slate-200/70 rounded-full overflow-hidden border border-slate-300/40">
             <div
               className={`h-full transition-all ${
                 quotaData.quotas?.registers?.is_exceeded ? 'bg-red-500' : 'bg-blue-500'

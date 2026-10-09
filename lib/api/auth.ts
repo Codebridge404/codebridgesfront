@@ -14,6 +14,11 @@ export async function loginApi(email: string, password: string) {
       if (orgName) {
         localStorage.setItem('active_org', orgName);
         window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName } }));
+      } else {
+        localStorage.removeItem('active_org');
+        localStorage.removeItem('cb_active_org_name');
+        localStorage.removeItem('cb_active_org_logo');
+        window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName: '', logoUrl: null } }));
       }
     }
   }
@@ -35,6 +40,11 @@ export async function quickSwitchApi(pin_code: string, outlet_id?: string) {
       if (orgName) {
         localStorage.setItem('active_org', orgName);
         window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName } }));
+      } else {
+        localStorage.removeItem('active_org');
+        localStorage.removeItem('cb_active_org_name');
+        localStorage.removeItem('cb_active_org_logo');
+        window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName: '', logoUrl: null } }));
       }
     }
   }
@@ -51,6 +61,12 @@ export async function registerApi(userData: { name: string; email?: string; pass
   if (res.token) {
     setAuthToken(res.token);
     setAuthUser(res.user);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('active_org');
+      localStorage.removeItem('cb_active_org_name');
+      localStorage.removeItem('cb_active_org_logo');
+      window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName: '', logoUrl: null } }));
+    }
   }
 
   return res;
@@ -246,31 +262,76 @@ export async function getAuditLogsApi(module?: string) {
   return await apiFetch(url);
 }
 
+export async function getCurrentUserApi() {
+  const res = await apiFetch('/me');
+  if (res?.user) {
+    setAuthUser(res.user);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cb_user_updated', { detail: { user: res.user } }));
+    }
+  }
+  return res;
+}
+
+export async function updateUserProfileApi(
+  payload: FormData | { name?: string; phone?: string; pin_code?: string; avatar_url?: string | null; remove_avatar?: boolean }
+) {
+  const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+  const res: any = await apiFetch('/auth/profile', {
+    method: 'POST',
+    body: isFormData ? payload : JSON.stringify(payload),
+  });
+
+  if (res?.user) {
+    setAuthUser(res.user);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cb_user_updated', { detail: { user: res.user } }));
+    }
+  }
+
+  return res;
+}
+
+export async function updateUserPasswordApi(payload: { current_password: string; new_password: string }) {
+  return await apiFetch('/auth/password', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+
 /**
  * Dynamically resolves and formats real-time display title for any role or custom RBAC role.
  */
 export function getRoleDisplayName(userOrRole?: any, activeOrgName?: string): string {
-  if (!userOrRole) return 'Organization Owner';
+  if (!userOrRole) return 'Organization';
   const userObj = typeof userOrRole === 'object' ? userOrRole : null;
   const roleSlug = (typeof userOrRole === 'string' ? userOrRole : userOrRole?.role || '').toLowerCase();
 
-  if (roleSlug === 'super_admin') return 'Platform Super Admin';
-  const nonOwnerRoles = ['cashier', 'inventory_clerk', 'accountant', 'supervisor'];
-  if (
-    ['admin', 'administrator', 'owner', 'organization_owner', 'tenant_admin'].includes(roleSlug) ||
-    Boolean(userObj?.tenant_id && !nonOwnerRoles.includes(roleSlug)) ||
-    (userObj?.tenant_name && activeOrgName && userObj.tenant_name.toLowerCase() === activeOrgName.toLowerCase() && !nonOwnerRoles.includes(roleSlug))
-  ) {
-    return 'Organization Owner';
+  // 1. Super Admin
+  if (roleSlug === 'super_admin') return 'Super Admin';
+
+  // 2. Organization (Tenant Owner / Administrator)
+  if (['organization', 'admin', 'administrator', 'owner', 'organization_owner', 'tenant_admin'].includes(roleSlug)) {
+    return 'Organization';
   }
+
+  // 3. Dynamic Sub-Role assigned by Organization
+  if (userObj?.role_name) {
+    return userObj.role_name;
+  }
+
+  // Known sub-role templates
+  if (roleSlug === 'cashier') return 'Cashier';
+  if (roleSlug === 'inventory_clerk') return 'Stock Clerk';
+  if (roleSlug === 'accountant') return 'Accountant';
+  if (roleSlug === 'meeting_organizer') return 'Meeting Coordinator';
   if (roleSlug === 'outlet_manager' || roleSlug === 'manager') return 'Store Manager';
   if (roleSlug === 'supervisor') return 'Shift Supervisor';
-  if (roleSlug === 'cashier') return 'Cashier';
-  if (roleSlug === 'inventory_clerk') return 'Inventory Clerk';
-  if (roleSlug === 'accountant') return 'Accountant';
-  if (roleSlug === 'user') return 'User Account';
-  if (userObj?.role_name) return userObj.role_name;
 
-  return roleSlug.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Staff';
+  // 4. Default Parent Role: Employees
+  if (roleSlug === 'employee') return 'Employee';
+
+  return roleSlug.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Employee';
 }
 

@@ -18,13 +18,13 @@ export function ProductCatalogTableRow({
   onAdjustStock,
   onViewMovements,
 }: ProductCatalogTableRowProps) {
-  const stock = parseFloat(p.stock_on_hand || '0');
-  const cost = parseFloat(p.cost_price || '0');
-  const selling = parseFloat(p.selling_price || p.price || '0');
-  const minBuffer = parseInt(p.min_reorder_point || '5', 10);
+  const stock = parseFloat(p.stock_on_hand ?? p.quantity ?? '0');
+  const cost = parseFloat(p.cost_price ?? '0');
+  const selling = parseFloat(p.selling_price ?? p.price ?? '0');
+  const minBuffer = Number(p.min_reorder_point ?? 0);
 
   const isOutOfStock = stock <= 0;
-  const isLowStock = !isOutOfStock && stock <= minBuffer;
+  const isLowStock = !isOutOfStock && minBuffer > 0 && stock <= minBuffer;
 
   const marginDollar = selling - cost;
   const marginPercent = selling > 0 ? (marginDollar / selling) * 100 : 0;
@@ -114,29 +114,7 @@ export function ProductCatalogTableRow({
         </div>
       </td>
 
-      {/* Scrollable Column 4: Barcode */}
-      <td className="px-3.5 py-3 w-[140px] min-w-[140px]">
-        {p.barcode ? (
-          <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-200/60 text-slate-800 font-bold border border-slate-300/60">
-            {p.barcode}
-          </span>
-        ) : (
-          <span className="text-slate-400 font-mono">—</span>
-        )}
-      </td>
-
-      {/* Scrollable Column 5: Description */}
-      <td className="px-3.5 py-3 w-[200px] min-w-[200px]">
-        {p.description ? (
-          <span className="text-slate-600 truncate block max-w-[180px]" title={p.description}>
-            {p.description}
-          </span>
-        ) : (
-          <span className="text-slate-300">—</span>
-        )}
-      </td>
-
-      {/* Scrollable Column 6: Stock Level Badge */}
+      {/* Scrollable Column 4: Quantity (Stock) */}
       <td className="px-3.5 py-3 w-[150px] min-w-[150px] font-mono font-bold">
         <span
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
@@ -152,22 +130,22 @@ export function ProductCatalogTableRow({
               isOutOfStock ? 'bg-rose-500' : isLowStock ? 'bg-amber-500' : 'bg-emerald-500'
             }`}
           />
-          {Math.floor(stock)} units
+          {Number.isInteger(stock) ? stock : parseFloat(stock.toFixed(2))} units
         </span>
       </td>
 
-      {/* Scrollable Column 7: Cost Price */}
-      <td className="px-3.5 py-3 w-[130px] min-w-[130px] font-mono font-bold text-slate-500">
-        ${cost.toFixed(2)}
-      </td>
-
-      {/* Scrollable Column 8: Selling Price */}
-      <td className="px-3.5 py-3 w-[130px] min-w-[130px] font-mono font-black text-slate-900">
+      {/* Scrollable Column 5: Selling Price */}
+      <td className="px-3.5 py-3 w-[120px] min-w-[120px] font-mono font-black text-slate-900">
         ${selling.toFixed(2)}
       </td>
 
-      {/* Scrollable Column 9: Gross Margin ($ / %) */}
-      <td className="px-3.5 py-3 w-[140px] min-w-[140px] font-mono font-bold">
+      {/* Scrollable Column 6: Cost Price */}
+      <td className="px-3.5 py-3 w-[120px] min-w-[120px] font-mono font-bold text-slate-500">
+        ${cost.toFixed(2)}
+      </td>
+
+      {/* Scrollable Column 7: Gross Margin ($ / %) */}
+      <td className="px-3.5 py-3 w-[130px] min-w-[130px] font-mono font-bold">
         <span
           className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
             marginDollar >= 0
@@ -179,14 +157,36 @@ export function ProductCatalogTableRow({
         </span>
       </td>
 
-      {/* Scrollable Column 10: Total Inventory Valuation */}
+      {/* Scrollable Column 8: Min Buffer Threshold */}
+      <td className="px-3.5 py-3 w-[120px] min-w-[120px] font-mono font-semibold text-slate-700">
+        {minBuffer > 0 ? `${minBuffer} units` : '0 units'}
+      </td>
+
+      {/* Scrollable Column 9: Total Inventory Valuation */}
       <td className="px-3.5 py-3 w-[130px] min-w-[130px] font-mono font-bold text-slate-700">
         ${totalValuation.toFixed(2)}
       </td>
 
-      {/* Scrollable Column 11: Min Buffer Threshold */}
-      <td className="px-3.5 py-3 w-[120px] min-w-[120px] font-mono font-semibold text-slate-500">
-        {minBuffer} units
+      {/* Scrollable Column 10: Barcode */}
+      <td className="px-3.5 py-3 w-[140px] min-w-[140px]">
+        {p.barcode ? (
+          <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-200/60 text-slate-800 font-bold border border-slate-300/60">
+            {p.barcode}
+          </span>
+        ) : (
+          <span className="text-slate-400 font-mono">—</span>
+        )}
+      </td>
+
+      {/* Scrollable Column 11: Description */}
+      <td className="px-3.5 py-3 w-[180px] min-w-[180px]">
+        {p.description ? (
+          <span className="text-slate-600 truncate block max-w-[160px]" title={p.description}>
+            {p.description}
+          </span>
+        ) : (
+          <span className="text-slate-300">—</span>
+        )}
       </td>
 
       {/* Scrollable Column 12: Active & Expiry Status */}

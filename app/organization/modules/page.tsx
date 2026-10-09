@@ -2,24 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { getAuthUser } from '@/lib/api';
 import { getEnabledModulesForOrg, fetchAndSyncModulesForOrg } from '@/lib/modules';
 import { OrgModuleFleetCard } from '@/components/organization/dashboard/OrgModuleFleetCard';
 
 export default function OrganizationModulesPage() {
-  const [orgName, setOrgName] = useState<string>('Primary Organization');
+  const [orgName, setOrgName] = useState<string>('');
   const [enabledModules, setEnabledModules] = useState<string[]>([]);
 
   useEffect(() => {
+    const authUser = getAuthUser();
     const active =
       typeof window !== 'undefined'
-        ? localStorage.getItem('active_org') || localStorage.getItem('cb_active_org_name') || 'Primary Organization'
-        : 'Primary Organization';
+        ? localStorage.getItem('active_org') || localStorage.getItem('cb_active_org_name') || authUser?.tenant_name || ''
+        : authUser?.tenant_name || '';
     setOrgName(active);
-    setEnabledModules(getEnabledModulesForOrg(active));
+    setEnabledModules(active ? getEnabledModulesForOrg(active) : []);
 
-    fetchAndSyncModulesForOrg(active).then((mods) => {
-      if (Array.isArray(mods)) setEnabledModules(mods);
-    });
+    if (active) {
+      fetchAndSyncModulesForOrg(active).then((mods) => {
+        if (Array.isArray(mods)) setEnabledModules(mods);
+      });
+    }
   }, []);
 
   return (

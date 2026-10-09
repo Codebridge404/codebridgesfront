@@ -1,95 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Store, Crown } from 'lucide-react';
-import { getAuthUser, apiFetch } from '@/lib/api';
-import { TenantSetupHeader } from '@/components/header/TenantSetupHeader';
+import { getAuthUser, apiFetch, logoutApi } from '@/lib/api';
+import { AppHeader } from '@/components/header/AppHeader';
 import {
-  PlanTierSelector,
-  PlanTier,
   TenantRegistrationForm,
   TenantFormData,
   TenantSuccessCard,
 } from '@/components/tenant';
 
-const PLANS: PlanTier[] = [
-  {
-    id: 'free_personal',
-    label: 'Personal Solopreneur',
-    icon: <User className="w-5 h-5" />,
-    price: 0,
-    billing: 'Forever Free',
-    description: 'Perfect for solo shop owners, pop-up stores, street vendors, and online freelancers just getting started.',
-    maxOutlets: 1,
-    maxRegisters: 2,
-    maxUsers: 5,
-    features: [
-      'Fast Touch POS Checkout',
-      'ABA KHQR Instant Payment',
-      'Basic Product Catalog (up to 200 SKUs)',
-      'Daily Revenue Summary',
-      'Public Online Storefront Page',
-      'Email & Chat Support',
-    ],
-    gradient: 'from-slate-700 to-slate-900',
-    cta: 'Start for Free',
-  },
-  {
-    id: 'business_runner',
-    label: 'Business Runner',
-    icon: <Store className="w-5 h-5" />,
-    badge: 'Most Popular',
-    price: 49,
-    billing: '/ month',
-    description: 'Ideal for retail stores, cafes, restaurants, and franchise runners managing up to 5 outlet locations.',
-    maxOutlets: 5,
-    maxRegisters: 15,
-    maxUsers: 50,
-    features: [
-      'Everything in Personal, plus:',
-      'Multi-Outlet POS & Inventory',
-      'Kitchen Display System (KDS)',
-      'Customer Display Face (CFD)',
-      'Supplier Purchase Orders & Stock Receiving',
-      'Daily Cash Drawer Shift Auditing',
-      'Staff Roles & Permissions Matrix',
-      'ABA Bakong Reconciliation Reports',
-      'Priority Support',
-    ],
-    gradient: 'from-brand to-brand-hover',
-    cta: 'Start 14-Day Free Trial',
-  },
-  {
-    id: 'enterprise_org',
-    label: 'Enterprise Organization',
-    icon: <Crown className="w-5 h-5" />,
-    badge: 'Full Power',
-    price: 199,
-    billing: '/ month',
-    description: 'For enterprise groups, chains, and organizations running multiple brands, warehouses, and hundreds of staff.',
-    maxOutlets: 50,
-    maxRegisters: 200,
-    maxUsers: 500,
-    features: [
-      'Everything in Business Runner, plus:',
-      'Unlimited Outlet Chains & Warehouses',
-      'Central Inventory Hub & Inter-Store Transfers',
-      'HR Workforce Management Portal',
-      'Finance & Accounts Reconciliation Suite',
-      'E-Commerce Storefront with KHQR Checkout',
-      'Dynamic Custom RBAC Role Builder',
-      'Enterprise Analytics & P&L Reports',
-      'Dedicated SLA + Account Manager',
-      'Custom Domain Integration',
-    ],
-    gradient: 'from-violet-600 to-indigo-600',
-    cta: 'Start 14-Day Enterprise Trial',
-  },
-];
-
 export function RegisterTenantForm() {
-  const [selectedPlan, setSelectedPlan] = useState<PlanTier | null>(PLANS[1]);
-  const [step, setStep] = useState<'choose' | 'register' | 'success'>('register');
+  const [step, setStep] = useState<'register' | 'success'>('register');
   const [formData, setFormData] = useState<TenantFormData>({
     workspaceType: 'company',
     fullName: '',
@@ -121,13 +42,10 @@ export function RegisterTenantForm() {
 
       const params = new URLSearchParams(window.location.search);
       const typeParam = params.get('type');
-
       if (typeParam === 'personal') {
         setFormData((prev) => ({ ...prev, workspaceType: 'personal' }));
-        setSelectedPlan(PLANS[0]);
       } else {
         setFormData((prev) => ({ ...prev, workspaceType: 'company' }));
-        setSelectedPlan(PLANS[1]);
       }
       setStep('register');
     }
@@ -135,18 +53,24 @@ export function RegisterTenantForm() {
 
   const handleSelectPlanType = (type: 'personal' | 'company') => {
     setFormData((prev) => ({ ...prev, workspaceType: type }));
-    setSelectedPlan(type === 'personal' ? PLANS[0] : PLANS[1]);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch {}
+    window.location.href = '/launchpad';
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlan) return;
 
     try {
       setLoading(true);
       setError('');
 
       const tenantName = formData.name.trim() || formData.fullName.trim() || 'My Organization';
+      const clientTier = formData.workspaceType === 'personal' ? 'free_personal' : 'business_runner';
       let registeredData: any = null;
 
       try {
@@ -158,7 +82,7 @@ export function RegisterTenantForm() {
             phone: formData.phone,
             address: formData.address,
             country: formData.country,
-            client_tier: formData.workspaceType === 'personal' ? 'free_personal' : selectedPlan.id,
+            client_tier: clientTier,
           }),
         });
 
@@ -167,7 +91,7 @@ export function RegisterTenantForm() {
         } else if (res?.name) {
           registeredData = res;
         }
-      } catch (networkErr) {
+      } catch (networkErr: any) {
         console.warn('[RegisterTenant] Backend API call failed, creating local workspace:', networkErr);
       }
 
@@ -175,7 +99,7 @@ export function RegisterTenantForm() {
         registeredData = {
           name: tenantName,
           company_code: 'CB-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
-          client_tier: formData.workspaceType === 'personal' ? 'free_personal' : selectedPlan.id,
+          client_tier: clientTier,
           status: 'trial',
           email: formData.email,
         };
@@ -184,7 +108,7 @@ export function RegisterTenantForm() {
       if (typeof window !== 'undefined') {
         const currentUserStr = localStorage.getItem('pos_user');
         const currentUserObj = currentUserStr ? JSON.parse(currentUserStr) : {};
-        const updatedRole = currentUserObj.role === 'super_admin' ? 'super_admin' : 'administrator';
+        const updatedRole = currentUserObj.role === 'super_admin' ? 'super_admin' : 'organization';
         const updatedUser = {
           ...currentUserObj,
           tenant_id: registeredData.id || currentUserObj.tenant_id,
@@ -210,32 +134,16 @@ export function RegisterTenantForm() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-slate-900 selection:bg-brand selection:text-white font-sans">
-      <TenantSetupHeader
-        currentUser={currentUser}
-        backUrl="/launchpad"
-        backLabel="Back to Onboarding Hub"
-      />
+    <div className="relative z-10 flex flex-col min-h-screen">
+      {/* 1. Global Platform Header */}
+      <AppHeader user={currentUser} handleLogout={handleLogout} />
 
-      <main className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        {step === 'choose' && (
-          <PlanTierSelector
-            plans={PLANS}
-            selectedPlan={selectedPlan}
-            onSelectPlan={(plan) => setSelectedPlan(plan)}
-            onProceedToForm={(plan) => {
-              setSelectedPlan(plan);
-              setStep('register');
-            }}
-          />
-        )}
-
-        {step === 'register' && selectedPlan && (
+      {/* 2. Main Content */}
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+        {step === 'register' && (
           <TenantRegistrationForm
-            selectedPlan={selectedPlan}
             formData={formData}
             setFormData={setFormData}
-            onBackToPlans={() => { window.location.href = '/launchpad'; }}
             onSelectPlanType={handleSelectPlanType}
             onSubmit={handleRegister}
             loading={loading}

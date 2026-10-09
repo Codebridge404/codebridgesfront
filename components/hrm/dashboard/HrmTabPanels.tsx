@@ -8,6 +8,7 @@ import {
   LeaveRequestsCard,
   StaffRosterTable,
 } from './index';
+import { HrmAttendanceTable } from '../attendance/HrmAttendanceTable';
 import {
   FileText,
   BarChart3,
@@ -61,8 +62,8 @@ export function HrmTabPanels({
   if (currentTab === 'attendance') {
     return (
       <div className="space-y-6">
+        <HrmAttendanceTable />
         <AttendanceRateCard />
-        <StaffRosterTable />
       </div>
     );
   }

@@ -6,12 +6,9 @@ import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermis
 import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/components/security/users';
 import { cardStyles } from '@/lib/theme';
 import { useConfirm, useToast } from '@/components/common';
-import {
-  WorkspaceStaffDirectory,
-  WorkspaceStaffInviteSearch,
-  WorkspaceStaffCreateForm,
-  AVAILABLE_ROLES,
-} from '@/components/launchpad/staff';
+import { WorkspaceStaffDirectory } from '@/components/launchpad/staff/WorkspaceStaffDirectory';
+import { WorkspaceStaffInviteSearch } from '@/components/launchpad/staff/WorkspaceStaffInviteSearch';
+import { WorkspaceStaffCreateForm, AVAILABLE_ROLES } from '@/components/launchpad/staff/WorkspaceStaffCreateForm';
 
 export default function OrganizationStaffPage() {
   const confirm = useConfirm();

@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { RegisterForm } from './RegisterForm';
+import { AuthTechBackground } from './AuthTechBackground';
 
 export function RegisterView() {
   return (
@@ -12,8 +13,12 @@ export function RegisterView() {
         </div>
       }
     >
-      <div className="min-h-screen w-full flex items-center justify-center bg-canvas text-slate-900 p-4 font-sans selection:bg-brand selection:text-white">
-        <RegisterForm />
+      <div className="relative min-h-screen w-full flex items-center justify-center bg-canvas text-slate-900 p-4 font-sans selection:bg-brand selection:text-white">
+        {/* Cyber-Security Matrix & Interactive Spotlight */}
+        <AuthTechBackground />
+        <div className="relative z-10 w-full flex items-center justify-center">
+          <RegisterForm />
+        </div>
       </div>
     </Suspense>
   );

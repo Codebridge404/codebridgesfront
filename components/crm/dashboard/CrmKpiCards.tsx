@@ -83,7 +83,7 @@ export function CrmKpiCards() {
         return (
           <div
             key={idx}
-            className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="bg-transparent p-5 rounded-2xl border border-slate-300/80 flex flex-col justify-between hover:border-slate-400 transition-all"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{c.title}</span>
@@ -97,7 +97,7 @@ export function CrmKpiCards() {
               <p className="text-xs text-slate-400 font-semibold">{c.subtitle}</p>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-1 text-[11px] font-extrabold text-brand">
+            <div className="pt-2 border-t border-slate-300/60 flex items-center gap-1 text-[11px] font-extrabold text-brand">
               {loading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
               ) : (

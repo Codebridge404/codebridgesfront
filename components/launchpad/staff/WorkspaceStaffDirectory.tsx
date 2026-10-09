@@ -85,7 +85,7 @@ export function WorkspaceStaffDirectory({
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-xs font-bold text-slate-900 truncate">{member.name}</p>
-                  <span className={badgeStyles.brand}>{getRoleDisplayName(member.role, activeOrgName)}</span>
+                  <span className={badgeStyles.brand}>{getRoleDisplayName(member, activeOrgName)}</span>
                 </div>
                 <p className="text-[11px] text-slate-500 truncate">{member.email}</p>
               </div>

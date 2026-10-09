@@ -26,6 +26,23 @@ export function removeAuthToken() {
     localStorage.removeItem('pos_token');
     localStorage.removeItem('pos_user');
     localStorage.removeItem('active_org');
+    localStorage.removeItem('cb_active_org_name');
+    localStorage.removeItem('cb_active_org_logo');
+    localStorage.removeItem('cb_impersonation');
+    localStorage.removeItem('active_tenant_id');
+
+    // Purge cached tenant module keys so they never bleed into other accounts
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('cb_enabled_modules_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {}
+
+    window.dispatchEvent(new CustomEvent('cb_user_updated', { detail: { user: null } }));
+    window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName: '', logoUrl: null } }));
+    window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName: '', updated: [] } }));
   }
 }
 
@@ -51,9 +68,10 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = getAuthToken();
   const baseUrl = getApiUrl();
 
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers as Record<string, string> || {}),
   };
 

@@ -12,6 +12,7 @@ import {
   OrgModuleFleetCard,
   OrgOutletsPreview,
   OrgStaffPreview,
+  OrgSetupGuideCard,
 } from '@/components/organization/dashboard';
 import { WorkspaceStaffModal } from '@/components/launchpad/WorkspaceStaffModal';
 
@@ -34,10 +35,10 @@ export function OrganizationDashboard() {
           localStorage.getItem('cb_active_org_name') ||
           authUser?.tenant_name ||
           authUser?.company_name
-        : authUser?.tenant_name) || 'Primary Organization';
+        : authUser?.tenant_name) || (authUser?.role === 'super_admin' ? 'CodeBridges Platform Hub' : '');
 
     setOrgName(activeOrg);
-    setEnabledModules(getEnabledModulesForOrg(activeOrg));
+    setEnabledModules(activeOrg ? getEnabledModulesForOrg(activeOrg) : []);
 
     try {
       setLoading(true);
@@ -82,7 +83,7 @@ export function OrganizationDashboard() {
     };
   }, []);
 
-  const roleTitle = getRoleDisplayName(user || 'admin', orgName);
+  const roleTitle = getRoleDisplayName(user || 'organization', orgName);
 
   return (
     <div className="space-y-4 w-full font-sans pb-10 text-slate-900">
@@ -139,12 +140,22 @@ export function OrganizationDashboard() {
         loading={loading}
       />
 
-      {/* 3. Independent Business Suites Fleet (Pastel Monogram Badges) */}
-      <OrgModuleFleetCard
-        orgName={orgName}
-        enabledModules={enabledModules}
-        onModulesUpdated={(updated) => setEnabledModules(updated)}
+      {/* 3. Getting Started / Business Setup Roadmap Guide */}
+      <OrgSetupGuideCard
+        outletsCount={outlets.length}
+        staffCount={staff.length}
+        activeModulesCount={enabledModules.length}
+        onOpenManageStaff={() => setIsStaffModalOpen(true)}
       />
+
+      {/* 4. Independent Business Suites Fleet (Pastel Monogram Badges) */}
+      <div id="business-suites">
+        <OrgModuleFleetCard
+          orgName={orgName}
+          enabledModules={enabledModules}
+          onModulesUpdated={(updated) => setEnabledModules(updated)}
+        />
+      </div>
 
       {/* 4. Split Overview: Store Outlets & Staff Roster */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

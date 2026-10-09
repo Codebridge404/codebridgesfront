@@ -49,6 +49,15 @@ export function ThermalReceiptPaper({
 
       {/* Store / Outlet Branding Header */}
       <div className="text-center space-y-1 pb-3 border-b border-dashed border-slate-300">
+        {(outlet?.logo_url || (typeof window !== 'undefined' && localStorage.getItem('cb_active_org_logo'))) && (
+          <div className="flex justify-center mb-1">
+            <img
+              src={outlet?.logo_url || (typeof window !== 'undefined' ? localStorage.getItem('cb_active_org_logo') || '' : '')}
+              alt="Logo"
+              className="max-h-12 max-w-[150px] object-contain grayscale contrast-125"
+            />
+          </div>
+        )}
         <h2 className="font-extrabold text-sm uppercase tracking-tight text-slate-900">
           {outlet?.name || 'Freshmart POS'}
         </h2>
@@ -61,7 +70,7 @@ export function ThermalReceiptPaper({
         )}
       </div>
 
-      {/* Metadata (Receipt No, Date, Cashier, Register) */}
+      {/* Metadata (Receipt No, Date, Order Mode & Table, Customer, Cashier, Register) */}
       <div className="py-2.5 border-b border-dashed border-slate-300 space-y-1 text-[10px]">
         <div className="flex justify-between">
           <span className="text-slate-500">Receipt No:</span>
@@ -71,6 +80,24 @@ export function ThermalReceiptPaper({
           <span className="text-slate-500">Date/Time:</span>
           <span>{formattedDate}</span>
         </div>
+        <div className="flex justify-between">
+          <span className="text-slate-500">Dining Mode:</span>
+          <span className="font-extrabold uppercase">
+            {sale?.order_type === 'dine_in'
+              ? `Dine-In (${sale?.table_name || 'Open Table'})`
+              : sale?.order_type === 'takeaway'
+              ? 'Takeaway'
+              : sale?.order_type === 'delivery'
+              ? 'Delivery'
+              : 'Dine-In'}
+          </span>
+        </div>
+        {sale?.customer_name && (
+          <div className="flex justify-between">
+            <span className="text-slate-500">Customer:</span>
+            <span className="font-bold text-slate-900">{sale.customer_name}</span>
+          </div>
+        )}
         <div className="flex justify-between">
           <span className="text-slate-500">Cashier:</span>
           <span className="font-bold">{cashier?.name || 'Admin Cashier'}</span>

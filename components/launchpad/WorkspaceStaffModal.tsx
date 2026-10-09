@@ -7,12 +7,9 @@ import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermis
 import { badgeStyles } from '@/lib/theme';
 import { useConfirm, useToast } from '@/components/common';
 import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/components/security/users';
-import {
-  WorkspaceStaffDirectory,
-  WorkspaceStaffInviteSearch,
-  WorkspaceStaffCreateForm,
-  AVAILABLE_ROLES,
-} from './staff';
+import { WorkspaceStaffDirectory } from './staff/WorkspaceStaffDirectory';
+import { WorkspaceStaffInviteSearch } from './staff/WorkspaceStaffInviteSearch';
+import { WorkspaceStaffCreateForm, AVAILABLE_ROLES } from './staff/WorkspaceStaffCreateForm';
 
 interface WorkspaceStaffModalProps {
   isOpen: boolean;
@@ -114,7 +111,7 @@ export function WorkspaceStaffModal({
       name: user.name || '',
       email: user.email || '',
       password: '',
-      role: user.role || 'cashier',
+      role: user.role_slug || user.role || 'cashier',
       outlet_id: user.outlet_id ? String(user.outlet_id) : '',
       pin_code: user.pin_code || '',
     });

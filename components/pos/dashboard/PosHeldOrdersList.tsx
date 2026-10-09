@@ -18,8 +18,8 @@ export function PosHeldOrdersList({
 }: PosHeldOrdersListProps) {
   if (!heldCarts || heldCarts.length === 0) {
     return (
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col items-center justify-center text-center text-slate-400 py-10 space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center">
+      <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 flex flex-col items-center justify-center text-center text-slate-400 py-10 space-y-2">
+        <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-200/60">
           <PauseCircle className="w-6 h-6" />
         </div>
         <p className="text-xs font-bold text-slate-700">No Held Orders</p>
@@ -31,14 +31,14 @@ export function PosHeldOrdersList({
   }
 
   return (
-    <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-4">
+    <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
             <PauseCircle className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-sm font-extrabold text-slate-900">Held & Suspended Carts</h4>
+            <h4 className="text-sm font-extrabold text-slate-900">Held &amp; Suspended Carts</h4>
             <p className="text-[11px] text-slate-400 font-medium">
               {heldCarts.length} customer carts on hold
             </p>
@@ -65,10 +65,10 @@ export function PosHeldOrdersList({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-amber-300 transition-all flex items-center justify-between gap-3"
+                className="p-3.5 rounded-2xl bg-slate-200/40 border border-slate-300/60 hover:border-amber-400 transition-all flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center shrink-0 shadow-2xs">
+                  <div className="w-8 h-8 rounded-xl bg-slate-200/60 border border-slate-300/60 text-slate-700 flex items-center justify-center shrink-0 font-bold">
                     <User className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
@@ -94,7 +94,7 @@ export function PosHeldOrdersList({
                   <button
                     onClick={() => onDeleteCart(c.id)}
                     title="Discard Cart"
-                    className="p-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-xl bg-transparent hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-300/60 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

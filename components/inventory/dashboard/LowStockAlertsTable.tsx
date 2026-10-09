@@ -45,8 +45,8 @@ export function LowStockAlertsTable() {
                     sku: b.sku || `SKU-${String(b.product_id || index).padStart(4, '0')}`,
                     warehouse: outlet.name || b.outlet_name || 'Main Store',
                     currentStock: Number(b.on_hand ?? b.quantity ?? b.current_stock ?? 0),
-                    reorderPoint: Number(b.min_reorder_point ?? b.reorder_level ?? b.min_stock ?? 5),
-                    suggestedPo: Math.max(10, (Number(b.min_reorder_point ?? 5) * 3) - Number(b.on_hand ?? 0)),
+                    reorderPoint: Number(b.min_reorder_point ?? b.reorder_level ?? b.min_stock ?? 0),
+                    suggestedPo: Math.max(0, (Number(b.min_reorder_point ?? b.reorder_level ?? 0) * 2) - Number(b.on_hand ?? 0)),
                     unit: b.unit || 'units',
                     supplier: b.supplier_name || 'Primary Supplier',
                   });

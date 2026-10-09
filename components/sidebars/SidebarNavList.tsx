@@ -13,6 +13,8 @@ import {
   Package,
   BarChart3,
   Settings,
+  UtensilsCrossed,
+  ShieldCheck,
   LucideIcon,
 } from 'lucide-react';
 
@@ -76,6 +78,11 @@ export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
           icon: ChefHat,
           target: '_blank',
         },
+        {
+          label: 'Tables & Dining',
+          href: '/pos/tables',
+          icon: UtensilsCrossed,
+        },
       ],
     },
     {
@@ -95,6 +102,11 @@ export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
           label: 'POS Analytics & Reports',
           href: '/pos/reports',
           icon: BarChart3,
+        },
+        {
+          label: 'Security & Staff PINs',
+          href: '/pos/security',
+          icon: ShieldCheck,
         },
         {
           label: 'Store & Hardware Settings',

@@ -14,7 +14,10 @@ import {
   ShoppingBag,
   ExternalLink,
   LogIn,
+  Calendar,
+  Loader2,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface TenantDetailDrawerProps {
   tenant: any | null;
@@ -28,10 +31,11 @@ interface TenantDetailDrawerProps {
 const AVAILABLE_MODULES = [
   { id: 'pos', name: 'Point of Sale (POS)', icon: Monitor, color: 'bg-brand-subtle text-brand' },
   { id: 'inventory', name: 'Stock & Inventory', icon: Boxes, color: 'bg-amber-50 text-amber-600' },
+  { id: 'meeting-management', name: 'Meeting System (MMS)', icon: Calendar, color: 'bg-purple-50 text-purple-600' },
   { id: 'finance', name: 'Finance & Accounts', icon: DollarSign, color: 'bg-emerald-50 text-emerald-600' },
   { id: 'hrm', name: 'HR & Workforce', icon: Briefcase, color: 'bg-rose-50 text-rose-600' },
   { id: 'crm', name: 'CRM & Pipeline', icon: Users, color: 'bg-blue-50 text-blue-600' },
-  { id: 'shop', name: 'E-Commerce Storefront', icon: ShoppingBag, color: 'bg-rose-50 text-rose-600' },
+  { id: 'shop', name: 'E-Commerce Storefront', icon: ShoppingBag, color: 'bg-orange-50 text-orange-600' },
 ];
 
 export function TenantDetailDrawer({
@@ -42,18 +46,42 @@ export function TenantDetailDrawer({
   onToggleModule,
   onEditQuotas,
 }: TenantDetailDrawerProps) {
-  const [enabledModules, setEnabledModules] = useState<string[]>(
-    tenant?.enabled_modules || ['pos', 'inventory', 'finance']
-  );
+  const [enabledModules, setEnabledModules] = useState<string[]>([]);
+  const [savingModule, setSavingModule] = useState(false);
+
+  React.useEffect(() => {
+    if (tenant) {
+      let mods = tenant.enabled_modules;
+      if (typeof mods === 'string') {
+        try {
+          mods = JSON.parse(mods);
+        } catch {
+          mods = [];
+        }
+      }
+      setEnabledModules(Array.isArray(mods) ? mods : []);
+    }
+  }, [tenant]);
 
   if (!isOpen || !tenant) return null;
 
-  const handleModuleClick = (modId: string) => {
+  const handleModuleClick = async (modId: string) => {
     const next = enabledModules.includes(modId)
       ? enabledModules.filter((m) => m !== modId)
       : [...enabledModules, modId];
     setEnabledModules(next);
-    onToggleModule?.(tenant.id, modId, next.includes(modId));
+    setSavingModule(true);
+    try {
+      await apiFetch('/tenants/modules', {
+        method: 'PUT',
+        body: JSON.stringify({ tenant_id: tenant.id, modules: next }),
+      });
+      onToggleModule?.(tenant.id, modId, next.includes(modId));
+    } catch (err) {
+      console.error('Failed to sync module entitlement:', err);
+    } finally {
+      setSavingModule(false);
+    }
   };
 
   return (
@@ -180,7 +208,13 @@ export function TenantDetailDrawer({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Module Entitlements</h4>
-                <span className="text-[10px] font-bold text-slate-500">Live Workspace Grants</span>
+                {savingModule ? (
+                  <span className="text-[10px] font-bold text-brand flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-emerald-600">Click card to grant/revoke</span>
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {AVAILABLE_MODULES.map((mod) => {

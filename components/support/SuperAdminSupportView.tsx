@@ -1,31 +1,114 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { LifeBuoy, Search, Megaphone, MessageSquare } from 'lucide-react';
+import { SupportTicket, PlatformAnnouncement, SupportStats } from './types';
+import { TicketsTab } from './TicketsTab';
+import { AnnouncementsTab } from './AnnouncementsTab';
+import { TicketReplyModal } from './TicketReplyModal';
+import { CreateAnnouncementModal } from './CreateAnnouncementModal';
 import {
-  LifeBuoy,
-  Search,
-  MessageSquare,
-} from 'lucide-react';
-import { SupportTicket, SAMPLE_TICKETS } from './types';
+  getSupportTicketsApi,
+  updateSupportTicketApi,
+  getPlatformAnnouncementsApi,
+  createPlatformAnnouncementApi,
+  togglePlatformAnnouncementApi,
+  deletePlatformAnnouncementApi,
+} from '@/lib/api';
 
 export function SuperAdminSupportView() {
-  const [tickets, setTickets] = useState<SupportTicket[]>(SAMPLE_TICKETS);
+  const [activeTab, setActiveTab] = useState<'tickets' | 'announcements'>('tickets');
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [stats, setStats] = useState<SupportStats | null>(null);
+  const [announcements, setAnnouncements] = useState<PlatformAnnouncement[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  const filteredTickets = tickets.filter((t) => {
-    const matchesSearch =
-      t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || t.status === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
+  // Modals
+  const [replyTicket, setReplyTicket] = useState<SupportTicket | null>(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+
+  const loadTickets = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getSupportTicketsApi({
+        status: selectedStatus === 'all' ? undefined : selectedStatus,
+        q: searchTerm || undefined,
+      });
+      if (res?.success) {
+        setTickets(res.data);
+        setStats(res.stats);
+      }
+    } catch {
+      setTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedStatus, searchTerm]);
+
+  const loadAnnouncements = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getPlatformAnnouncementsApi();
+      if (res?.success) {
+        setAnnouncements(res.data);
+      }
+    } catch {
+      setAnnouncements([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'tickets') {
+      loadTickets();
+    } else {
+      loadAnnouncements();
+    }
+  }, [activeTab, loadTickets, loadAnnouncements]);
+
+  const handleSaveTicketReply = async (
+    ticketId: string,
+    status: 'open' | 'in_progress' | 'resolved',
+    responseNote: string
+  ) => {
+    const res = await updateSupportTicketApi(ticketId, {
+      status,
+      response_note: responseNote,
+    });
+    if (res?.success) {
+      loadTickets();
+    }
+  };
+
+  const handleCreateAnnouncement = async (data: {
+    title: string;
+    message: string;
+    severity: 'info' | 'warning' | 'critical';
+    target_audience: string;
+  }) => {
+    const res = await createPlatformAnnouncementApi(data);
+    if (res?.success) {
+      loadAnnouncements();
+    }
+  };
+
+  const handleToggleAnnouncement = async (id: number) => {
+    await togglePlatformAnnouncementApi(id);
+    loadAnnouncements();
+  };
+
+  const handleDeleteAnnouncement = async (id: number) => {
+    await deletePlatformAnnouncementApi(id);
+    loadAnnouncements();
+  };
 
   return (
-    <div className="space-y-3 w-full font-sans pb-6">
+    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-12">
       {/* Header */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand to-brand-hover p-0.5 shadow-md shadow-brand/15 flex items-center justify-center">
             <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
@@ -35,118 +118,94 @@ export function SuperAdminSupportView() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                Merchant Support Desk &amp; Error Stream
+                Global Support Desk &amp; Maintenance Broadcasts
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand text-[10px] font-extrabold border border-brand/20 uppercase">
-                Merchant Care
+                Platform Operations
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Respond to customer inquiries, resolve technical issues, and monitor real-time exception logs across all tenants.
+              Respond to cross-tenant issues, provide support resolutions, and publish system maintenance announcements.
             </p>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search tickets..."
-            className="pl-8 pr-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand"
-          />
-        </div>
-      </div>
-
-      {/* Tickets List */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="font-black text-sm text-slate-900 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-brand" />
-            <span>Active Merchant Tickets ({filteredTickets.length})</span>
-          </h3>
-
-          <div className="flex items-center gap-1.5 text-xs font-bold">
-            {['all', 'open', 'in_progress', 'resolved'].map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setSelectedStatus(st)}
-                className={`px-3 py-1 rounded-xl transition-all capitalize cursor-pointer ${
-                  selectedStatus === st
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {st.replace('_', ' ')}
-              </button>
-            ))}
+        {/* Tab & Search */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5">
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('tickets')}
+              className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'tickets' ? 'bg-white text-slate-900 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Merchant Tickets</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('announcements')}
+              className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'announcements' ? 'bg-white text-slate-900 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              <span>Announcements</span>
+            </button>
           </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-black">
-              <tr>
-                <th className="px-4 py-3 text-left">Ticket ID &amp; Subject</th>
-                <th className="px-4 py-3 text-left">Tenant Organization</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Priority</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredTickets.map((t) => (
-                <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="font-extrabold text-slate-900">{t.subject}</p>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.id} • {t.createdAt}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-bold text-slate-800">{t.tenantName}</p>
-                    <p className="text-[10px] text-slate-400">{t.requester}</p>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-slate-600">{t.category}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                        t.priority === 'urgent'
-                          ? 'bg-rose-100 text-rose-800'
-                          : t.priority === 'high'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {t.priority}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                        t.status === 'open'
-                          ? 'bg-blue-100 text-blue-800'
-                          : t.status === 'in_progress'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-emerald-100 text-emerald-800'
-                      }`}
-                    >
-                      {t.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-brand-subtle hover:text-brand font-extrabold text-xs transition-colors cursor-pointer">
-                      Reply
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {activeTab === 'tickets' && (
+            <div className="relative w-full sm:w-60">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search tickets..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand text-slate-900 placeholder:text-slate-400"
+              />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs">
+        {activeTab === 'tickets' ? (
+          <TicketsTab
+            tickets={tickets}
+            stats={stats}
+            loading={loading}
+            selectedStatus={selectedStatus}
+            onSelectStatus={setSelectedStatus}
+            onOpenReply={(t) => setReplyTicket(t)}
+          />
+        ) : (
+          <AnnouncementsTab
+            announcements={announcements}
+            loading={loading}
+            onOpenCreateModal={() => setShowAnnouncementModal(true)}
+            onToggleActive={handleToggleAnnouncement}
+            onDelete={handleDeleteAnnouncement}
+          />
+        )}
+      </div>
+
+      {/* Reply Modal */}
+      <TicketReplyModal
+        ticket={replyTicket}
+        isOpen={Boolean(replyTicket)}
+        onClose={() => setReplyTicket(null)}
+        onSave={handleSaveTicketReply}
+      />
+
+      {/* Create Announcement Modal */}
+      <CreateAnnouncementModal
+        isOpen={showAnnouncementModal}
+        onClose={() => setShowAnnouncementModal(false)}
+        onSubmit={handleCreateAnnouncement}
+      />
     </div>
   );
 }

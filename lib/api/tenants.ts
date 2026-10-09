@@ -26,6 +26,45 @@ export async function registerTenantApi(data: any) {
   });
 }
 
+export interface TenantProfile {
+  id: number;
+  name: string;
+  legal_name?: string | null;
+  slug: string;
+  company_code?: string | null;
+  logo_url?: string | null;
+  receipt_footer?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  country?: string | null;
+  currency?: string | null;
+  client_tier?: string | null;
+  status?: string | null;
+  enabled_modules?: string[];
+}
+
+export async function getTenantProfileApi(orgName?: string): Promise<{ success: boolean; data?: TenantProfile; message?: string }> {
+  try {
+    let url = '/tenants/profile';
+    if (orgName) url += `?org_name=${encodeURIComponent(orgName)}`;
+    return await apiFetch(url);
+  } catch (err: any) {
+    console.warn('[Tenants API] Could not fetch tenant profile:', err);
+    return { success: false, message: err?.message || 'Could not fetch organization profile' };
+  }
+}
+
+export async function updateTenantProfileApi(
+  payload: FormData | Record<string, any>
+): Promise<{ success: boolean; data?: TenantProfile; message?: string }> {
+  const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+  return await apiFetch('/tenants/profile', {
+    method: 'POST',
+    body: isFormData ? payload : JSON.stringify(payload),
+  });
+}
+
 export async function getTenantModulesApi(orgName?: string) {
   try {
     let url = '/tenants/modules';

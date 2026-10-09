@@ -36,7 +36,7 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
 
   if (stores.length === 0) {
     return (
-      <div className="p-12 text-center space-y-3 bg-white rounded-2xl border border-slate-200">
+      <div className="p-12 text-center space-y-3 bg-transparent rounded-2xl border border-slate-300/80">
         <Building2 className="w-10 h-10 text-slate-300 mx-auto" />
         <p className="text-xs text-slate-500 font-semibold">No store outlets registered yet</p>
       </div>
@@ -52,8 +52,8 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
           initial="hidden"
           animate="visible"
           variants={cardVariants}
-          className={`p-5 rounded-2xl bg-white border transition-all shadow-xs flex flex-col justify-between space-y-4 ${
-            st.is_active ? 'border-slate-200 hover:border-slate-300' : 'border-slate-200 opacity-60 bg-slate-50'
+          className={`p-5 rounded-2xl bg-transparent border transition-all flex flex-col justify-between space-y-4 ${
+            st.is_active ? 'border-slate-300/80 hover:border-slate-400' : 'border-slate-300/60 opacity-60'
           }`}
         >
           <div className="space-y-3">
@@ -64,7 +64,7 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
               </div>
               <span
                 className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  st.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
+                  st.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200/50 text-slate-600 border border-slate-300/60'
                 }`}
               >
                 {st.is_active ? 'Active' : 'Inactive'}
@@ -86,15 +86,15 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-              <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-300/60 text-xs">
+              <div className="flex items-center gap-2 bg-slate-200/40 border border-slate-300/60 p-2 rounded-xl">
                 <Monitor className="w-4 h-4 text-brand" />
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Registers</p>
                   <p className="font-mono font-bold text-slate-800">{st.registers_count || 0}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl">
+              <div className="flex items-center gap-2 bg-slate-200/40 border border-slate-300/60 p-2 rounded-xl">
                 <Users className="w-4 h-4 text-brand" />
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Staff</p>
@@ -104,11 +104,11 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-3 border-t border-slate-300/60 flex items-center justify-between">
             <button
               onClick={() => onToggleActive(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                st.is_active ? 'text-slate-500 hover:text-slate-700 hover:bg-slate-100' : 'text-emerald-600 hover:bg-emerald-50'
+              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                st.is_active ? 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50' : 'text-emerald-600 hover:bg-emerald-50'
               }`}
             >
               <Power className="w-3.5 h-3.5" />
@@ -117,7 +117,7 @@ export const StoreCardGrid: React.FC<StoreCardGridProps> = ({
 
             <button
               onClick={() => onEdit(st)}
-              className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1 rounded-lg bg-slate-200/50 hover:bg-slate-200 border border-slate-300/60 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5" />
               Edit

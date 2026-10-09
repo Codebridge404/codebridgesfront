@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Download, Printer, RefreshCw } from 'lucide-react';
-import { getSalesReportApi, getOutletsApi, getAuthUser } from '@/lib/api';
+import { BarChart3, Download, Printer, RefreshCw, FileText, Landmark } from 'lucide-react';
+import { getSalesReportApi, getOutletsApi, getAuthUser, downloadReportCsvApi } from '@/lib/api';
 import {
   PosReportsKpiGrid,
   PosReportsTenderSettlement,
@@ -12,10 +12,12 @@ import {
   PosReportsFilterBar,
 } from './index';
 import { PosThermalReportModal } from '../shifts/PosThermalReportModal';
+import { PosReportsTaxCard } from './PosReportsTaxCard';
 
 export function PosReportsManagementView() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'executive' | 'tax'>('executive');
   const [period, setPeriod] = useState<'today' | 'yesterday' | '7d' | '30d' | 'custom'>('today');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
@@ -98,40 +100,42 @@ export function PosReportsManagementView() {
     }
   };
 
-  const handleExportCsv = () => {
-    const csvContent = [
-      ['Metric', 'Value'],
-      ['Gross Sales', metrics.grossSales.toFixed(2)],
-      ['Net Sales', metrics.netSales.toFixed(2)],
-      ['Completed Orders', metrics.totalOrders],
-      ['Average Basket', metrics.avgTicket.toFixed(2)],
-      ['Discounts Total', metrics.discountsGiven.toFixed(2)],
-      ['Refunds Total', metrics.refundsTotal.toFixed(2)],
-      ['Cash Sales', metrics.cashUsd.toFixed(2)],
-      ['ABA KHQR Sales', metrics.khqrSales.toFixed(2)],
-      ['Card Sales', metrics.cardSales.toFixed(2)],
-    ].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `POS-Report-${startDate}-to-${endDate}.csv`;
-    link.click();
+  const handleExportCsv = async () => {
+    try {
+      await downloadReportCsvApi(activeTab === 'tax' ? 'tax' : 'sales');
+    } catch {
+      const csvContent = [
+        ['Metric', 'Value'],
+        ['Gross Sales', metrics.grossSales.toFixed(2)],
+        ['Net Sales', metrics.netSales.toFixed(2)],
+        ['Completed Orders', metrics.totalOrders],
+        ['Average Basket', metrics.avgTicket.toFixed(2)],
+        ['Discounts Total', metrics.discountsGiven.toFixed(2)],
+        ['Refunds Total', metrics.refundsTotal.toFixed(2)],
+        ['Cash Sales', metrics.cashUsd.toFixed(2)],
+        ['ABA KHQR Sales', metrics.khqrSales.toFixed(2)],
+        ['Card Sales', metrics.cardSales.toFixed(2)],
+      ].map((r) => r.join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `POS-Report-${startDate}-to-${endDate}.csv`;
+      link.click();
+    }
   };
 
   return (
-    <div className="space-y-3 w-full font-sans text-slate-900 pb-6">
+    <div className="space-y-4 w-full font-sans text-slate-900 pb-6">
       {/* 1. Header Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-2xl bg-brand-subtle border border-brand/20 text-brand flex items-center justify-center">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight">POS Reports</h1>
-              <p className="text-xs text-slate-500 font-medium">Real-time terminal transaction analytics and tender settlement records</p>
-            </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-brand-subtle border border-brand/20 text-brand flex items-center justify-center">
+            <BarChart3 className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">POS Reports &amp; Ledger</h1>
+            <p className="text-xs text-slate-500 font-medium">Real-time terminal transaction analytics and tax settlement records</p>
           </div>
         </div>
 
@@ -163,7 +167,35 @@ export function PosReportsManagementView() {
         </div>
       </div>
 
-      {/* 2. Date & Outlet Filter Bar */}
+      {/* 2. Navigation Tab Switcher */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs w-fit">
+        <button
+          type="button"
+          onClick={() => setActiveTab('executive')}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+            activeTab === 'executive'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span>Executive Sales &amp; Velocity</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('tax')}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+            activeTab === 'tax'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Landmark className="w-3.5 h-3.5" />
+          <span>VAT &amp; Tax Compliance (10%)</span>
+        </button>
+      </div>
+
+      {/* 3. Date & Outlet Filter Bar */}
       <PosReportsFilterBar
         period={period} onPeriodChange={handlePeriodChange}
         startDate={startDate} onStartDateChange={setStartDate}
@@ -172,20 +204,22 @@ export function PosReportsManagementView() {
         outlets={outlets}
       />
 
-      {/* 3. Key Metric Cards */}
-      <PosReportsKpiGrid metrics={metrics} />
-
-      {/* 4. Tender Settlement Breakdown & Hourly Flow */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <PosReportsTenderSettlement cashUsd={metrics.cashUsd} khqrSales={metrics.khqrSales} cardSales={metrics.cardSales} />
-        <PosReportsHourlyVelocity hourlySales={hourlySales} />
-      </div>
-
-      {/* 5. Cashier Velocity & Top Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PosReportsCashierVelocityTable cashiers={cashierPerformance} />
-        <PosReportsCategoryPerformance categories={topCategories} />
-      </div>
+      {/* 4. Tab Views */}
+      {activeTab === 'tax' ? (
+        <PosReportsTaxCard startDate={startDate} endDate={endDate} />
+      ) : (
+        <>
+          <PosReportsKpiGrid metrics={metrics} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <PosReportsTenderSettlement cashUsd={metrics.cashUsd} khqrSales={metrics.khqrSales} cardSales={metrics.cardSales} />
+            <PosReportsHourlyVelocity hourlySales={hourlySales} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PosReportsCashierVelocityTable cashiers={cashierPerformance} />
+            <PosReportsCategoryPerformance categories={topCategories} />
+          </div>
+        </>
+      )}
 
       {/* Thermal X/Z-Report Modal */}
       <PosThermalReportModal

@@ -47,6 +47,37 @@ export async function getPurchaseOrdersApi() {
   return await apiFetch('/purchase-orders');
 }
 
+export async function createPurchaseOrderApi(data: {
+  supplier: string;
+  po_number?: string;
+  items_count?: number;
+  est_total: number;
+  order_date?: string;
+  status?: string;
+}) {
+  return await apiFetch('/purchase-orders', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updatePurchaseOrderStatusApi(id: string | number, status: string) {
+  return await apiFetch(`/purchase-orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function receivePurchaseOrderApi(
+  id: string | number,
+  payload?: { outlet_id?: string; items?: Array<{ product_id: any; quantity: number; unit_cost?: number }> }
+) {
+  return await apiFetch(`/purchase-orders/${id}/receive`, {
+    method: 'POST',
+    body: JSON.stringify(payload || {}),
+  });
+}
+
 // Stock Transfers
 export async function getTransfersApi(outletId?: number, status?: string, search?: string) {
   let url = '/inventory/transfers';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { ThermalReceiptModal } from '@/components/receipt/ThermalReceiptModal';
 import { SalesReturnModal } from '@/components/returns/SalesReturnModal';
@@ -19,9 +19,16 @@ import {
   PosShiftCloseModal,
 } from '@/components/pos';
 import { usePosTerminalState } from './usePosTerminalState';
+import { usePosCustomerAndTable } from './usePosCustomerAndTable';
+import { PosOrderContextBar } from './PosOrderContextBar';
+import { PosCustomerSelectorModal } from './PosCustomerSelectorModal';
+import { PosTableSelectorModal } from './PosTableSelectorModal';
 
 function PosTerminalContent() {
   const t = usePosTerminalState();
+  const custTable = usePosCustomerAndTable();
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showTableModal, setShowTableModal] = useState(false);
 
   return (
     <div className="h-screen max-h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
@@ -89,32 +96,72 @@ function PosTerminalContent() {
           </div>
         </div>
 
-        {/* Right 4 Cols: Pinned Cart Panel */}
-        <div className="lg:col-span-4 h-full flex flex-col min-h-0 overflow-hidden">
-          <PosCartPanel
-            cart={t.cart}
-            appliedCoupon={t.appliedCoupon}
-            couponError={t.couponError}
-            onUpdateQty={t.handleUpdateQty}
-            onRemoveItem={t.handleRemoveCartItem}
-            onClearCart={t.handleClearCart}
-            onOpenHoldModal={() => t.setShowHeldCartsModal(true)}
-            onApplyCoupon={t.handleApplyCoupon}
-            onRemoveCoupon={() => t.setAppliedCoupon(null)}
-            onOpenCheckout={t.handleOpenCheckout}
-            isProcessing={t.isProcessing}
+        {/* Right 4 Cols: Order Context Bar + Pinned Cart Panel */}
+        <div className="lg:col-span-4 h-full flex flex-col min-h-0 overflow-hidden space-y-2">
+          <PosOrderContextBar
+            customer={custTable.selectedCustomer}
+            table={custTable.selectedTable}
+            orderType={custTable.orderType}
+            onOpenCustomerModal={() => setShowCustomerModal(true)}
+            onOpenTableModal={() => setShowTableModal(true)}
           />
+
+          <div className="flex-1 min-h-0">
+            <PosCartPanel
+              cart={t.cart}
+              appliedCoupon={t.appliedCoupon}
+              couponError={t.couponError}
+              onUpdateQty={t.handleUpdateQty}
+              onRemoveItem={t.handleRemoveCartItem}
+              onClearCart={() => {
+                t.handleClearCart();
+                custTable.resetCustomerAndTable();
+              }}
+              onOpenHoldModal={() => t.setShowHeldCartsModal(true)}
+              onApplyCoupon={t.handleApplyCoupon}
+              onRemoveCoupon={() => t.setAppliedCoupon(null)}
+              onOpenCheckout={t.handleOpenCheckout}
+              isProcessing={t.isProcessing}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Reusable Modals */}
+      {/* Customer and Dining Table Modals */}
+      <PosCustomerSelectorModal
+        isOpen={showCustomerModal}
+        onClose={() => setShowCustomerModal(false)}
+        selectedCustomer={custTable.selectedCustomer}
+        onSelectCustomer={custTable.setSelectedCustomer}
+      />
+
+      <PosTableSelectorModal
+        isOpen={showTableModal}
+        onClose={() => setShowTableModal(false)}
+        orderType={custTable.orderType}
+        onSelectOrderType={custTable.setOrderType}
+        selectedTable={custTable.selectedTable}
+        onSelectTable={custTable.setSelectedTable}
+      />
+
+      {/* Checkout and Shift Modals */}
       <PosCheckoutModal
         isOpen={t.showCheckoutModal}
         onClose={() => t.setShowCheckoutModal(false)}
         cart={t.cart}
         appliedCoupon={t.appliedCoupon}
         defaultTender={t.defaultTender}
-        onCompleteSale={t.handleCompleteSale}
+        customer={custTable.selectedCustomer}
+        onCompleteSale={async (tenderType, tenderedNum, printReceipt) => {
+          await t.handleCompleteSale(tenderType, tenderedNum, printReceipt, {
+            customer_id: custTable.selectedCustomer?.id,
+            customer_name: custTable.selectedCustomer?.name,
+            table_id: custTable.selectedTable?.id,
+            table_name: custTable.selectedTable?.name,
+            order_type: custTable.orderType,
+          });
+          custTable.resetCustomerAndTable();
+        }}
         onTriggerKhqrModal={() => t.setShowBakongModal(true)}
       />
 
@@ -158,27 +205,35 @@ function PosTerminalContent() {
         }}
       />
 
-      <BakongKhqrModal
-        isOpen={t.showBakongModal}
-        onClose={() => t.setShowBakongModal(false)}
-        amount={t.cart.reduce((sum, item) => sum + item.price * item.qty, 0) * 1.1}
-        salePayload={{
-          outlet_id: t.activeOutletId || t.user?.outlet_id || '0d612401-62c2-4e9e-9857-69e40f24c86d',
-          register_id: '9cd597e1-d134-4a91-b5e1-3dfd72c63554',
-          idempotency_key: `khqr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          items: t.cart.map((i) => ({
-            product_id: i.product_id || i.product?.id,
-            name: i.name,
-            quantity: i.qty,
-            price: i.price,
-          })),
-        }}
-        onSuccess={(sale) => {
-          t.setCompletedSale(sale);
-          t.handleClearCart();
-          t.setShowBakongModal(false);
-        }}
-      />
+      {t.showBakongModal && (
+        <BakongKhqrModal
+          isOpen={t.showBakongModal}
+          onClose={() => t.setShowBakongModal(false)}
+          amount={t.cart.reduce((sum, item) => sum + item.price * item.qty, 0) * 1.1}
+          salePayload={{
+            outlet_id: t.activeOutletId || t.user?.outlet_id || '0d612401-62c2-4e9e-9857-69e40f24c86d',
+            register_id: '9cd597e1-d134-4a91-b5e1-3dfd72c63554',
+            idempotency_key: `khqr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            items: t.cart.map((i) => ({
+              product_id: i.product_id || i.product?.id,
+              name: i.name,
+              quantity: i.qty,
+              price: i.price,
+            })),
+            customer_id: custTable.selectedCustomer?.id || null,
+            customer_name: custTable.selectedCustomer?.name || null,
+            table_id: custTable.selectedTable?.id || null,
+            table_name: custTable.selectedTable?.name || null,
+            order_type: custTable.orderType,
+          }}
+          onSuccess={(sale) => {
+            t.setCompletedSale(sale);
+            t.handleClearCart();
+            custTable.resetCustomerAndTable();
+            t.setShowBakongModal(false);
+          }}
+        />
+      )}
 
       <CashierQuickSwitchModal
         isOpen={t.showQuickSwitchModal}

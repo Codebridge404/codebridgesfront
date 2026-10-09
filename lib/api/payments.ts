@@ -1,15 +1,57 @@
 import { apiFetch } from './client';
 
 // ABA Bakong KHQR
-export async function generateBakongKhqrApi(payload: { amount: number; currency?: string; sale_id?: string; bill_number?: string }) {
+export async function generateBakongKhqrApi(payload: {
+  amount: number;
+  currency?: string;
+  sale_id?: string;
+  bill_number?: string;
+  merchant_id?: string;
+  merchant_name?: string;
+  merchant_city?: string;
+  bank_name?: string;
+}) {
   return await apiFetch('/payments/khqr/generate', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
-export async function checkBakongPaymentStatusApi(paymentAttemptId: string) {
-  return await apiFetch(`/payments/${paymentAttemptId}/status`);
+export async function checkBakongPaymentStatusApi(
+  paymentAttemptId: string,
+  params?: { hash?: string; token?: string; amount?: number; currency?: string }
+) {
+  const query = new URLSearchParams();
+  if (params?.hash) query.append('hash', params.hash);
+  if (params?.token) query.append('token', params.token);
+  if (params?.amount) query.append('amount', params.amount.toString());
+  if (params?.currency) query.append('currency', params.currency);
+  const qs = query.toString();
+
+  const headers: Record<string, string> = {};
+  if (params?.token) {
+    headers['X-Bakong-Token'] = params.token;
+  }
+
+  return await apiFetch(`/payments/${paymentAttemptId}/status${qs ? `?${qs}` : ''}`, {
+    headers,
+  });
+}
+
+export async function confirmBakongPaymentHashApi(
+  paymentAttemptId: string,
+  payload: { hash: string; token?: string; amount?: number; currency?: string; force_confirm?: boolean }
+) {
+  const headers: Record<string, string> = {};
+  if (payload.token) {
+    headers['X-Bakong-Token'] = payload.token;
+  }
+
+  return await apiFetch(`/payments/${paymentAttemptId}/confirm-hash`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function simulateBakongPaymentApi(paymentAttemptId: string) {

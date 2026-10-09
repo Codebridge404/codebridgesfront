@@ -1,62 +1,66 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Building2,
-  Users,
-  Grid,
-  Settings,
-  Rocket,
-  Store,
-  Boxes,
-  Briefcase,
-  DollarSign,
-  UserCheck,
-  ChevronRight,
-  ExternalLink,
-  ShieldCheck,
+  LayoutDashboard, Building2, Grid, Users, Store, Boxes, Briefcase,
+  DollarSign, UserCheck, Calendar, Settings, ChevronDown, ChevronRight, ExternalLink,
+  Search, X, Sparkles, LucideIcon,
 } from 'lucide-react';
-import { getAuthUser, getRoleDisplayName } from '@/lib/api';
+import { getAuthUser } from '@/lib/api';
 import { getEnabledModulesForOrg } from '@/lib/modules';
-import { AppIcons } from '@/components/ui/icons';
-import { badgeStyles } from '@/lib/theme';
 
 export interface OrganizationSidebarProps {
   sidebarOpen: boolean;
   onToggleSidebar?: () => void;
+  userRole?: string;
+}
+
+interface OrgNavItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: string;
+  isExternal?: boolean;
+}
+
+interface OrgNavGroup {
+  id: string;
+  title: string;
+  collapsible?: boolean;
+  items: OrgNavItem[];
 }
 
 export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [navSearch, setNavSearch] = useState('');
   const [orgName, setOrgName] = useState<string>('My Organization');
   const [enabledModules, setEnabledModules] = useState<string[]>([]);
 
   const syncOrgState = () => {
     const authUser = getAuthUser();
-    setUser(authUser);
-
     if (typeof window !== 'undefined') {
-      const storedOrg =
-        localStorage.getItem('active_org') ||
-        localStorage.getItem('cb_active_org_name') ||
-        authUser?.tenant_name ||
-        authUser?.company_name ||
-        'Primary Organization';
-      setOrgName(storedOrg);
-      setEnabledModules(getEnabledModulesForOrg(storedOrg));
+      if (authUser && (authUser.tenant_id || authUser.role === 'super_admin')) {
+        const stored =
+          localStorage.getItem('active_org') ||
+          localStorage.getItem('cb_active_org_name') ||
+          authUser?.tenant_name ||
+          authUser?.company_name ||
+          '';
+        setOrgName(stored || 'Workspace');
+        setEnabledModules(stored ? getEnabledModulesForOrg(stored) : []);
+      } else {
+        setOrgName('');
+        setEnabledModules([]);
+      }
     }
   };
 
   useEffect(() => {
     syncOrgState();
-
     const handleOrgChange = () => syncOrgState();
     const handleModulesChange = () => syncOrgState();
-
     window.addEventListener('cb_org_changed', handleOrgChange);
     window.addEventListener('cb_modules_changed', handleModulesChange);
     return () => {
@@ -65,195 +69,220 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
     };
   }, []);
 
-  if (!sidebarOpen) return null;
+  const rawNavGroups: OrgNavGroup[] = useMemo(() => {
+    const suiteItems: OrgNavItem[] = [];
+    if (enabledModules.includes('pos')) suiteItems.push({ name: 'Point of Sale Fleet', href: '/pos/dashboard', icon: Store, badge: 'Live' });
+    if (enabledModules.includes('inventory')) suiteItems.push({ name: 'Multi-Warehouse Stock', href: '/inventory/dashboard', icon: Boxes });
+    if (enabledModules.includes('meeting-management') || enabledModules.includes('meetings')) {
+      suiteItems.push({ name: 'Meeting System (MMS)', href: '/meetings', icon: Calendar, badge: 'MMS' });
+    }
+    if (enabledModules.includes('hrm')) suiteItems.push({ name: 'HR & Workforce Suite', href: '/hrm/dashboard', icon: Briefcase });
+    if (enabledModules.includes('finance') || enabledModules.includes('accounting')) {
+      suiteItems.push({ name: 'Financial Accounting', href: '/financial/dashboard', icon: DollarSign });
+    }
+    if (enabledModules.includes('crm')) suiteItems.push({ name: 'CRM & Customer Loyalty', href: '/crm', icon: UserCheck });
 
-  const roleName = getRoleDisplayName(user || 'admin', orgName);
+    const groups: OrgNavGroup[] = [
+      {
+        id: 'workspace-command',
+        title: 'Workspace Command',
+        collapsible: false,
+        items: [
+          { name: 'Executive Dashboard', href: '/organization/dashboard', icon: LayoutDashboard, badge: 'Live' },
+          { name: 'Subscribed Modules Hub', href: '/organization/modules', icon: Grid, badge: enabledModules.length > 0 ? `${enabledModules.length} Active` : undefined },
+        ],
+      },
+      {
+        id: 'store-fleet',
+        title: 'Store Operations & Fleet',
+        items: [
+          { name: 'Store Outlets & Hubs', href: '/organization/outlets', icon: Building2 },
+          { name: 'Staff Roster & Roles', href: '/organization/staff', icon: Users },
+        ],
+      },
+    ];
 
-  const mainSections = [
-    {
-      title: 'Workspace Hub',
-      items: [
-        { label: 'Executive Dashboard', href: '/organization/dashboard', icon: LayoutDashboard },
-        { label: 'Subscribed Modules', href: '/organization/modules', icon: Grid, badge: `${enabledModules.length} Active` },
-      ],
-    },
-    {
-      title: 'Structure & People',
-      items: [
-        { label: 'Store Outlets & Hubs', href: '/organization/outlets', icon: Building2 },
-        { label: 'Workspace Staff & RBAC', href: '/organization/staff', icon: Users },
-        { label: 'POS Access & PINs', href: '/organization/security', icon: ShieldCheck },
-      ],
-    },
-  ];
+    if (suiteItems.length > 0) groups.push({ id: 'business-suites', title: 'Subscribed Business Suites', items: suiteItems });
+    groups.push({
+      id: 'workspace-governance',
+      title: 'Workspace Governance',
+      items: [{ name: 'Workspace Profile & Settings', href: '/organization/settings', icon: Settings }],
+    });
 
-  // OONE Design Standard Pastel Monograms (from unique.md Section 5)
-  const activeSuiteLinks: { label: string; href: string; icon: any; badgeStyle: string }[] = [];
-  if (enabledModules.includes('pos')) {
-    activeSuiteLinks.push({
-      label: 'Point of Sale Fleet',
-      href: '/pos/dashboard',
-      icon: Store,
-      badgeStyle: 'bg-[#F5F3FF] text-[#7C3AED] border-[#DDD6FE]',
-    });
-  }
-  if (enabledModules.includes('inventory')) {
-    activeSuiteLinks.push({
-      label: 'Multi-Warehouse Stock',
-      href: '/inventory/dashboard',
-      icon: Boxes,
-      badgeStyle: 'bg-[#FFFBEB] text-[#D97706] border-[#FDE68A]',
-    });
-  }
-  if (enabledModules.includes('hrm')) {
-    activeSuiteLinks.push({
-      label: 'HR & Workforce Suite',
-      href: '/hrm/dashboard',
-      icon: Briefcase,
-      badgeStyle: 'bg-[#FFF1F2] text-[#E11D48] border-[#FECDD3]',
-    });
-  }
-  if (enabledModules.includes('finance') || enabledModules.includes('accounting')) {
-    activeSuiteLinks.push({
-      label: 'Financial Accounting',
-      href: '/financial/dashboard',
-      icon: DollarSign,
-      badgeStyle: 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]',
-    });
-  }
-  if (enabledModules.includes('crm')) {
-    activeSuiteLinks.push({
-      label: 'CRM & Customer Loyalty',
-      href: '/crm',
-      icon: UserCheck,
-      badgeStyle: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
-    });
-  }
+    return groups;
+  }, [enabledModules]);
 
-  const checkIsActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({
+    'workspace-command': true,
+    'store-fleet': true,
+    'business-suites': true,
+    'workspace-governance': true,
+  });
+
+  useEffect(() => {
+    const currentGroup = rawNavGroups.find((g) =>
+      g.items.some((item) => item.href.split('?')[0] === pathname)
+    );
+    if (currentGroup) setExpandedGroups((prev) => ({ ...prev, [currentGroup.id]: true }));
+  }, [pathname, rawNavGroups]);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
+
+  const isItemActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  const filteredNavGroups = useMemo(() => {
+    if (!navSearch.trim()) return rawNavGroups;
+    const query = navSearch.toLowerCase().trim();
+    return rawNavGroups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter((item) => item.name.toLowerCase().includes(query)),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [rawNavGroups, navSearch]);
 
   return (
-    <aside className="w-64 bg-transparent border-r border-slate-300/80 flex flex-col shrink-0 select-none z-20 overflow-hidden font-sans">
-      {/* 1. Sidebar Header: Organization Identity */}
-      <div className="p-3.5 border-b border-slate-200/80 bg-white/60 backdrop-blur-xs flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-2xl bg-brand-subtle border border-brand-border/60 flex items-center justify-center shrink-0">
-            <AppIcons.Organization className="w-5 h-5 text-brand" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-extrabold text-xs text-slate-900 truncate tracking-tight">{orgName}</p>
-            <span className="text-[10px] font-bold text-brand uppercase tracking-wider block truncate">
-              {roleName}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Scrollable Navigation List */}
-      <div className="p-2.5 space-y-3.5 flex-1 overflow-y-auto">
-        {mainSections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-0.5">
-            <p className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
-              {section.title}
-            </p>
-            {section.items.map((item, iIdx) => {
-              const Icon = item.icon;
-              const isActive = checkIsActive(item.href);
-              return (
-                <Link
-                  key={iIdx}
-                  href={item.href}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all duration-200 ease-out group select-none ${
-                    isActive
-                      ? 'bg-brand text-white shadow-md shadow-brand/25 font-black translate-x-0.5'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 hover:translate-x-0.5 font-bold'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon
-                      className={`w-4 h-4 shrink-0 transition-all duration-200 ${
-                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-brand group-hover:scale-110'
-                      }`}
-                    />
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`px-1.5 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-brand-subtle text-brand border border-brand-border'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-
-        {/* 3. Subscribed Suites Section (OONE Pastel Monograms) */}
-        {activeSuiteLinks.length > 0 && (
-          <div className="space-y-0.5 pt-2 border-t border-slate-200/80">
-            <div className="px-3 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
-              <span>Active Suites</span>
-              <span className="text-[9px] text-emerald-600 font-extrabold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                ONLINE
+    <aside
+      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
+        sidebarOpen ? 'w-64' : 'w-[72px]'
+      }`}
+    >
+      {/* Top Context Pill */}
+      <div className="px-3 pt-3 pb-2">
+        {sidebarOpen ? (
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-brand-subtle/50 border border-brand-border/60 text-brand text-[11px] font-black tracking-wide shadow-2xs">
+            <div className="flex items-center gap-2 truncate">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="truncate uppercase text-[10px] font-extrabold tracking-wider text-slate-700">
+                {orgName}
               </span>
             </div>
-            {activeSuiteLinks.map((suite, idx) => {
-              const Icon = suite.icon;
-              return (
-                <Link
-                  key={idx}
-                  href={suite.href}
-                  className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all group select-none"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${suite.badgeStyle}`}>
-                      <Icon className="w-3 h-3" />
-                    </div>
-                    <span className="truncate">{suite.label}</span>
-                  </div>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-brand transition-colors" />
-                </Link>
-              );
-            })}
+            <Sparkles className="w-3.5 h-3.5 text-brand shrink-0 opacity-80" />
+          </div>
+        ) : (
+          <div className="flex justify-center" title={`${orgName} - Active`}>
+            <div className="w-9 h-9 rounded-xl bg-brand-subtle border border-brand-border/60 flex items-center justify-center text-brand">
+              <Building2 className="w-4 h-4" />
+            </div>
           </div>
         )}
-
-        {/* 4. Governance */}
-        <div className="space-y-0.5 pt-2 border-t border-slate-200/80">
-          <p className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
-            Governance
-          </p>
-          <Link
-            href="/organization/settings"
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ease-out group select-none ${
-              checkIsActive('/organization/settings')
-                ? 'bg-brand text-white shadow-md shadow-brand/25 font-black translate-x-0.5'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 hover:translate-x-0.5 font-bold'
-            }`}
-          >
-            <Settings className="w-4 h-4 text-slate-400 group-hover:text-brand transition-colors shrink-0" />
-            <span className="truncate">Workspace Profile &amp; Settings</span>
-          </Link>
-        </div>
       </div>
 
-      {/* 5. Footer: Return to Launchpad */}
-      <div className="p-2.5 border-t border-slate-200/80 bg-white/40">
-        <Link
-          href="/launchpad"
-          className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100/80 text-slate-600 hover:text-brand text-xs font-bold transition-all group"
-        >
-          <div className="flex items-center gap-2">
-            <Rocket className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand transition-colors" />
-            <span>All Apps Launchpad</span>
+      {/* Quick Nav Search */}
+      {sidebarOpen && (
+        <div className="px-3 py-1.5">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Quick find module..."
+              value={navSearch}
+              onChange={(e) => setNavSearch(e.target.value)}
+              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-slate-100/70 border border-slate-200/60 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
+            />
+            {navSearch && (
+              <button
+                type="button"
+                onClick={() => setNavSearch('')}
+                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-        </Link>
+        </div>
+      )}
+
+      {/* Scrollable Navigation List */}
+      <nav className="flex-1 px-2.5 py-2 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
+        {filteredNavGroups.map((group) => {
+          const isCollapsible = group.collapsible !== false;
+          const isExpanded = !isCollapsible || navSearch ? true : (expandedGroups[group.id] ?? true);
+
+          return (
+            <div key={group.id} className="space-y-1">
+              {sidebarOpen ? (
+                isCollapsible ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.id)}
+                    className="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors group cursor-pointer"
+                  >
+                    <span className="truncate">{group.title}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-100 px-1 rounded">
+                        {group.items.length}
+                      </span>
+                      {isExpanded ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronRight className="w-3 h-3 text-slate-400" />}
+                    </div>
+                  </button>
+                ) : (
+                  <div className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
+                    {group.title}
+                  </div>
+                )
+              ) : (
+                <div className="h-px bg-slate-100 my-2 mx-1" />
+              )}
+
+              {(isExpanded || !sidebarOpen) && (
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isItemActive(item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        title={!sidebarOpen ? item.name : undefined}
+                        className={`group relative flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs transition-all duration-150 ${
+                          active
+                            ? 'bg-gradient-to-r from-brand to-brand-hover text-white font-black shadow-sm shadow-brand/25'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-bold'
+                        } ${!sidebarOpen ? 'justify-center px-0 w-11 h-10 mx-auto' : ''}`}
+                      >
+                        {active && <span className="absolute -left-1.5 top-1.5 bottom-1.5 w-1 rounded-r-full bg-brand shadow-xs" />}
+                        <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${active ? 'text-white' : 'text-slate-400 group-hover:text-brand'}`} />
+                        {sidebarOpen && <span className="truncate tracking-tight flex-1">{item.name}</span>}
+                        {sidebarOpen && item.badge && (
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto shrink-0 ${active ? 'bg-white/25 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                            {item.badge}
+                          </span>
+                        )}
+                        {sidebarOpen && item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400 opacity-70 ml-auto shrink-0" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="p-3 border-t border-slate-200/80 bg-slate-50/70">
+        {sidebarOpen ? (
+          <div className="flex items-center justify-between text-[10px]">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span className="font-bold text-slate-500 truncate">Org Engine v2.5</span>
+            </div>
+            <span className="font-mono font-bold text-[9px] bg-slate-200/80 text-slate-700 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+              Active
+            </span>
+          </div>
+        ) : (
+          <div className="flex justify-center" title="Tenant Workspace: Active">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+        )}
       </div>
     </aside>
   );

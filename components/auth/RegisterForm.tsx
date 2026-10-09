@@ -76,7 +76,7 @@ export function RegisterForm() {
         }
         setSuccess(true);
         setTimeout(() => {
-          router.push('/');
+          router.push('/launchpad');
         }, 1500);
       } else {
         setError(res.message || 'Registration failed. Please try again.');
@@ -94,7 +94,7 @@ export function RegisterForm() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full max-w-lg bg-white border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/5 space-y-6 relative overflow-hidden"
+      className="w-full max-w-lg bg-white/90 backdrop-blur-2xl border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden"
     >
       {/* Top Back Link */}
       <div className="flex items-center justify-between">

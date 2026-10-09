@@ -91,14 +91,7 @@ export function AcceptInviteForm() {
       });
 
       if (res.status === 'success') {
-        const userRole = (res.user?.role || '').toLowerCase();
-        if (['cashier', 'clerk'].includes(userRole)) {
-          router.push('/pos/pos-terminal');
-        } else if (['supervisor', 'outlet_manager'].includes(userRole)) {
-          router.push('/pos');
-        } else {
-          router.push('/super-admin/dashboard');
-        }
+        router.push('/launchpad');
       }
     } catch (err: any) {
       alert(err.message || 'Failed to accept invitation. Please try again.');
@@ -121,7 +114,7 @@ export function AcceptInviteForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-3xl border border-slate-200 shadow-xl p-8 max-w-md w-full text-center space-y-6"
+        className="bg-white/90 backdrop-blur-2xl rounded-3xl border border-slate-200 shadow-xl p-8 max-w-md w-full text-center space-y-6"
       >
         <div className="w-16 h-16 rounded-3xl bg-red-50 text-red-500 flex items-center justify-center mx-auto shadow-inner">
           <AlertCircle className="w-8 h-8" />
@@ -144,7 +137,7 @@ export function AcceptInviteForm() {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden"
+      className="bg-white/90 backdrop-blur-2xl rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden"
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-brand via-brand-hover to-indigo-700 p-8 text-white">

@@ -47,7 +47,7 @@ export function UserStatsHeader({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onOpenPermissionsModal}
-            className="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200/80 text-slate-700 font-semibold text-xs shadow-[0_2px_12px_rgba(15,23,42,0.03)] hover:border-slate-300 flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-slate-700 hover:bg-slate-200/50 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors backdrop-blur-sm"
           >
             <Grid className="w-4 h-4 text-brand" />
             Permissions Matrix
@@ -81,7 +81,7 @@ export function UserStatsHeader({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <motion.div
           whileHover={{ y: -3 }}
-          className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex items-center justify-between"
+          className="p-5 rounded-2xl bg-transparent border border-slate-300/80 flex items-center justify-between transition-all"
         >
           <div>
             <h4 className="text-2xl font-black text-slate-900">{totalUsers}</h4>
@@ -94,7 +94,7 @@ export function UserStatsHeader({
 
         <motion.div
           whileHover={{ y: -3 }}
-          className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex items-center justify-between"
+          className="p-5 rounded-2xl bg-transparent border border-slate-300/80 flex items-center justify-between transition-all"
         >
           <div>
             <h4 className="text-2xl font-black text-slate-900">{activeUsersCount}</h4>
@@ -107,7 +107,7 @@ export function UserStatsHeader({
 
         <motion.div
           whileHover={{ y: -3 }}
-          className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex items-center justify-between"
+          className="p-5 rounded-2xl bg-transparent border border-slate-300/80 flex items-center justify-between transition-all"
         >
           <div>
             <h4 className="text-2xl font-black text-slate-900">{superAdminsCount}</h4>

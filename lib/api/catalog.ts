@@ -170,3 +170,10 @@ export async function updateTableStatusApi(id: string, status: string) {
     body: JSON.stringify({ status }),
   });
 }
+
+export async function createTableApi(data: { name: string; zone?: string; capacity?: number }) {
+  return await apiFetch('/tables', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}

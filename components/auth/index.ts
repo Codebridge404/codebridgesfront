@@ -7,3 +7,4 @@ export * from './LoginView';
 export * from './AcceptInviteView';
 export * from './RegisterView';
 export * from './RegisterTenantView';
+export * from './AuthTechBackground';

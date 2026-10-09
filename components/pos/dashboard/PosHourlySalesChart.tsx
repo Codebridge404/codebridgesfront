@@ -34,7 +34,7 @@ export function PosHourlySalesChart({ data, todayTotal }: PosHourlySalesChartPro
   );
 
   return (
-    <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-6">
+    <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 flex flex-col justify-between space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -47,7 +47,7 @@ export function PosHourlySalesChart({ data, todayTotal }: PosHourlySalesChartPro
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+        <div className="flex items-center gap-2 bg-slate-200/50 px-3 py-1.5 rounded-xl border border-slate-300/60 text-xs font-bold text-slate-700">
           <Clock className="w-3.5 h-3.5 text-brand" />
           <span>
             {peak.sales > 0 ? (
@@ -74,14 +74,14 @@ export function PosHourlySalesChart({ data, todayTotal }: PosHourlySalesChartPro
                 </div>
 
                 {/* Bar */}
-                <div className="w-full bg-slate-100 rounded-t-lg h-full flex items-end overflow-hidden">
+                <div className="w-full bg-slate-200/50 rounded-t-lg h-full flex items-end overflow-hidden">
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${Math.max(item.sales > 0 ? heightPct : 4, 4)}%` }}
                     transition={{ delay: idx * 0.02, duration: 0.3 }}
                     className={`w-full rounded-t-lg transition-colors ${
                       item.sales === 0
-                        ? 'bg-slate-200/60'
+                        ? 'bg-slate-300/50'
                         : isPeak
                         ? 'bg-brand shadow-md shadow-brand/20'
                         : 'bg-brand/40 hover:bg-brand/70'
@@ -100,7 +100,7 @@ export function PosHourlySalesChart({ data, todayTotal }: PosHourlySalesChartPro
       </div>
 
       {/* Footer Metrics */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+      <div className="pt-3 border-t border-slate-300/60 flex items-center justify-between text-xs text-slate-500 font-medium">
         <span>Today&apos;s Gross Volume: <strong className="text-slate-900">${(todayTotal || 0).toFixed(2)}</strong></span>
         <span className="text-[11px] text-slate-400">Aggregated from live POS checkout receipts</span>
       </div>

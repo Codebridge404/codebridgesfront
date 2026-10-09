@@ -6,6 +6,16 @@ import { createUserApi } from '@/lib/api';
 import { buttonStyles } from '@/lib/theme';
 import { useToast } from '@/components/common';
 
+export const AVAILABLE_ROLES = [
+  { value: 'cashier', label: 'Cashier (POS Operator)' },
+  { value: 'inventory_clerk', label: 'Stock Clerk (Inventory & Transfers)' },
+  { value: 'accountant', label: 'Accountant (Financials & Reports)' },
+  { value: 'meeting_organizer', label: 'Meeting Coordinator (MMS Scheduling)' },
+  { value: 'outlet_manager', label: 'Store Manager (Operations Oversight)' },
+  { value: 'employee', label: 'General Employee (Staff Member)' },
+  { value: 'organization', label: 'Organization Administrator' },
+];
+
 interface WorkspaceStaffCreateFormProps {
   outlets: any[];
   availableRoles: Array<{ value: string; label: string }>;

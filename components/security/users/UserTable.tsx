@@ -31,6 +31,7 @@ export function UserTable({
     switch (role) {
       case 'super_admin':
         return 'bg-brand-subtle text-brand border-brand/20';
+      case 'organization':
       case 'admin':
       case 'administrator':
       case 'owner':
@@ -46,8 +47,9 @@ export function UserTable({
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'accountant':
         return 'bg-sky-50 text-sky-700 border-sky-200';
-      case 'user':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'meeting_organizer':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'employee':
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -63,7 +65,7 @@ export function UserTable({
   };
 
   return (
-    <div className="rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] overflow-hidden">
+    <div className="rounded-2xl bg-transparent border border-slate-300/80 overflow-hidden">
       {loading ? (
         <div className="p-12 text-center text-xs text-slate-400 font-medium">
           Loading user profiles...
@@ -78,8 +80,8 @@ export function UserTable({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 border-b border-slate-200/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <table className="w-full text-left text-xs bg-transparent">
+            <thead className="bg-transparent border-b border-slate-300/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               <tr>
                 <th className="py-3.5 px-4">User Name</th>
                 <th className="py-3.5 px-4">Email</th>
@@ -90,7 +92,7 @@ export function UserTable({
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+            <tbody className="divide-y divide-slate-300/60 font-medium text-slate-700 bg-transparent">
               {users.map((user, idx) => (
                 <motion.tr
                   key={user.id}
@@ -98,7 +100,7 @@ export function UserTable({
                   initial="hidden"
                   animate="visible"
                   variants={cardVariants}
-                  className="hover:bg-brand-subtle/40 transition-colors"
+                  className="hover:bg-slate-200/40 transition-colors"
                 >
                   {/* Name + Avatar */}
                   <td className="py-3.5 px-4">
@@ -126,14 +128,14 @@ export function UserTable({
                       )}`}
                     >
                       <Shield className="w-3 h-3" />
-                      {(user.role || 'user').replace(/_/g, ' ')}
+                      {user.role_name || (user.role || 'employee').replace(/_/g, ' ')}
                     </span>
                   </td>
 
                   {/* PIN Code */}
                   <td className="py-3.5 px-4 font-mono text-xs">
                     {user.pin_code ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px]">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200/50 border border-slate-300/60 text-slate-700 font-bold text-[10px]">
                         <Lock className="w-3 h-3 text-brand" />
                         PIN Set
                       </span>

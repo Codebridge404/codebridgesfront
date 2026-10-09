@@ -1,4 +1,4 @@
-import { CodeBridgesOnboardingLaunchpad } from '@/components/launchpad';
+import { CodeBridgesOnboardingLaunchpad } from '@/components/launchpad/CodeBridgesOnboardingLaunchpad';
 
 export const metadata = {
   title: 'Launchpad | CodeBridges Enterprise Suite',

@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { ModuleSuiteHeader } from './ModuleSuiteHeader';
 import { UniversalModuleSidebar, NavSection } from './UniversalModuleSidebar';
-import { ImpersonationBanner } from '@/components/ui/ImpersonationBanner';
-import { getAuthUser, getAuthToken, isModuleEnabledForOrg, enableModuleForOrg } from '@/lib/api';
+import { ImpersonationBanner, PlatformAnnouncementBanner } from '@/components/ui';
+import { getAuthUser, getAuthToken, isModuleEnabledForOrg, enableModuleForOrg, getModuleDefaultLogo } from '@/lib/api';
+import { useConfirm } from '@/components/common';
 
 interface UniversalModuleLayoutProps {
-  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization';
+  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization' | 'meeting-management' | 'meetings' | string;
   moduleTitle: string;
   moduleIcon: any;
   moduleBadge?: string;
@@ -37,6 +38,7 @@ export function UniversalModuleLayout({
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
+  const confirm = useConfirm();
 
   useEffect(() => {
     const user = getAuthUser();
@@ -49,14 +51,14 @@ export function UniversalModuleLayout({
       return;
     }
     if (user?.role === 'cashier') {
-      router.replace('/pos/pos-terminal');
+      router.replace('/cashier/pos-terminal');
       return;
     }
 
     const org =
       typeof window !== 'undefined'
-        ? localStorage.getItem('active_org') || user?.tenant_name || user?.company || 'Primary Organization'
-        : user?.tenant_name || 'Primary Organization';
+        ? localStorage.getItem('active_org') || user?.tenant_name || user?.company_name || ''
+        : user?.tenant_name || '';
     setActiveOrg(org);
 
     // Verify if currentModuleId is enabled for this active organization (organization workspace is always enabled)
@@ -89,8 +91,9 @@ export function UniversalModuleLayout({
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-canvas flex flex-col font-sans text-slate-800">
-      {/* 1. Impersonation Alert Banner */}
+      {/* 1. Impersonation & Platform Announcement Banners */}
       <ImpersonationBanner />
+      <PlatformAnnouncementBanner />
 
       {/* 2. Top Header Bar */}
       <ModuleSuiteHeader
@@ -115,8 +118,7 @@ export function UniversalModuleLayout({
           />
         )}
 
-        {/* Content Viewport */}
-        <main className={`flex-1 h-full flex flex-col overflow-y-auto bg-canvas ${mainClassName || 'p-1 sm:p-1.5 lg:p-2'}`}>
+        <main className={`flex-1 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden bg-transparent ${mainClassName || 'p-1 sm:p-1.5 lg:p-2'}`}>
           {!isEnabled ? (
             <div className="h-full flex items-center justify-center p-6">
               <div className="bg-white p-8 rounded-3xl border border-slate-200/90 shadow-lg max-w-md w-full text-center space-y-4">
@@ -139,10 +141,23 @@ export function UniversalModuleLayout({
                   >
                     Back to Launchpad
                   </Link>
-                  {(currentUser?.role === 'super_admin' || currentUser?.role === 'admin') && (
+                  {(currentUser?.role === 'super_admin' || currentUser?.role === 'organization' || currentUser?.role === 'admin') && (
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
+                        const confirmed = await confirm({
+                          title: `Activate ${moduleTitle}?`,
+                          description: `Are you sure you want to activate ${moduleTitle} for workspace "${activeOrg}"? This will enable workspace routing and allow authorized team members to access this module.`,
+                          variant: 'brand',
+                          logoUrl: getModuleDefaultLogo(currentModuleId),
+                          confirmText: 'Activate Module',
+                          cancelText: 'Cancel',
+                          details: [
+                            { label: 'Module Suite', value: moduleTitle },
+                            { label: 'Target Workspace', value: activeOrg },
+                          ],
+                        });
+                        if (!confirmed) return;
                         enableModuleForOrg(activeOrg, currentModuleId);
                         setIsEnabled(true);
                       }}

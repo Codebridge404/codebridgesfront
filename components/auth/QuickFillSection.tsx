@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, UserCheck } from 'lucide-react';
+import { ShieldCheck, UserCheck, Building2 } from 'lucide-react';
 
 interface QuickFillSectionProps {
   onQuickFill: (email: string, pass: string) => void;
@@ -20,6 +20,16 @@ export function QuickFillSection({ onQuickFill }: QuickFillSectionProps) {
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          type="button"
+          onClick={() => onQuickFill('admin@pos.com', 'password')}
+          className="px-2 py-1.5 text-xs font-bold rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors text-center shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+        >
+          <Building2 className="w-3.5 h-3.5 text-purple-600" />
+          Org Owner
+        </motion.button>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}

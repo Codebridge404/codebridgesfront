@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { LoginForm } from './LoginForm';
+import { AuthTechBackground } from './AuthTechBackground';
 
 export function LoginView() {
   return (
@@ -12,8 +13,12 @@ export function LoginView() {
         </div>
       }
     >
-      <div className="min-h-screen w-full flex items-center justify-center bg-canvas text-slate-900 p-4 font-sans selection:bg-brand selection:text-white">
-        <LoginForm />
+      <div className="relative min-h-screen w-full flex items-center justify-center bg-canvas text-slate-900 p-4 font-sans selection:bg-brand selection:text-white">
+        {/* Cyber-Security Matrix & Interactive Spotlight */}
+        <AuthTechBackground />
+        <div className="relative z-10 w-full flex items-center justify-center">
+          <LoginForm />
+        </div>
       </div>
     </Suspense>
   );

@@ -99,7 +99,7 @@ export function CreateOrgModal({
       if (typeof window !== 'undefined') {
         const currentUserStr = localStorage.getItem('pos_user');
         const currentUserObj = currentUserStr ? JSON.parse(currentUserStr) : {};
-        const updatedRole = currentUserObj.role === 'super_admin' ? 'super_admin' : 'administrator';
+        const updatedRole = currentUserObj.role === 'super_admin' ? 'super_admin' : 'organization';
         const updatedUser = {
           ...currentUserObj,
           tenant_id: createdOrgData.id || currentUserObj.tenant_id,

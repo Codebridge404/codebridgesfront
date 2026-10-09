@@ -9,7 +9,7 @@ import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 
 interface ModuleSuiteHeaderProps {
-  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization';
+  currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization' | 'meeting-management' | 'meetings' | string;
   moduleTitle: string;
   moduleIcon: any;
   onToggleSidebar?: () => void;
@@ -126,8 +126,8 @@ export function ModuleSuiteHeader({
           {userMenuOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-in fade-in zoom-in-95 text-xs">
               <div className="px-3 py-2 border-b border-slate-100">
-                <p className="font-extrabold text-slate-900">{user?.name || 'User'}</p>
-                <p className="text-[11px] text-slate-400 font-mono truncate">{user?.email || 'user@codebridges.io'}</p>
+                <p className="font-extrabold text-slate-900">{user?.name || ''}</p>
+                <p className="text-[11px] text-slate-400 font-mono truncate">{user?.email || ''}</p>
                 <span className={`inline-block mt-1 ${badgeStyles.brand}`}>
                   {getRoleDisplayName(user, activeOrg)}
                 </span>
@@ -146,14 +146,16 @@ export function ModuleSuiteHeader({
                   </Link>
                 ) : (
                   <>
-                    <Link
-                      href="/organization/dashboard"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
-                    >
-                      <AppIcons.Organization className="w-4 h-4 text-brand" />
-                      <span>Organization Dashboard</span>
-                    </Link>
+                    {['organization', 'admin', 'super_admin', 'owner', 'organization_owner', 'manager', 'accountant', 'staff'].includes(user?.role) && (
+                      <Link
+                        href="/organization/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="w-full px-3 py-2 rounded-xl bg-brand-subtle hover:bg-purple-100 text-brand border border-brand-border flex items-center gap-2.5 font-bold text-xs transition-colors"
+                      >
+                        <AppIcons.Organization className="w-4 h-4 text-brand" />
+                        <span>Organization Dashboard</span>
+                      </Link>
+                    )}
                     <Link
                       href="/launchpad"
                       onClick={() => setUserMenuOpen(false)}

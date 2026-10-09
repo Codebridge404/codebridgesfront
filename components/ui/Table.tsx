@@ -4,24 +4,24 @@ import { cn } from '@/lib/utils';
 
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto border border-slate-200/80 rounded-2xl bg-white shadow-xs">
+    <div className="w-full overflow-x-auto border border-slate-300/80 rounded-2xl bg-transparent">
       <table className={cn('w-full caption-bottom text-xs font-sans text-left', className)} {...props} />
     </div>
   );
 }
 
 export function TableHeader({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn('bg-slate-50/75 border-b border-slate-200/80', className)} {...props} />;
+  return <thead className={cn('bg-transparent border-b border-slate-300/60', className)} {...props} />;
 }
 
 export function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={cn('divide-y divide-slate-100/90', className)} {...props} />;
+  return <tbody className={cn('divide-y divide-slate-200/80 bg-transparent', className)} {...props} />;
 }
 
 export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
   return (
     <tr
-      className={cn('transition-colors hover:bg-slate-50/60 data-[state=selected]:bg-purple-50/60', className)}
+      className={cn('transition-colors hover:bg-slate-200/40 data-[state=selected]:bg-brand/10', className)}
       {...props}
     />
   );

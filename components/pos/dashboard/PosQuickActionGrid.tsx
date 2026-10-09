@@ -105,7 +105,7 @@ export function PosQuickActionGrid({
               className={`p-5 rounded-3xl border transition-all h-full flex flex-col justify-between cursor-pointer ${
                 act.isPrimary
                   ? 'bg-brand text-white border-brand shadow-md shadow-brand/20'
-                  : 'bg-white text-slate-900 border-slate-200/90 hover:border-brand/40 hover:shadow-md'
+                  : 'bg-transparent text-slate-900 border-slate-300/80 hover:border-brand/50'
               }`}
             >
               <div>
@@ -140,7 +140,7 @@ export function PosQuickActionGrid({
 
               <div
                 className={`mt-4 pt-3 flex items-center justify-between text-xs font-bold ${
-                  act.isPrimary ? 'border-t border-white/20 text-white' : 'border-t border-slate-100 text-brand'
+                  act.isPrimary ? 'border-t border-white/20 text-white' : 'border-t border-slate-300/60 text-brand'
                 }`}
               >
                 <span>Launch Action</span>

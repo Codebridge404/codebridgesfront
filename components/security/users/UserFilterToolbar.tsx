@@ -21,7 +21,7 @@ export function UserFilterToolbar({
   dynamicRoles,
 }: UserFilterToolbarProps) {
   return (
-    <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="p-4 rounded-2xl bg-transparent border border-slate-300/80 flex flex-col sm:flex-row items-center justify-between gap-4">
       {/* Search Input Bar */}
       <form onSubmit={onSearchSubmit} className="relative w-full sm:w-80">
         <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
@@ -30,7 +30,7 @@ export function UserFilterToolbar({
           placeholder="Search user by name or email..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200/90 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white transition-all"
+          className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-transparent border border-slate-300/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/50 transition-all font-medium"
         />
       </form>
 
@@ -43,7 +43,7 @@ export function UserFilterToolbar({
         <select
           value={selectedRole}
           onChange={(e) => onRoleChange(e.target.value)}
-          className="px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/90 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white w-full sm:w-48 capitalize cursor-pointer transition-all"
+          className="px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/50 w-full sm:w-48 capitalize cursor-pointer transition-all"
         >
           <option value="all">All Roles</option>
           {dynamicRoles.length > 0 ? (
@@ -55,14 +55,13 @@ export function UserFilterToolbar({
           ) : (
             <>
               <option value="super_admin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="outlet_manager">Outlet Manager</option>
-              <option value="supervisor">Supervisor</option>
+              <option value="organization">Organization</option>
+              <option value="employee">Employees (All Staff)</option>
               <option value="cashier">Cashier</option>
-              <option value="inventory_clerk">Inventory Clerk</option>
+              <option value="inventory_clerk">Stock Clerk</option>
               <option value="accountant">Accountant</option>
-              <option value="user">User</option>
-              <option value="customer">Customer</option>
+              <option value="meeting_organizer">Meeting Coordinator</option>
+              <option value="outlet_manager">Store Manager</option>
             </>
           )}
         </select>

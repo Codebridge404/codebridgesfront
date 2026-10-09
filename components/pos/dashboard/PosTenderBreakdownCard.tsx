@@ -19,7 +19,7 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between"
+      className="p-6 rounded-3xl bg-transparent border border-slate-300/80 flex flex-col justify-between"
     >
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -37,13 +37,13 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
             </div>
           </div>
 
-          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold text-slate-600 bg-slate-200/50 border border-slate-300/60 px-2 py-0.5 rounded-full">
             Split Tender
           </span>
         </div>
 
         {/* Horizontal Stacked Progress Bar */}
-        <div className="h-3 rounded-full bg-slate-100 flex overflow-hidden my-4">
+        <div className="h-3 rounded-full bg-slate-200/60 border border-slate-300/40 flex overflow-hidden my-4">
           <div
             style={{ width: `${cashPct}%` }}
             className="bg-emerald-500 transition-all duration-500"
@@ -63,7 +63,7 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
 
         {/* Tender Items */}
         <div className="space-y-2.5 text-xs">
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-200/40 border border-slate-300/60">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
                 <Banknote className="w-3.5 h-3.5" />
@@ -76,7 +76,7 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-200/40 border border-slate-300/60">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-brand-subtle text-brand flex items-center justify-center">
                 <QrCode className="w-3.5 h-3.5" />
@@ -89,7 +89,7 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-200/40 border border-slate-300/60">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
                 <CreditCard className="w-3.5 h-3.5" />
@@ -104,7 +104,7 @@ export function PosTenderBreakdownCard({ kpis }: PosTenderBreakdownCardProps) {
         </div>
       </div>
 
-      <div className="pt-3 mt-2 border-t border-slate-100 text-[11px] text-slate-400 font-medium text-center">
+      <div className="pt-3 mt-2 border-t border-slate-300/60 text-[11px] text-slate-400 font-medium text-center">
         Automated matching with ABA Bakong settlement reconciliation
       </div>
     </motion.div>

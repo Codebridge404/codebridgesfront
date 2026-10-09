@@ -29,11 +29,11 @@ export function TenantTable({
   onDelete,
 }: TenantTableProps) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs font-sans">
+    <div className="bg-transparent rounded-2xl border border-slate-300/80 overflow-hidden font-sans">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+            <tr className="bg-transparent border-b border-slate-300/60 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
               <th className="px-5 py-3">Store Organization</th>
               <th className="px-4 py-3">Workspace Owner</th>
               <th className="px-4 py-3">Client Tier</th>
@@ -43,7 +43,7 @@ export function TenantTable({
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-200/80 bg-transparent">
             {loading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-bold">

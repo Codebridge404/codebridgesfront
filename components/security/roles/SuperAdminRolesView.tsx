@@ -176,7 +176,7 @@ export const SuperAdminRolesView: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-3 font-sans pb-6">
+    <div className="w-full max-w-full space-y-3 font-sans pb-6">
       <AnimatePresence>
         {notification && (
           <motion.div
@@ -204,14 +204,14 @@ export const SuperAdminRolesView: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-transparent p-4 sm:p-5 rounded-2xl border border-slate-300/80">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-xl bg-brand-subtle text-brand">
               <ShieldCheck className="w-5 h-5" />
             </span>
             <h1 className="text-xl font-extrabold text-slate-900">
-              Dynamic Roles &amp; Custom Permissions Matrix
+              Roles &amp; Permissions
             </h1>
           </div>
           <p className="text-xs text-slate-500 font-medium">
@@ -222,7 +222,7 @@ export const SuperAdminRolesView: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={loadData}
-            className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl border border-slate-300/80 bg-transparent hover:bg-slate-200/50 text-slate-700 shadow-2xs backdrop-blur-sm cursor-pointer transition-all"
             title="Reload permissions schema"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand' : ''}`} />
@@ -230,7 +230,7 @@ export const SuperAdminRolesView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-start gap-6">
+      <div className="w-full min-w-0 flex flex-col lg:flex-row items-start gap-4 lg:gap-6">
         <RolesListSidebar
           roles={roles}
           search={search}

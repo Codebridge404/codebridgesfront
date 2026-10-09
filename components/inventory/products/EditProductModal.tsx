@@ -30,7 +30,7 @@ export function EditProductModal({
     expiry_date: '',
     selling_price: '',
     cost_price: '',
-    min_reorder_point: '5',
+    min_reorder_point: '0',
     description: '',
   });
   const [saving, setSaving] = useState(false);
@@ -47,7 +47,7 @@ export function EditProductModal({
         expiry_date: product.expiry_date ? String(product.expiry_date).split('T')[0] : '',
         selling_price: product.selling_price ? String(product.selling_price) : (product.price ? String(product.price) : '0'),
         cost_price: product.cost_price ? String(product.cost_price) : '0',
-        min_reorder_point: product.min_reorder_point ? String(product.min_reorder_point) : '5',
+        min_reorder_point: product.min_reorder_point !== undefined && product.min_reorder_point !== null ? String(product.min_reorder_point) : '0',
         description: product.description || '',
       });
       setError(null);
@@ -76,7 +76,7 @@ export function EditProductModal({
         expiry_date: formData.expiry_date || undefined,
         selling_price: parseFloat(formData.selling_price) || 0,
         cost_price: parseFloat(formData.cost_price) || 0,
-        min_reorder_point: parseInt(formData.min_reorder_point, 10) || 5,
+        min_reorder_point: isNaN(parseInt(formData.min_reorder_point, 10)) ? 0 : Math.max(0, parseInt(formData.min_reorder_point, 10)),
         description: formData.description.trim() || undefined,
       };
 

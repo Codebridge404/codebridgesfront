@@ -53,10 +53,10 @@ export function PosRecentSalesTable({
   };
 
   return (
-    <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-4">
+    <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-brand-subtle text-brand flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-xl bg-brand-subtle text-brand flex items-center justify-center font-bold border border-brand/20">
             <Receipt className="w-4 h-4" />
           </div>
           <div>
@@ -77,9 +77,9 @@ export function PosRecentSalesTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs bg-transparent">
           <thead>
-            <tr className="border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
+            <tr className="border-b border-slate-300/80 text-[10px] uppercase font-bold text-slate-400">
               <th className="py-2.5 px-3">Receipt / Time</th>
               <th className="py-2.5 px-3">Customer</th>
               <th className="py-2.5 px-3">Tender</th>
@@ -87,7 +87,7 @@ export function PosRecentSalesTable({
               <th className="py-2.5 px-3 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+          <tbody className="divide-y divide-slate-300/60 font-medium text-slate-700 bg-transparent">
             {sales.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
@@ -96,7 +96,7 @@ export function PosRecentSalesTable({
               </tr>
             ) : (
               sales.slice(0, 6).map((sale) => (
-                <tr key={sale.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={sale.id} className="hover:bg-slate-200/40 transition-colors">
                   <td className="py-3 px-3">
                     <p className="font-mono font-extrabold text-slate-900">
                       {sale.receipt_number}
@@ -120,7 +120,7 @@ export function PosRecentSalesTable({
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         onClick={() => onViewReceipt(sale.id)}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-200/50 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition-colors border border-slate-300/60 flex items-center gap-1 cursor-pointer"
                       >
                         <Receipt className="w-3 h-3 text-slate-500" />
                         <span>Receipt</span>
@@ -128,7 +128,7 @@ export function PosRecentSalesTable({
                       <button
                         onClick={() => onReturnSale(sale.id)}
                         title="Process Return / Refund"
-                        className="p-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg bg-transparent hover:bg-rose-50 border border-slate-300/60 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-3 h-3" />
                       </button>

@@ -27,7 +27,7 @@ export function PosRegisterFleetCard({ registers = [], onOpenTerminal }: PosRegi
   const fleet = registers || [];
 
   return (
-    <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-5">
+    <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 flex flex-col justify-between space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -54,7 +54,7 @@ export function PosRegisterFleetCard({ registers = [], onOpenTerminal }: PosRegi
       {/* Register List */}
       <div className="space-y-3">
         {fleet.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-center text-xs text-slate-400 font-medium">
+          <div className="p-6 rounded-2xl bg-slate-200/40 border border-slate-300/60 text-center text-xs text-slate-400 font-medium">
             <Monitor className="w-6 h-6 text-slate-300 mx-auto mb-1.5" />
             <p className="font-extrabold text-slate-700">Primary Terminal (REG-01) Ready</p>
             <p className="text-[11px] text-slate-400 mt-0.5">Open a shift drawer to begin tracking real-time drawer velocity.</p>
@@ -63,10 +63,10 @@ export function PosRegisterFleetCard({ registers = [], onOpenTerminal }: PosRegi
           fleet.map((reg) => (
             <div
               key={reg.id}
-              className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="p-4 rounded-2xl bg-slate-200/40 hover:bg-slate-200/60 border border-slate-300/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white text-slate-700 flex items-center justify-center border border-slate-200 shadow-2xs font-extrabold text-xs">
+                <div className="w-9 h-9 rounded-xl bg-slate-200/60 text-slate-700 flex items-center justify-center border border-slate-300/60 font-extrabold text-xs">
                   {reg.code?.replace('REG-', '#') || '#01'}
                 </div>
                 <div>
@@ -89,7 +89,7 @@ export function PosRegisterFleetCard({ registers = [], onOpenTerminal }: PosRegi
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 sm:border-l sm:border-slate-200 sm:pl-4 justify-between sm:justify-end">
+              <div className="flex items-center gap-4 sm:border-l sm:border-slate-300/60 sm:pl-4 justify-between sm:justify-end">
                 <div className="text-left sm:text-right">
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Drawer Sales</p>
                   <p className="text-xs font-black text-slate-900">${(reg.totalSales || 0).toFixed(2)}</p>

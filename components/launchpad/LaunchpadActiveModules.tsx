@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Layers, CheckCircle2, ArrowRight, Power, RefreshCw } from 'lucide-react';
-import { CatalogModule } from './types';
+import { CatalogModule } from './CodeBridgesOnboardingLaunchpad';
 import { ModuleCard } from '@/components/ui';
 
 interface LaunchpadActiveModulesProps {
@@ -33,7 +33,7 @@ export function LaunchpadActiveModules({
       </div>
 
       {activeModules.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-8 text-center shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-2">
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl border border-slate-200/80 p-8 text-center shadow-2xs space-y-2">
           <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
             <Layers className="w-5 h-5" />
           </div>
@@ -49,7 +49,7 @@ export function LaunchpadActiveModules({
             const isSubscription = mod.id === 'bill-subscription';
             const isTenantUser = userRole !== 'super_admin';
             const launchHref =
-              mod.id === 'pos-management' && userRole === 'cashier' ? '/pos/pos-terminal' : mod.href;
+              mod.id === 'pos-management' && userRole === 'cashier' ? '/cashier/pos-terminal' : mod.href;
 
             return (
               <ModuleCard
@@ -59,6 +59,7 @@ export function LaunchpadActiveModules({
                 icon={mod.icon}
                 logoUrl={mod.logoUrl}
                 description={mod.description}
+                cardBg={mod.cardBg}
                 size="standard"
                 statusDot={true}
                 isSelected={true}

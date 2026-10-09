@@ -72,9 +72,9 @@ export function PosSuiteHeader({
 
   const navLinks = [
     ...(isManagerial ? [{ label: 'POS Dashboard', href: '/pos', icon: LayoutDashboard }] : []),
-    { label: 'POS Terminal', href: '/pos/pos-terminal', icon: Monitor },
-    ...(isManagerial ? [{ label: 'Orders & Receipts', href: '/pos/orders', icon: Receipt }] : []),
-    ...(isManagerial ? [{ label: 'Shifts & Till Float', href: '/pos/shifts', icon: Clock }] : []),
+    { label: 'POS Terminal', href: isManagerial ? '/pos/pos-terminal' : '/cashier/pos-terminal', icon: Monitor },
+    { label: 'Orders & Receipts', href: isManagerial ? '/pos/orders' : '/cashier/orders', icon: Receipt },
+    { label: 'Shifts & Till Float', href: isManagerial ? '/pos/shifts' : '/cashier/shifts', icon: Clock },
     { label: 'Customer CFD', href: '/pos/customer-display', icon: Tv, target: '_blank', isExternal: true },
   ];
 
@@ -103,7 +103,7 @@ export function PosSuiteHeader({
       <div className="h-16 px-4 sm:px-6 flex items-center justify-between gap-3">
         {/* Zone 1: Branding & Register Identity */}
         <div className="flex items-center gap-3 shrink-0">
-          <Link href="/pos/dashboard" className="flex items-center gap-2.5 group">
+          <Link href={isManagerial ? '/pos/dashboard' : '/cashier/pos-terminal'} className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center font-extrabold text-white shadow-md shadow-brand/20 group-hover:scale-105 transition-transform">
               <Monitor className="w-5 h-5" />
             </div>
@@ -248,7 +248,10 @@ export function PosSuiteHeader({
       <div className="px-4 sm:px-6 bg-slate-50/70 border-t border-slate-200/60 flex items-center justify-between gap-2 overflow-x-auto py-1">
         <nav className="flex items-center gap-1">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive =
+              pathname === link.href ||
+              (link.href === '/cashier/pos-terminal' && (pathname === '/cashier' || pathname === '/pos/pos-terminal')) ||
+              (link.href === '/pos/pos-terminal' && (pathname === '/cashier/pos-terminal' || pathname === '/cashier'));
             const Icon = link.icon;
 
             return (

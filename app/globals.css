@@ -4,45 +4,50 @@
   --background: #ffffff;
   --foreground: #1E293B;
 
-  /* 1. Primary / Brand Colors (New Palette: #E3F2FD, #90CAF9, #2196F3, #0D47A1) */
-  --color-brand: #2196F3;
-  --color-brand-hover: #0D47A1;
-  --color-brand-subtle: #E3F2FD;
-  --color-brand-border: #90CAF9;
-  --color-brand-dark: #0D47A1;
-  --color-primary-navy: #0D47A1;
+  /* 1. Primary / Brand Colors (Aurora Royal Sapphire Symphony) */
+  --color-brand: #2563EB;
+  --color-brand-hover: #1D4ED8;
+  --color-brand-subtle: #EFF6FF;
+  --color-brand-border: #BFDBFE;
+  --color-brand-dark: #1E40AF;
+  --color-primary-navy: #0F172A;
 
-  /* 2. Background Colors */
-  --color-canvas: #E3F2FD;
-  --color-canvas-end: #F0F7FF;
-  --color-canvas-gradient: linear-gradient(135deg, #E3F2FD 0%, #F0F7FF 100%);
-  --color-surface: #FFFFFF;
-  --color-card-border: #E2E8F0;
+  /* 2. Background Colors (Aurora Glassmorphic Mesh) */
+  --color-canvas: #F0F6FF;
+  --color-canvas-end: #F8FAFD;
+  --color-canvas-gradient:
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.10) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.10) 0px, transparent 50%),
+    #F8FAFD;
+  --color-surface: rgba(255, 255, 255, 0.85);
+  --color-surface-subtle: rgba(248, 250, 252, 0.85);
+  --color-card-border: rgba(226, 232, 240, 0.8);
 
   /* 3. Accent & Status Colors (Donut charts, tags, badges) */
-  --color-status-paid: #2196F3;
+  --color-status-paid: #2563EB;
   --color-status-processing: #F59E0B;
   --color-status-processing-light: #FBBF24;
   --color-status-pending: #EF4444;
   --color-status-pending-light: #F87171;
-  --color-status-hold: #9CA3AF;
-  --color-status-hold-light: #D1D5DB;
+  --color-status-hold: #94A3B8;
+  --color-status-hold-light: #CBD5E1;
 
   /* 4. Semantic Colors */
-  --color-semantic-green: #22C55E;
-  --color-semantic-emerald: #10B981;
-  --color-icon-bg-blue: #E3F2FD;
+  --color-semantic-green: #10B981;
+  --color-semantic-emerald: #059669;
+  --color-icon-bg-blue: #EFF6FF;
   --color-icon-bg-teal: #CCFBF1;
 
   /* 5. Text Colors */
-  --color-text-primary: #1E293B;
-  --color-text-secondary: #6B7280;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
   --color-text-muted: #94A3B8;
 
   /* 6. Sidebar Tokens */
-  --color-sidebar-bg: #FFFFFF;
-  --color-sidebar-active: #E3F2FD;
-  --color-sidebar-active-text: #0D47A1;
+  --color-sidebar-bg: rgba(255, 255, 255, 0.92);
+  --color-sidebar-active: #EFF6FF;
+  --color-sidebar-active-text: #1D4ED8;
 
   /* Global Sleek Radius Tokens */
   --radius-3xl: 0.75rem; /* 12px */
@@ -100,7 +105,12 @@
 }
 
 body {
-  background: linear-gradient(135deg, #E3F2FD 0%, #F0F7FF 100%);
+  background-color: #F8FAFD;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.10) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.10) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 40%);
   background-attachment: fixed;
   color: var(--color-text-primary);
   font-family: Arial, Helvetica, sans-serif;
@@ -144,37 +154,49 @@ main .bg-white[class*="space-y-6"] > :not(:first-child) {
   background-color: transparent !important;
 }
 
-/* Card Surface & Hover Micro-Interactions (Clean Modern SaaS: Pure White + Soft Brand Border & Lift) */
-main .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not([role="tooltip"]):not(button):not(input) {
-  background-color: var(--color-surface, #FFFFFF) !important;
-  border-color: var(--color-card-border, #E2E8F0);
+/* Card Surface & Hover Micro-Interactions (Aurora Glassmorphic Card Surface) */
+main .bg-white[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"], [class*="fixed"] *, [role="dialog"], [role="dialog"] *, [role="menu"], [role="menu"] *, [role="tooltip"], [role="tooltip"] *, button, input, .opaque-surface, .opaque-surface *),
+main .bg-slate-50[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"], [class*="fixed"] *, [role="dialog"], [role="dialog"] *, [role="menu"], [role="menu"] *, [role="tooltip"], [role="tooltip"] *, button, input, .opaque-surface, .opaque-surface *) {
+  background-color: var(--color-surface, rgba(255, 255, 255, 0.85));
+  border-color: var(--color-card-border, rgba(226, 232, 240, 0.8));
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-main .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not([role="tooltip"]):not(button):not(input):hover {
-  border-color: var(--color-brand-border, #90CAF9) !important;
-  box-shadow: 0 4px 16px -2px rgba(33, 150, 243, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+main .bg-white[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"], [class*="fixed"] *, [role="dialog"], [role="dialog"] *, button, input, .opaque-surface, .opaque-surface *):hover,
+main .bg-slate-50[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"], [class*="fixed"] *, [role="dialog"], [role="dialog"] *, button, input, .opaque-surface, .opaque-surface *):hover {
+  border-color: rgba(148, 163, 184, 0.9);
+  box-shadow: 0 4px 16px -2px rgba(37, 99, 235, 0.08);
+}
+
+/* Ensure data tables, thead, and table bodies default to transparent in main page content */
+main table:not(.fixed *, [class*="fixed"] *, [role="dialog"] *),
+main thead:not(.fixed *, [class*="fixed"] *, [role="dialog"] *),
+main tbody:not(.fixed *, [class*="fixed"] *, [role="dialog"] *) {
+  background-color: transparent !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+}
+
+main table thead:not(.fixed *, [class*="fixed"] *, [role="dialog"] *) tr {
+  border-bottom: 1px solid rgba(203, 213, 225, 0.8) !important;
+}
+
+main table tbody tr:not(.fixed *, [class*="fixed"] *, [role="dialog"] *):hover {
+  background-color: rgba(226, 232, 240, 0.35) !important;
+}
+
+/* Form inputs & selects on main page content */
+main input:not(.fixed *, [class*="fixed"] *, [role="dialog"] *):not(header input):not([type="checkbox"]):not([type="radio"]),
+main select:not(.fixed *, [class*="fixed"] *, [role="dialog"] *):not(header select) {
+  border-color: rgba(203, 213, 225, 0.8) !important;
 }
 
 /* Stat & KPI Cards subtle elevation lift on hover */
-main [class*="grid"] > .bg-white[class*="rounded-"]:not([role="dialog"]):not([role="menu"]):not(button):hover {
+main [class*="grid"] > .bg-white[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"] *, [role="dialog"] *):hover,
+main [class*="grid"] > .bg-slate-50[class*="rounded-"]:not(.fixed, .fixed *, [class*="fixed"] *, [role="dialog"] *):hover {
   transform: translateY(-1.5px);
-}
-
-/* Card Titles & Headings default to Deep Navy/Slate (#1E293B) */
-main .bg-white[class*="rounded-"] h1,
-main .bg-white[class*="rounded-"] h2,
-main .bg-white[class*="rounded-"] h3,
-main .bg-white[class*="rounded-"] h4 {
-  color: var(--color-primary-navy, #1E293B) !important;
-}
-
-/* Stat Card numbers default to Deep Navy/Slate */
-main .bg-white[class*="rounded-"] p[class*="text-2xl"],
-main .bg-white[class*="rounded-"] span[class*="text-2xl"],
-main .bg-white[class*="rounded-"] p[class*="text-3xl"],
-main .bg-white[class*="rounded-"] span[class*="text-3xl"] {
-  color: var(--color-primary-navy, #1E293B) !important;
 }
 
 /* Active Sidebar Navigation Item highlight token */
@@ -188,66 +210,86 @@ main .bg-white[class*="rounded-"] span[class*="text-3xl"] {
    Header & Search Bar Global Design System
    ========================================================================== */
 header {
-  background-color: var(--color-surface, #FFFFFF) !important;
-  border-bottom: 1px solid var(--color-card-border, #E2E8F0) !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
-/* Header Headings & Brand Titles in Deep Navy/Slate (#1E293B) */
-header h1,
-header h2,
-header h3,
-header .font-black,
-header span.font-extrabold {
+header h1, header h2, header h3, header .font-black, header span.font-extrabold {
   color: var(--color-primary-navy, #1E293B);
 }
 
-/* Header Search Bar: Pure White Surface (#FFFFFF) with Brand Focus Ring */
-header input[type="text"],
-header input[type="search"],
-.header-search-bar {
+header input[type="text"], header input[type="search"], .header-search-bar {
   background-color: #FFFFFF !important;
   border: 1px solid var(--color-card-border, #E2E8F0) !important;
   color: var(--color-text-primary, #1E293B) !important;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-header input[type="text"]:focus,
-header input[type="search"]:focus,
-.header-search-bar:focus {
+header input[type="text"]:focus, header input[type="search"]:focus, .header-search-bar:focus {
   border-color: var(--color-brand, #2196F3) !important;
   box-shadow: 0 0 0 3px var(--color-brand-subtle, #E3F2FD) !important;
   outline: none !important;
 }
 
-header input[type="text"]::placeholder,
-header input[type="search"]::placeholder {
+header input[type="text"]::placeholder, header input[type="search"]::placeholder {
   color: var(--color-text-muted, #94A3B8) !important;
 }
 
-/* Header Action & Navigation Icon Buttons Hover Micro-Interactions */
 header button:hover:not([class*="bg-brand"]):not([class*="bg-rose"]):not([class*="bg-emerald"]) {
   background-color: var(--color-brand-subtle, #E3F2FD) !important;
   color: var(--color-brand, #2196F3) !important;
 }
 
-/* Sticky Table Cells: Solid Canvas Fill to match background and prevent scroll collision */
-main table th[class*="sticky"],
-main table td[class*="sticky"],
-.sticky-canvas-cell {
-  background-color: var(--color-canvas, #E3F2FD) !important;
+/* Sticky Table Cells: Solid Canvas Fill */
+main table th[class*="sticky"], main table td[class*="sticky"], .sticky-canvas-cell {
+  background-color: #F0F6FF !important;
 }
-
 main table tr:hover td[class*="sticky"] {
-  background-color: #d6e9fa !important;
+  background-color: #E0EDFC !important;
 }
 
-/* Ensure all modals, dialogs, drawers, dropdowns, and popovers maintain crisp white surfaces */
-.fixed .bg-white,
-[class*="fixed"] .bg-white,
-[role="dialog"] .bg-white,
-[role="dialog"],
-[role="menu"] .bg-white,
-[role="tooltip"] .bg-white,
-.opaque-surface {
+/* ==========================================================================
+   Modals, Popups, Dialogs & Drawers: Full Solid Restoration to Normal
+   ========================================================================== */
+main .fixed [class*="bg-white"], main [class*="fixed"] [class*="bg-white"], main [role="dialog"] [class*="bg-white"],
+.fixed [class*="bg-white"], [class*="fixed"] [class*="bg-white"], [role="dialog"] [class*="bg-white"], [role="dialog"], dialog, .opaque-surface {
   background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+main .fixed [class*="bg-slate-50"], main [class*="fixed"] [class*="bg-slate-50"], main [role="dialog"] [class*="bg-slate-50"],
+.fixed [class*="bg-slate-50"], [class*="fixed"] [class*="bg-slate-50"] {
+  background-color: #F8FAFC !important;
+  backdrop-filter: none !important;
+}
+
+main .fixed [class*="shadow-2xl"], main [class*="fixed"] [class*="shadow-2xl"], main [role="dialog"] [class*="shadow-2xl"],
+.fixed [class*="shadow-2xl"], [class*="fixed"] [class*="shadow-2xl"] {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+main .fixed [class*="shadow-xl"], main [class*="fixed"] [class*="shadow-xl"], main [role="dialog"] [class*="shadow-xl"],
+.fixed [class*="shadow-xl"], [class*="fixed"] [class*="shadow-xl"] {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+main .fixed [class*="shadow-lg"], main [class*="fixed"] [class*="shadow-lg"], main [role="dialog"] [class*="shadow-lg"] {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+}
+
+main .fixed input:not([type="checkbox"]):not([type="radio"]), main [class*="fixed"] input:not([type="checkbox"]):not([type="radio"]),
+main [role="dialog"] input:not([type="checkbox"]):not([type="radio"]), .fixed input:not([type="checkbox"]):not([type="radio"]),
+[class*="fixed"] input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: #ffffff !important;
+  border-color: #E2E8F0 !important;
+}
+
+main .fixed table, main [class*="fixed"] table, main [role="dialog"] table {
+  background-color: #ffffff !important;
+}
+main .fixed thead, main [class*="fixed"] thead, main [role="dialog"] thead {
+  background-color: #F8FAFC !important;
 }
