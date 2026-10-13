@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MeetingScheduleGrid, MeetingBookingModal } from '@/components/meetings';
+import { MeetingScheduleGrid } from '@/components/meetings/MeetingScheduleGrid';
+import { MeetingBookingModal } from '@/components/meetings/MeetingBookingModal';
 
 export default function MeetingSchedulePage() {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);

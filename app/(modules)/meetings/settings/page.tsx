@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { MeetingTelegramSettings } from '@/components/meetings';
+import { MeetingSystemSettingsView } from '@/components/meetings/MeetingSystemSettingsView';
 
 export default function MeetingSettingsPage() {
-  return <MeetingTelegramSettings />;
+  return <MeetingSystemSettingsView />;
 }

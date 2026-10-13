@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { MeetingDashboardView } from '@/components/meetings';
+import { MeetingDashboardView } from '@/components/meetings/MeetingDashboardView';
 
 export default function MeetingsPage() {
   return <MeetingDashboardView />;

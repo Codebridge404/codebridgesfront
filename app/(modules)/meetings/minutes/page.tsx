@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { MeetingMinutesView } from '@/components/meetings';
+import { MeetingMinutesView } from '@/components/meetings/MeetingMinutesView';
 
 export default function MeetingMinutesPage() {
   return <MeetingMinutesView />;

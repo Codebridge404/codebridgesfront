@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { CalendarClock } from 'lucide-react';
 import { UniversalModuleLayout } from '@/components/module-shell';
-import { MeetingsSidebar, MeetingBookingModal } from '@/components/meetings';
+import { MeetingsSidebar } from '@/components/meetings/MeetingsSidebar';
+import { MeetingBookingModal } from '@/components/meetings/MeetingBookingModal';
 
 export default function MeetingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

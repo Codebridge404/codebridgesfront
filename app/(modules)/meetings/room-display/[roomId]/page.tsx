@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { RoomDoorDisplayView } from '@/components/meetings';
+import { RoomDoorDisplayView } from '@/components/meetings/RoomDoorDisplayView';
 
 export default function RoomDisplayPage() {
   const params = useParams();

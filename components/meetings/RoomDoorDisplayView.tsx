@@ -9,6 +9,7 @@ import {
   Calendar,
   Sparkles,
   ArrowLeft,
+  Wrench,
 } from 'lucide-react';
 import {
   getMeetingRoomsApi,
@@ -17,6 +18,7 @@ import {
   MeetingRoomItem,
   MeetingItem,
 } from '@/lib/api/meetings';
+import { RoomIssueReportModal } from './RoomIssueReportModal';
 
 interface RoomDoorDisplayViewProps {
   roomId: number;
@@ -29,6 +31,7 @@ export function RoomDoorDisplayView({ roomId }: RoomDoorDisplayViewProps) {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState(false);
+  const [issueModalOpen, setIssueModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -264,11 +267,30 @@ export function RoomDoorDisplayView({ roomId }: RoomDoorDisplayViewProps) {
         </div>
       </div>
 
-      {/* Footer Notice */}
+      {/* Footer Notice & In-Room Support Actions */}
       <div className="border-t border-slate-200 pt-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 font-bold">
-        <p>CodeBridges Enterprise Digital Door Signage Tablet Engine</p>
+        <div className="flex items-center gap-3">
+          <p>CodeBridges Enterprise Digital Door Signage Tablet Engine</p>
+          <span className="hidden sm:inline">•</span>
+          <button
+            type="button"
+            onClick={() => setIssueModalOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Wrench className="w-3.5 h-3.5 text-amber-600" />
+            <span>Report Room Defect</span>
+          </button>
+        </div>
         <p className="font-mono">Auto-refreshes every 15s • Syncs with Zero-Conflict Engine</p>
       </div>
+
+      <RoomIssueReportModal
+        isOpen={issueModalOpen}
+        roomId={roomId}
+        roomName={room?.name}
+        isPublicKiosk={true}
+        onClose={() => setIssueModalOpen(false)}
+      />
     </div>
   );
 }

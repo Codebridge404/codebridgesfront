@@ -8,14 +8,20 @@ import {
   Calendar,
   DoorOpen,
   FileText,
-  Send,
   PlusCircle,
   Building2,
-  Users,
   BarChart3,
   Tablet,
+  Package,
+  UserCheck,
+  CheckSquare,
+  ShieldAlert,
+  Sliders,
+  User,
+  ChevronRight,
 } from 'lucide-react';
 import { getAuthUser, getRoleDisplayName } from '@/lib/api';
+import { getMeetingsApi, getMyActionItemsApi } from '@/lib/api/meetings';
 
 interface MeetingsSidebarProps {
   sidebarOpen: boolean;
@@ -26,30 +32,92 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [orgName, setOrgName] = useState<string>('My Workspace');
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
+  const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
+
+  const syncState = () => {
+    const authUser = getAuthUser();
+    setUser(authUser);
+    setOrgName(localStorage.getItem('active_org') || authUser?.tenant_name || 'My Workspace');
+  };
+
+  const loadBadges = async () => {
+    try {
+      const [meetingsRes, actionsRes] = await Promise.allSettled([
+        getMeetingsApi(),
+        getMyActionItemsApi(),
+      ]);
+
+      if (meetingsRes.status === 'fulfilled') {
+        const d = meetingsRes.value?.data ?? meetingsRes.value;
+        if (Array.isArray(d)) {
+          const pending = d.filter((m: any) => m.status === 'pending_approval').length;
+          setPendingApprovalsCount(pending);
+        }
+      }
+
+      if (actionsRes.status === 'fulfilled' && actionsRes.value?.data) {
+        if (Array.isArray(actionsRes.value.data)) {
+          const pending = actionsRes.value.data.filter((a: any) => a.status !== 'completed').length;
+          setPendingActionsCount(pending);
+        }
+      }
+    } catch {
+      // silently handle
+    }
+  };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUser(getAuthUser());
-      setOrgName(localStorage.getItem('active_org') || 'My Workspace');
-    }
+    syncState();
+    loadBadges();
+
+    const handleOrgChange = () => {
+      syncState();
+      loadBadges();
+    };
+
+    window.addEventListener('cb_org_changed', handleOrgChange);
+    const interval = setInterval(loadBadges, 25000);
+
+    return () => {
+      window.removeEventListener('cb_org_changed', handleOrgChange);
+      clearInterval(interval);
+    };
   }, []);
 
   if (!sidebarOpen) return null;
 
   const roleName = getRoleDisplayName(user || 'employee', orgName);
+  const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
+  const userInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : 'U';
 
   const navLinks = [
     { title: "Today's Agenda", href: '/meetings', icon: CalendarClock },
     { title: 'Schedule Matrix', href: '/meetings/schedule', icon: Calendar },
+    {
+      title: 'Boardroom Approvals',
+      href: '/meetings/approvals',
+      icon: ShieldAlert,
+      badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : undefined,
+      badgeColor: 'bg-amber-100 text-amber-800 font-black',
+    },
     { title: 'Room Fleet', href: '/meetings/rooms', icon: DoorOpen },
-    { title: 'Minutes & Actions', href: '/meetings/minutes', icon: FileText },
+    { title: 'Equipment Logistics', href: '/meetings/equipment', icon: Package },
+    { title: 'Support Specialists', href: '/meetings/staff', icon: UserCheck },
+    {
+      title: 'Action Items & RSVPs',
+      href: '/meetings/action-items',
+      icon: CheckSquare,
+      badge: pendingActionsCount > 0 ? pendingActionsCount : undefined,
+      badgeColor: 'bg-indigo-100 text-indigo-700 font-black',
+    },
+    { title: 'Minutes & MOM', href: '/meetings/minutes', icon: FileText },
     { title: 'Space Analytics', href: '/meetings/analytics', icon: BarChart3 },
-    { title: 'Telegram & Alerts', href: '/meetings/settings', icon: Send },
+    { title: 'Governance & Alerts', href: '/meetings/settings', icon: Sliders },
   ];
 
-
   return (
-    <aside className="w-64 bg-white/95 backdrop-blur-md border-r border-slate-200/90 h-[calc(100vh-3.5rem)] sticky top-14 flex flex-col justify-between p-3.5 shadow-xs select-none">
+    <aside className="w-64 bg-white/95 backdrop-blur-md border-r border-slate-200/90 h-full flex flex-col justify-between p-3.5 shadow-xs select-none shrink-0 overflow-y-auto">
       <div className="space-y-4">
         {/* Workspace Identity Mini-Card */}
         <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
@@ -87,35 +155,73 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                <span>{link.title}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                  <span className="truncate">{link.title}</span>
+                </div>
+                {link.badge !== undefined && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] shrink-0 ${
+                      isActive ? 'bg-white/20 text-white' : link.badgeColor || 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
         </div>
       </div>
 
-      {/* Footer Info */}
-      <div className="pt-3 border-t border-slate-100 space-y-2">
+      {/* Footer Info & Interactive User Profile Mini-Card */}
+      <div className="pt-3 border-t border-slate-100 space-y-2 mt-4">
+        {/* User Profile Mini-Card */}
+        <Link
+          href="/profile"
+          className="p-2.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 flex items-center gap-2.5 transition-all cursor-pointer group"
+          title="Manage Your Profile Settings"
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={user?.name || 'User'}
+              className="w-8 h-8 rounded-xl object-cover border border-slate-200 shrink-0 shadow-2xs"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+              {userInitials}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+              {user?.name || 'My Profile'}
+            </p>
+            <p className="text-[10px] text-slate-400 truncate">{roleName}</p>
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-500 transition-colors shrink-0" />
+        </Link>
+
+        {/* Digital Door Signage Kiosk Button */}
         <Link
           href="/meetings/room-display/1"
-          className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors"
+          className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors"
           title="Digital Door Signage Kiosk Mode"
         >
           <Tablet className="w-3.5 h-3.5 text-indigo-600" />
           <span>Door Signage Kiosk</span>
         </Link>
+
         <p className="text-[10px] font-bold text-slate-400 flex items-center justify-center gap-1">
           <Calendar className="w-3 h-3 text-indigo-500" /> Zero-Conflict Conference Engine
         </p>
       </div>
     </aside>
-
   );
 }
