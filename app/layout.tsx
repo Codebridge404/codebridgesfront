@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CodeBridges Enterprise Suite",
-  description: "Enterprise POS, Multi-Warehouse Inventory, Dynamic RBAC, Finance & HRM Cloud Platform",
+  title: "CodeBridge@ — Multi-Tenant Enterprise Platform",
+  description: "Unified Multi-Tenant Enterprise Cloud Suite — Launchpad, HRM, CRM, Financial Accounting, Inventory Logistics, Meeting Management (MMS) & Commerce",
   icons: {
     icon: [
       { url: "/logo/Codebridge.svg", type: "image/svg+xml" },
