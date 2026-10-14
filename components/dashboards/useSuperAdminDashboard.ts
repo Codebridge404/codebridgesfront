@@ -264,8 +264,7 @@ export function useSuperAdminDashboard() {
 
       setHealthTelemetry([
         { name: 'auth-service', domain: 'Auth, RBAC, CRM, Outlets', port: 8001, latencyMs: measuredLatency, status: 'healthy', lastChecked: 'Just now' },
-        { name: 'inventory-service', domain: 'Catalog, SKUs, Stock Ledger', port: 8003, latencyMs: Math.max(1, measuredLatency + 2), status: 'healthy', lastChecked: 'Just now' },
-        { name: 'sales-service', domain: 'POS, Shifts, Payments, Finance', port: 8006, latencyMs: Math.max(1, measuredLatency + 4), status: 'healthy', lastChecked: 'Just now' },
+        { name: 'operations-service', domain: 'Operations, Catalog, Shifts, Commerce', port: 8003, latencyMs: Math.max(1, measuredLatency + 2), status: 'healthy', lastChecked: 'Just now' },
       ]);
     } catch (err: any) {
       console.error('[SuperAdminDashboard Hook Error]:', err);

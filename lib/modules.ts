@@ -80,10 +80,11 @@ export const MODULE_ALIASES: Record<string, string> = {
   'cfd-display': 'pos',
   'cfd-service': 'pos',
 
-  // Inventory
+  // Inventory & Operations
   'inventory': 'inventory',
   'inventory-suite': 'inventory',
   'inventory-service': 'inventory',
+  'operations-service': 'inventory',
 
   // HRM
   'hrm': 'hrm',

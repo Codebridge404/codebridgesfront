@@ -59,6 +59,8 @@ export interface MeetingMinutesItem {
   recorded_by?: number;
   recorder_name?: string;
   content: string;
+  agenda?: string;
+  key_decisions?: string;
   action_items?: Array<{
     id?: string | number;
     title?: string;
@@ -158,15 +160,6 @@ export interface AttachmentItem {
   created_at: string;
 }
 
-export interface TelegramConfigItem {
-  id?: number;
-  tenant_id?: number;
-  bot_token?: string;
-  chat_id?: string;
-  is_enabled: boolean;
-  notify_on_booking: boolean;
-  notify_15m_before: boolean;
-}
 
 export interface RecurringPreviewItem {
   index: number;
@@ -208,6 +201,7 @@ export async function createMeetingApi(data: Partial<MeetingItem> & {
 export async function getMeetingApi(id: number | string) {
   return await apiFetch(`/meetings/${id}`);
 }
+export const getMeetingDetailsApi = getMeetingApi;
 
 export async function updateMeetingApi(id: number | string, data: Partial<MeetingItem>) {
   return await apiFetch(`/meetings/${id}`, {
@@ -502,6 +496,8 @@ export async function saveMeetingMinutesApi(meetingId: number | string, data: Pa
 }
 
 export interface TelegramConfigItem {
+  id?: number;
+  tenant_id?: number;
   bot_enabled: boolean;
   bot_token?: string;
   bot_token_masked?: string;
@@ -510,6 +506,10 @@ export interface TelegramConfigItem {
   default_chat_id?: string;
   default_reminder_minutes?: number;
   bot_link?: string;
+  chat_id?: string;
+  is_enabled?: boolean;
+  notify_on_booking?: boolean;
+  notify_15m_before?: boolean;
 }
 
 export interface TelegramTemplateItem {
