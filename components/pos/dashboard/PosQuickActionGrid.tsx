@@ -25,7 +25,32 @@ export function PosQuickActionGrid({
   onOpenReturn,
   activeShift,
 }: PosQuickActionGridProps) {
-  const actions = [
+  const [terminalSettings, setTerminalSettings] = React.useState<{ cfdEnabled?: boolean; kdsEnabled?: boolean }>({
+    cfdEnabled: true,
+    kdsEnabled: true,
+  });
+
+  React.useEffect(() => {
+    const loadSettings = () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('cb_pos_terminal_settings');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            setTerminalSettings({
+              cfdEnabled: parsed.cfdEnabled !== undefined ? Boolean(parsed.cfdEnabled) : true,
+              kdsEnabled: parsed.kdsEnabled !== undefined ? Boolean(parsed.kdsEnabled) : true,
+            });
+          }
+        } catch {}
+      }
+    };
+    loadSettings();
+    window.addEventListener('cb_terminal_settings_updated', loadSettings);
+    return () => window.removeEventListener('cb_terminal_settings_updated', loadSettings);
+  }, []);
+
+  const allActions = [
     {
       title: 'Launch Cashier Register',
       subtitle: 'Start ringing orders & fast touch sales',
@@ -84,6 +109,12 @@ export function PosQuickActionGrid({
       target: '_blank',
     },
   ];
+
+  const actions = allActions.filter((act) => {
+    if (act.title.includes('Customer Display') && terminalSettings.cfdEnabled === false) return false;
+    if (act.title.includes('Kitchen Display') && terminalSettings.kdsEnabled === false) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-3">

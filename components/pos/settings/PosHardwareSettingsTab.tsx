@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Printer, ScanBarcode, Tv, Zap, CheckCircle2 } from 'lucide-react';
+import { Printer, ScanBarcode, Tv, Zap, CheckCircle2, ChefHat } from 'lucide-react';
 
 interface PosHardwareSettingsTabProps {
   settings: any;
@@ -107,8 +107,74 @@ export function PosHardwareSettingsTab({
         </div>
       </div>
 
-      {/* Cash Drawer & Barcode Scanner */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* POS Fleet Terminals: CFD & KDS & Cash Drawer */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Customer Display (CFD) */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Tv className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900">Customer Display (CFD)</h3>
+              <p className="text-xs text-slate-500">Secondary screen facing customer</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.cfdEnabled !== false}
+                onChange={(e) => onChange('cfdEnabled', e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-xs font-bold text-slate-800">Enable Customer Display (CFD)</span>
+            </label>
+
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.cfdAutoKhqr}
+                onChange={(e) => onChange('cfdAutoKhqr', e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-xs font-bold text-slate-800">Auto-render Bakong KHQR</span>
+            </label>
+            <p className="text-[11px] text-slate-400 pl-1">
+              Uncheck to hide CFD terminal from POS navigation if not used.
+            </p>
+          </div>
+        </div>
+
+        {/* Kitchen Display (KDS) */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <ChefHat className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900">Kitchen Display (KDS)</h3>
+              <p className="text-xs text-slate-500">Kitchen order ticket station</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.kdsEnabled !== false}
+                onChange={(e) => onChange('kdsEnabled', e.target.checked)}
+                className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+              />
+              <span className="text-xs font-bold text-slate-800">Enable Kitchen Display (KDS)</span>
+            </label>
+            <p className="text-[11px] text-slate-400 pl-1 pt-1">
+              Uncheck to hide KDS terminal from POS navigation if your business does not prepare kitchen orders.
+            </p>
+          </div>
+        </div>
+
         {/* Cash Drawer */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
@@ -121,48 +187,15 @@ export function PosHardwareSettingsTab({
             </div>
           </div>
 
-          <label className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.drawerKickOnCash}
-              onChange={(e) => onChange('drawerKickOnCash', e.target.checked)}
-              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
-            />
-            <span className="text-xs font-bold text-slate-800">Kick Drawer on Cash Tenders</span>
-          </label>
-        </div>
-
-        {/* Barcode & CFD */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-          <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Tv className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900">CFD &amp; Barcode Scanner</h3>
-              <p className="text-xs text-slate-500">Secondary display &amp; hardware scanners</p>
-            </div>
-          </div>
-
           <div className="space-y-2">
             <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.cfdEnabled}
-                onChange={(e) => onChange('cfdEnabled', e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                checked={settings.drawerKickOnCash}
+                onChange={(e) => onChange('drawerKickOnCash', e.target.checked)}
+                className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
               />
-              <span className="text-xs font-bold text-slate-800">Enable Customer Display (CFD Broadcast)</span>
-            </label>
-
-            <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.cfdAutoKhqr}
-                onChange={(e) => onChange('cfdAutoKhqr', e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <span className="text-xs font-bold text-slate-800">Auto-render Bakong KHQR on Secondary Screen</span>
+              <span className="text-xs font-bold text-slate-800">Kick Drawer on Cash Tenders</span>
             </label>
           </div>
         </div>

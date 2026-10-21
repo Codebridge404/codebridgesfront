@@ -4,9 +4,24 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Building2, Grid, Users, Store, Boxes, Briefcase,
-  DollarSign, UserCheck, Calendar, Settings, ChevronDown, ChevronRight, ExternalLink,
-  Search, X, Sparkles, LucideIcon,
+  LayoutDashboard,
+  Building2,
+  Grid,
+  Users,
+  Store,
+  Boxes,
+  Briefcase,
+  DollarSign,
+  UserCheck,
+  Calendar,
+  Settings,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Search,
+  X,
+  Sparkles,
+  LucideIcon,
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/api';
 import { getEnabledModulesForOrg } from '@/lib/modules';
@@ -17,7 +32,7 @@ export interface OrganizationSidebarProps {
   userRole?: string;
 }
 
-interface OrgNavItem {
+export interface OrgNavItem {
   name: string;
   href: string;
   icon: LucideIcon;
@@ -106,7 +121,13 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
     groups.push({
       id: 'workspace-governance',
       title: 'Workspace Governance',
-      items: [{ name: 'Workspace Profile & Settings', href: '/organization/settings', icon: Settings }],
+      items: [
+        {
+          name: 'Workspace Profile & Settings',
+          href: '/organization/settings',
+          icon: Settings,
+        },
+      ],
     });
 
     return groups;
@@ -130,7 +151,9 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
     setExpandedGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
-  const isItemActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const isItemActive = (href: string) => {
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   const filteredNavGroups = useMemo(() => {
     if (!navSearch.trim()) return rawNavGroups;
@@ -247,15 +270,29 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-bold'
                         } ${!sidebarOpen ? 'justify-center px-0 w-11 h-10 mx-auto' : ''}`}
                       >
-                        {active && <span className="absolute -left-1.5 top-1.5 bottom-1.5 w-1 rounded-r-full bg-brand shadow-xs" />}
-                        <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${active ? 'text-white' : 'text-slate-400 group-hover:text-brand'}`} />
+                        {active && (
+                          <span className="absolute -left-1.5 top-1.5 bottom-1.5 w-1 rounded-r-full bg-brand shadow-xs" />
+                        )}
+                        <Icon
+                          className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${
+                            active ? 'text-white' : 'text-slate-400 group-hover:text-brand'
+                          }`}
+                        />
                         {sidebarOpen && <span className="truncate tracking-tight flex-1">{item.name}</span>}
                         {sidebarOpen && item.badge && (
-                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto shrink-0 ${active ? 'bg-white/25 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                          <span
+                            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto shrink-0 ${
+                              active
+                                ? 'bg-white/25 text-white'
+                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            }`}
+                          >
                             {item.badge}
                           </span>
                         )}
-                        {sidebarOpen && item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400 opacity-70 ml-auto shrink-0" />}
+                        {sidebarOpen && item.isExternal && (
+                          <ExternalLink className="w-3 h-3 text-slate-400 opacity-70 ml-auto shrink-0" />
+                        )}
                       </Link>
                     );
                   })}

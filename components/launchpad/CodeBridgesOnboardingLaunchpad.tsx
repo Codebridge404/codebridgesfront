@@ -52,7 +52,9 @@ export function CodeBridgesOnboardingLaunchpad() {
     try {
       setLoadingCatalog(true);
       const records = await getPlatformModulesApi();
-      const mapped: CatalogModule[] = records.map((r) => ({
+      const mapped: CatalogModule[] = records
+        .filter((r) => r.is_active !== false && !['kds-kitchen', 'cfd-display', 'kds', 'cfd'].includes(r.id))
+        .map((r) => ({
         id: r.id,
         name: r.name,
         monogram: r.monogram,

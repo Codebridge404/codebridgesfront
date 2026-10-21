@@ -33,6 +33,65 @@ export interface OrgNavSection {
 }
 
 export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
+  let cfdOn = true;
+  let kdsOn = true;
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('cb_pos_terminal_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.cfdEnabled !== undefined) cfdOn = Boolean(parsed.cfdEnabled);
+        if (parsed.kdsEnabled !== undefined) kdsOn = Boolean(parsed.kdsEnabled);
+      }
+    } catch {}
+  }
+
+  const fleetItems: OrgNavItem[] = [
+    {
+      label: 'POS Terminal',
+      href: '/pos/pos-terminal',
+      icon: Store,
+      badge: 'Live',
+      badgeColor: 'bg-amber-100 text-amber-800',
+    },
+    {
+      label: 'Shifts & Till Float',
+      href: '/pos/shifts',
+      icon: Clock,
+      badge: activeShift ? 'Open' : undefined,
+      badgeColor: 'bg-emerald-100 text-emerald-800',
+    },
+    {
+      label: 'Orders & Receipts',
+      href: '/pos/orders',
+      icon: Receipt,
+    },
+  ];
+
+  if (cfdOn) {
+    fleetItems.push({
+      label: 'Customer Display (CFD)',
+      href: '/pos/customer-display',
+      icon: Tv,
+      target: '_blank',
+    });
+  }
+
+  if (kdsOn) {
+    fleetItems.push({
+      label: 'Kitchen Display (KDS)',
+      href: '/pos/kitchen-display',
+      icon: ChefHat,
+      target: '_blank',
+    });
+  }
+
+  fleetItems.push({
+    label: 'Tables & Dining',
+    href: '/pos/tables',
+    icon: UtensilsCrossed,
+  });
+
   return [
     {
       title: 'Executive Command',
@@ -46,44 +105,7 @@ export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
     },
     {
       title: 'Point of Sale Fleet',
-      items: [
-        {
-          label: 'POS Terminal',
-          href: '/pos/pos-terminal',
-          icon: Store,
-          badge: 'Live',
-          badgeColor: 'bg-amber-100 text-amber-800',
-        },
-        {
-          label: 'Shifts & Till Float',
-          href: '/pos/shifts',
-          icon: Clock,
-          badge: activeShift ? 'Open' : undefined,
-          badgeColor: 'bg-emerald-100 text-emerald-800',
-        },
-        {
-          label: 'Orders & Receipts',
-          href: '/pos/orders',
-          icon: Receipt,
-        },
-        {
-          label: 'Customer Display (CFD)',
-          href: '/pos/customer-display',
-          icon: Tv,
-          target: '_blank',
-        },
-        {
-          label: 'Kitchen Display (KDS)',
-          href: '/pos/kitchen-display',
-          icon: ChefHat,
-          target: '_blank',
-        },
-        {
-          label: 'Tables & Dining',
-          href: '/pos/tables',
-          icon: UtensilsCrossed,
-        },
-      ],
+      items: fleetItems,
     },
     {
       title: 'Items & Catalog',
@@ -128,6 +150,17 @@ export function SidebarNavList({ sections, activeShift, lowStockCount }: Sidebar
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get('tab');
+  const [, setSettingVersion] = React.useState(0);
+
+  React.useEffect(() => {
+    const handleSettingsUpdate = () => {
+      setSettingVersion((v) => v + 1);
+    };
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdate);
+    return () => {
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdate);
+    };
+  }, []);
 
   const navSections = sections || getSidebarNavSections(activeShift);
 

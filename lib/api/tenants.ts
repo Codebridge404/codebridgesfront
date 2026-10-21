@@ -42,6 +42,14 @@ export interface TenantProfile {
   client_tier?: string | null;
   status?: string | null;
   enabled_modules?: string[];
+  payment_settings?: {
+    bakong_merchant_id?: string;
+    bakong_bank_name?: string;
+    bakong_secret?: string;
+    sms_gateway_provider?: string;
+    sms_api_key?: string;
+    [key: string]: any;
+  } | null;
 }
 
 export async function getTenantProfileApi(orgName?: string): Promise<{ success: boolean; data?: TenantProfile; message?: string }> {
@@ -188,6 +196,25 @@ export async function updateOutletApi(id: number | string, data: any) {
 export async function deleteOutletApi(id: number | string) {
   return await apiFetch(`/outlets/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export async function getOutletTerminalSettingsApi(outletId: number | string) {
+  try {
+    return await apiFetch(`/outlets/${outletId}/terminal-settings`);
+  } catch (err) {
+    console.warn('[Outlets API] Failed to fetch outlet terminal settings:', err);
+    return { status: 'error', data: null };
+  }
+}
+
+export async function updateOutletTerminalSettingsApi(
+  outletId: number | string,
+  data: { is_kds_enabled?: boolean; is_cfd_enabled?: boolean; terminal_settings?: any }
+) {
+  return await apiFetch(`/outlets/${outletId}/terminal-settings`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
   });
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings,
@@ -12,9 +13,12 @@ import {
   Loader2,
   Receipt,
   QrCode,
+  ExternalLink,
+  Building2,
+  Check,
+  AlertTriangle,
 } from 'lucide-react';
-import { getOutletsApi, createBankAccountApi } from '@/lib/api';
-import { IntegrationsSettingsTab } from '@/components/settings';
+import { getOutletsApi, getOutletTerminalSettingsApi, updateOutletTerminalSettingsApi, getTenantProfileApi } from '@/lib/api';
 import { PosHardwareSettingsTab } from './PosHardwareSettingsTab';
 import { PosPolicySettingsTab } from './PosPolicySettingsTab';
 import { PosReceiptSettingsTab } from './PosReceiptSettingsTab';
@@ -40,6 +44,7 @@ const DEFAULT_SETTINGS = {
   barcodeBeeper: true,
   cfdEnabled: true,
   cfdAutoKhqr: true,
+  kdsEnabled: true,
   autoLockMinutes: '2',
   requirePinForVoid: true,
   requirePinForRefund: true,
@@ -56,10 +61,9 @@ function PosTerminalSettingsContent() {
   const [testPrintSuccess, setTestPrintSuccess] = useState(false);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
-  // Dynamic Bakong Integration State for POS Checkout
+  // Dynamic Bakong State read from Organization Settings
   const [bakongMerchantId, setBakongMerchantId] = useState('');
   const [bakongBankName, setBakongBankName] = useState('');
-  const [bakongSecret, setBakongSecret] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -76,21 +80,71 @@ function PosTerminalSettingsContent() {
 
       const merchant = localStorage.getItem('cb_bakong_merchant_id') || '';
       const bank = localStorage.getItem('cb_bakong_bank_name') || '';
-      const secret = localStorage.getItem('cb_bakong_secret') || '';
       if (merchant) setBakongMerchantId(merchant);
       if (bank) setBakongBankName(bank);
-      if (secret) setBakongSecret(secret);
+
+      if (!merchant) {
+        getTenantProfileApi()
+          .then((res) => {
+            if (res?.success && res.data?.payment_settings) {
+              const pay =
+                typeof res.data.payment_settings === 'string'
+                  ? JSON.parse(res.data.payment_settings)
+                  : res.data.payment_settings;
+
+              if (pay.bakong_merchant_id) {
+                setBakongMerchantId(pay.bakong_merchant_id);
+                localStorage.setItem('cb_bakong_merchant_id', pay.bakong_merchant_id);
+              }
+              if (pay.bakong_bank_name) {
+                setBakongBankName(pay.bakong_bank_name);
+                localStorage.setItem('cb_bakong_bank_name', pay.bakong_bank_name);
+              }
+              if (pay.bakong_secret) {
+                localStorage.setItem('cb_bakong_secret', pay.bakong_secret);
+              }
+            }
+          })
+          .catch(() => {});
+      }
     }
 
+    const handleBakongUpdate = () => {
+      if (typeof window !== 'undefined') {
+        setBakongMerchantId(localStorage.getItem('cb_bakong_merchant_id') || '');
+        setBakongBankName(localStorage.getItem('cb_bakong_bank_name') || '');
+      }
+    };
+    window.addEventListener('cb_bakong_changed', handleBakongUpdate);
+
     getOutletsApi()
-      .then((res) => {
+      .then(async (res) => {
         const list = Array.isArray(res) ? res : res?.data || [];
         setOutlets(list);
+        const targetOutletId = settings.outletId || (list.length > 0 ? list[0].id : null);
         if (list.length > 0 && !settings.outletId) {
           setSettings((prev) => ({ ...prev, outletId: list[0].id, outletName: list[0].name }));
         }
+
+        if (targetOutletId) {
+          try {
+            const termRes = await getOutletTerminalSettingsApi(targetOutletId);
+            if (termRes?.status === 'success' && termRes.data) {
+              setSettings((prev) => ({
+                ...prev,
+                kdsEnabled: termRes.data.is_kds_enabled !== undefined ? Boolean(termRes.data.is_kds_enabled) : prev.kdsEnabled,
+                cfdEnabled: termRes.data.is_cfd_enabled !== undefined ? Boolean(termRes.data.is_cfd_enabled) : prev.cfdEnabled,
+                ...(termRes.data.terminal_settings || {}),
+              }));
+            }
+          } catch {}
+        }
       })
       .catch(() => {});
+
+    return () => {
+      window.removeEventListener('cb_bakong_changed', handleBakongUpdate);
+    };
   }, []);
 
   const handleChange = (key: string, value: any) => {
@@ -101,33 +155,33 @@ function PosTerminalSettingsContent() {
     e.preventDefault();
     setLoading(true);
 
+    if (settings.outletId) {
+      try {
+        await updateOutletTerminalSettingsApi(settings.outletId, {
+          is_kds_enabled: settings.kdsEnabled !== false,
+          is_cfd_enabled: settings.cfdEnabled !== false,
+          terminal_settings: {
+            printerType: settings.printerType,
+            printerIp: settings.printerIp,
+            printerPort: settings.printerPort,
+            paperWidth: settings.paperWidth,
+            autoPrintReceipt: settings.autoPrintReceipt,
+            printKitchenTicket: settings.printKitchenTicket,
+            drawerKickOnCash: settings.drawerKickOnCash,
+            cfdAutoKhqr: settings.cfdAutoKhqr,
+          },
+        });
+      } catch (err) {
+        console.warn('Failed to sync terminal settings to backend outlet:', err);
+      }
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('cb_pos_terminal_settings', JSON.stringify(settings));
       localStorage.setItem('cb_pos_receipt_header', settings.receiptHeader || '');
       localStorage.setItem('cb_pos_receipt_footer', settings.receiptFooter || '');
 
-      localStorage.setItem('cb_bakong_merchant_id', bakongMerchantId);
-      localStorage.setItem('cb_bakong_bank_name', bakongBankName);
-      localStorage.setItem('cb_bakong_secret', bakongSecret);
-
       window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: settings }));
-      window.dispatchEvent(
-        new CustomEvent('cb_bakong_changed', {
-          detail: { merchantId: bakongMerchantId, bankName: bakongBankName },
-        })
-      );
-    }
-
-    if (bakongMerchantId && bakongBankName) {
-      try {
-        await createBankAccountApi({
-          bank_name: bakongBankName,
-          account_name: settings.outletName || 'Store Merchant Account',
-          account_number: bakongMerchantId,
-          currency: settings.baseCurrency || 'USD',
-          status: 'connected',
-        });
-      } catch {}
     }
 
     setTimeout(() => {
@@ -138,7 +192,7 @@ function PosTerminalSettingsContent() {
   };
 
   const handleResetDefaults = () => {
-    if (confirm('Reset all terminal hardware, receipt, and payment settings to factory defaults?')) {
+    if (confirm('Reset all terminal hardware, receipt, and policy settings to factory defaults?')) {
       const reset = { ...DEFAULT_SETTINGS, outletId: outlets[0]?.id || '' };
       setSettings(reset);
       if (typeof window !== 'undefined') {
@@ -154,7 +208,7 @@ function PosTerminalSettingsContent() {
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand mb-1">
             <Settings className="w-4 h-4" />
-            <span>POS Hardware, Receipt &amp; Payment Configuration</span>
+            <span>POS Hardware, Receipt &amp; Terminal Policies</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Point of Sale Settings</h1>
         </div>
@@ -190,7 +244,7 @@ function PosTerminalSettingsContent() {
             className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2 shadow-xs"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>POS configuration, receipt template &amp; Bakong KHQR credentials successfully updated!</span>
+            <span>POS hardware configuration, receipt template &amp; policies successfully updated!</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -264,21 +318,77 @@ function PosTerminalSettingsContent() {
       )}
 
       {activeTab === 'payments' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-xs">
-          <IntegrationsSettingsTab
-            bakongMerchantId={bakongMerchantId}
-            setBakongMerchantId={setBakongMerchantId}
-            bakongBankName={bakongBankName}
-            setBakongBankName={setBakongBankName}
-            bakongSecret={bakongSecret}
-            setBakongSecret={setBakongSecret}
-            title="NBC Bakong KHQR Store Payment Gateway"
-            description="Connect your Bakong Account ID or Merchant ID to collect real-time payments directly into your store bank account during POS checkout."
-            merchantIdLabel="Bakong Account ID / Merchant ID"
-            merchantIdPlaceholder="e.g. yourname@aba or 012345678@aba"
-            secretKeyLabel="Bakong Open API Developer Token"
-            showSmsGateway={false}
-          />
+        <div className="bg-transparent rounded-3xl border border-slate-300/80 p-6 sm:p-7 space-y-6 shadow-xs animate-in fade-in duration-200">
+          {/* Header Banner */}
+          <div className="p-5 rounded-2xl bg-transparent border border-brand/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-transparent border border-brand/20 text-brand flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                <QrCode className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">
+                  Payment Gateways are Centrally Configured
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  Payment gateways, NBC Bakong KHQR credentials, acquiring settlement bank accounts, and SMS notification gateways have moved to the <strong>Organization Workspace Settings</strong>.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/organization/settings?tab=payments"
+              className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-black shadow-sm shadow-brand/20 transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <span>Open Organization Payment Settings</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Active Configuration Status Card */}
+          <div className="rounded-xl border border-slate-300/80 bg-transparent p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-slate-500" />
+                <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  Active Organization Payment Credentials
+                </span>
+              </div>
+              {bakongMerchantId ? (
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/30 flex items-center gap-1">
+                  <Check className="w-3 h-3 text-emerald-600" />
+                  <span>Ready for POS Checkout</span>
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 border border-amber-500/30 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-amber-600" />
+                  <span>Not Configured Yet</span>
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="bg-transparent p-3.5 rounded-xl border border-slate-300/80">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Settlement Merchant ID
+                </span>
+                <span className="font-mono font-bold text-slate-800">
+                  {bakongMerchantId || '— (No Merchant ID configured)'}
+                </span>
+              </div>
+
+              <div className="bg-transparent p-3.5 rounded-xl border border-slate-300/80">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Acquiring Settlement Bank
+                </span>
+                <span className="font-bold text-slate-800">
+                  {bakongBankName || '— (No Settlement Bank configured)'}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 font-medium">
+              Every POS register, kitchen terminal, and customer-facing display automatically uses these central credentials when processing sales or dynamic Bakong QR codes.
+            </p>
+          </div>
         </div>
       )}
 

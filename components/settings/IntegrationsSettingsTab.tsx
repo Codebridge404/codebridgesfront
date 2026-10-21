@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { QrCode, Smartphone, Eye, EyeOff } from 'lucide-react';
+import { Smartphone, Eye, EyeOff } from 'lucide-react';
 
 interface IntegrationsSettingsTabProps {
   bakongMerchantId: string;
@@ -47,7 +47,7 @@ export function IntegrationsSettingsTab({
 
   return (
     <div className="space-y-6">
-      <div className="p-4 rounded-2xl bg-brand-subtle/60 border border-brand/20 flex items-start gap-3">
+      <div className="p-4 rounded-2xl bg-transparent border border-brand/30 flex items-start gap-3">
         <img
           src="/BakongKHQR/Bakong.png"
           alt="Bakong KHQR"
@@ -73,7 +73,7 @@ export function IntegrationsSettingsTab({
             value={bakongMerchantId}
             onChange={(e) => setBakongMerchantId(e.target.value)}
             placeholder={merchantIdPlaceholder}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-brand/30"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-mono font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
           />
         </div>
         <div>
@@ -84,7 +84,7 @@ export function IntegrationsSettingsTab({
             type="text"
             value={bakongBankName}
             onChange={(e) => setBakongBankName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand/30"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
           />
         </div>
         <div className="sm:col-span-2">
@@ -97,7 +97,7 @@ export function IntegrationsSettingsTab({
               value={bakongSecret}
               onChange={(e) => setBakongSecret(e.target.value)}
               placeholder={secretKeyPlaceholder}
-              className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-brand/30"
+              className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-mono font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
             />
             <button
               type="button"
@@ -114,7 +114,7 @@ export function IntegrationsSettingsTab({
 
       {showSmsGateway && (
         <>
-          <hr className="border-slate-100 my-4" />
+          <hr className="border-slate-300/70 my-4" />
 
           <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-slate-500" />
@@ -128,10 +128,10 @@ export function IntegrationsSettingsTab({
               <select
                 value={smsGatewayProvider}
                 onChange={(e) => setSmsGatewayProvider?.(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
               >
-                <option value="plasgate">Plasgate (Cambodia Direct Route)</option>
-                <option value="twilio">Twilio Global SMS</option>
+                <option value="plasgate" className="bg-white text-slate-900">Plasgate (Cambodia Direct Route)</option>
+                <option value="twilio" className="bg-white text-slate-900">Twilio Global SMS</option>
               </select>
             </div>
             <div>
@@ -143,7 +143,7 @@ export function IntegrationsSettingsTab({
                   type={showSmsKey ? 'text' : 'password'}
                   value={smsApiKey}
                   onChange={(e) => setSmsApiKey?.(e.target.value)}
-                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-medium"
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-xs font-mono font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
                 />
                 <button
                   type="button"

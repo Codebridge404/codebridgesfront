@@ -8,6 +8,7 @@ import {
   checkBakongPaymentStatusApi,
   confirmBakongPaymentHashApi,
   simulateBakongPaymentApi,
+  getTenantProfileApi,
 } from '@/lib/api';
 import { BakongKhqrCard } from './BakongKhqrCard';
 
@@ -69,9 +70,38 @@ export function BakongKhqrModal({
       setLoading(true);
       setErrorMessage(null);
       const isWindow = typeof window !== 'undefined';
-      const customMerchantId = merchantId || (isWindow ? localStorage.getItem('cb_bakong_merchant_id') || undefined : undefined);
-      const customMerchantName = merchantName || (isWindow ? localStorage.getItem('active_org') || undefined : undefined);
-      const customBank = isWindow ? localStorage.getItem('cb_bakong_bank_name') || undefined : undefined;
+      let customMerchantId = merchantId || (isWindow ? localStorage.getItem('cb_bakong_merchant_id') || undefined : undefined);
+      let customMerchantName = merchantName || (isWindow ? localStorage.getItem('active_org') || undefined : undefined);
+      let customBank = isWindow ? localStorage.getItem('cb_bakong_bank_name') || undefined : undefined;
+
+      if (!customMerchantId && isWindow) {
+        try {
+          const profileRes = await getTenantProfileApi();
+          if (profileRes?.success && profileRes.data) {
+            if (profileRes.data.payment_settings) {
+              const pay =
+                typeof profileRes.data.payment_settings === 'string'
+                  ? JSON.parse(profileRes.data.payment_settings)
+                  : profileRes.data.payment_settings;
+
+              if (pay.bakong_merchant_id) {
+                customMerchantId = pay.bakong_merchant_id;
+                localStorage.setItem('cb_bakong_merchant_id', pay.bakong_merchant_id);
+              }
+              if (pay.bakong_bank_name) {
+                customBank = pay.bakong_bank_name;
+                localStorage.setItem('cb_bakong_bank_name', pay.bakong_bank_name);
+              }
+              if (pay.bakong_secret) {
+                localStorage.setItem('cb_bakong_secret', pay.bakong_secret);
+              }
+            }
+            if (profileRes.data.name && !customMerchantName) {
+              customMerchantName = profileRes.data.name;
+            }
+          }
+        } catch {}
+      }
 
       const res = await generateBakongKhqrApi({
         amount,
