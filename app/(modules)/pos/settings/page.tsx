@@ -1,5 +1,5 @@
-import { PosTerminalSettingsView } from '@/components/pos';
+import { redirect } from 'next/navigation';
 
 export default function PosTerminalSettingsPage() {
-  return <PosTerminalSettingsView />;
+  redirect('/organization/settings?tab=hardware');
 }

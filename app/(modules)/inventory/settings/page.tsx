@@ -1,5 +1,5 @@
-import { StoreSettingsView } from '@/components/inventory';
+import { redirect } from 'next/navigation';
 
 export default function StoreSettingsPage() {
-  return <StoreSettingsView />;
+  redirect('/organization/settings?tab=inventory');
 }

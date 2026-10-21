@@ -1,5 +1,5 @@
-import { AccountingManagementView } from '@/components/accounting';
+import { redirect } from 'next/navigation';
 
 export default function AccountingSettingsPage() {
-  return <AccountingManagementView initialTab="settings" />;
+  redirect('/organization/settings?tab=finance');
 }

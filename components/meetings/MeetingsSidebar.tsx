@@ -113,7 +113,7 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
     },
     { title: 'Minutes & MOM', href: '/meetings/minutes', icon: FileText },
     { title: 'Space Analytics', href: '/meetings/analytics', icon: BarChart3 },
-    { title: 'Governance & Alerts', href: '/meetings/settings', icon: Sliders },
+    { title: 'Governance & Alerts', href: '/organization/settings?tab=telegram', icon: Sliders },
   ];
 
   return (

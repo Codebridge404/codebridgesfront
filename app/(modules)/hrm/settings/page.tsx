@@ -1,5 +1,5 @@
-import { HrmManagementView } from '@/components/hrm';
+import { redirect } from 'next/navigation';
 
 export default function HrmSettingsPage() {
-  return <HrmManagementView initialTab="settings" />;
+  redirect('/organization/settings?tab=hrm');
 }

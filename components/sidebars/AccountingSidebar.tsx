@@ -57,7 +57,7 @@ const ACCOUNTING_SIDEBAR_SECTIONS: NavSection[] = [
     items: [
       { label: 'P&L & Balance Sheet', href: '/financial/reports', icon: BarChart3 },
       { label: 'Accounting Access & RBAC', href: '/financial/access', icon: ShieldCheck },
-      { label: 'Accounting Settings', href: '/financial/settings', icon: Settings },
+      { label: 'Accounting Settings', href: '/organization/settings?tab=finance', icon: Settings },
     ],
   },
 ];

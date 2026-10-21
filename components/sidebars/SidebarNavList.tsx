@@ -132,7 +132,7 @@ export function getSidebarNavSections(activeShift: any): OrgNavSection[] {
         },
         {
           label: 'Store & Hardware Settings',
-          href: '/pos/settings',
+          href: '/organization/settings?tab=hardware',
           icon: Settings,
         },
       ],
