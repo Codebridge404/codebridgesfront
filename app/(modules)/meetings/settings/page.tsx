@@ -1,5 +1,8 @@
-import { redirect } from 'next/navigation';
+'use client';
+
+import React from 'react';
+import { MeetingSystemSettingsView } from '@/components/meetings/MeetingSystemSettingsView';
 
 export default function MeetingSettingsPage() {
-  redirect('/organization/settings?tab=telegram');
+  return <MeetingSystemSettingsView />;
 }

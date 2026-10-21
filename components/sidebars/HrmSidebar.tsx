@@ -82,7 +82,7 @@ function HrmSidebarContent() {
       items: [
         { label: 'HR Reports', href: '/hrm/reports', icon: BarChart3 },
         { label: 'HR Access & RBAC', href: '/hrm/access', icon: ShieldCheck },
-        { label: 'HR Settings', href: '/organization/settings?tab=hrm', icon: Settings },
+        { label: 'HR Settings', href: '/hrm/settings', icon: Settings },
       ],
     },
   ];

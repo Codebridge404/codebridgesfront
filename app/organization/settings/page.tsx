@@ -10,54 +10,35 @@ import {
 } from '@/lib/api';
 import {
   SettingsSubSidebar,
-  SettingsTab,
+  GlobalSettingsTab,
   ProfileSettingsTab,
   RegionalSettingsTab,
   PaymentsSettingsTab,
-  HardwareSettingsTab,
-  ReceiptsSettingsTab,
-  TerminalsSettingsTab,
-  InventorySettingsTab,
-  FinanceSettingsTab,
-  HrmSettingsTab,
   SmsSettingsTab,
-  TelegramSettingsTab,
 } from '@/components/settings';
 
-const VALID_TABS: SettingsTab[] = [
-  'profile',
-  'regional',
-  'payments',
-  'hardware',
-  'receipts',
-  'terminals',
-  'inventory',
-  'finance',
-  'hrm',
-  'sms',
-  'telegram',
-];
+const VALID_GLOBAL_TABS: GlobalSettingsTab[] = ['profile', 'regional', 'payments', 'sms'];
 
-function UnifiedSettingsContent() {
+function GlobalOrganizationSettingsContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const tabParam = searchParams.get('tab') as SettingsTab | null;
-  const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
-    if (tabParam && VALID_TABS.includes(tabParam)) {
+  const tabParam = searchParams.get('tab') as GlobalSettingsTab | null;
+  const [activeTab, setActiveTab] = useState<GlobalSettingsTab>(() => {
+    if (tabParam && VALID_GLOBAL_TABS.includes(tabParam)) {
       return tabParam;
     }
     return 'profile';
   });
 
   useEffect(() => {
-    const currentTab = searchParams.get('tab') as SettingsTab | null;
-    if (currentTab && VALID_TABS.includes(currentTab)) {
+    const currentTab = searchParams.get('tab') as GlobalSettingsTab | null;
+    if (currentTab && VALID_GLOBAL_TABS.includes(currentTab)) {
       setActiveTab(currentTab);
     }
   }, [searchParams]);
 
-  const switchTab = (tab: SettingsTab) => {
+  const switchTab = (tab: GlobalSettingsTab) => {
     setActiveTab(tab);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
@@ -153,7 +134,6 @@ function UnifiedSettingsContent() {
               localStorage.setItem('active_org', data.name);
             }
 
-            // Sync payment and regional credentials from backend JSON column
             if (data.payment_settings) {
               const pay =
                 typeof data.payment_settings === 'string'
@@ -189,7 +169,6 @@ function UnifiedSettingsContent() {
     try {
       let updatedLogoUrl = formData.logo_url;
 
-      // 1. Submit Profile to Backend API
       if (logoFile) {
         const payloadData = new FormData();
         payloadData.append('name', formData.name);
@@ -228,7 +207,6 @@ function UnifiedSettingsContent() {
         }
       }
 
-      // 2. Sync Local Storage & Notify All Global UI Components
       if (typeof window !== 'undefined' && formData.name) {
         localStorage.setItem('active_org', formData.name);
         if (updatedLogoUrl) {
@@ -292,16 +270,16 @@ function UnifiedSettingsContent() {
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand mb-1">
             <Settings className="w-4 h-4" />
-            <span>Central SaaS Settings Hub</span>
+            <span>Organization Workspace Settings</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">System &amp; Workspace Settings</h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Global Workspace Configuration</h1>
           <p className="text-xs text-slate-500 font-medium">
-            Manage organization branding, regional localization, payment gateways, POS hardware, and module policies
+            Company-wide brand identity, regional currency, centralized NBC Bakong KHQR, and SMS alerts
           </p>
         </div>
       </div>
 
-      {/* Main 2-Column Layout: Sub-Sidebar + Active Tab Content */}
+      {/* Main 2-Column Layout: Sub-Sidebar + Active Global Tab Content */}
       <div className="flex flex-col md:flex-row items-start gap-8">
         <SettingsSubSidebar activeTab={activeTab} onTabChange={switchTab} />
 
@@ -335,21 +313,7 @@ function UnifiedSettingsContent() {
 
           {activeTab === 'payments' && <PaymentsSettingsTab />}
 
-          {activeTab === 'hardware' && <HardwareSettingsTab />}
-
-          {activeTab === 'receipts' && <ReceiptsSettingsTab />}
-
-          {activeTab === 'terminals' && <TerminalsSettingsTab />}
-
-          {activeTab === 'inventory' && <InventorySettingsTab />}
-
-          {activeTab === 'finance' && <FinanceSettingsTab />}
-
-          {activeTab === 'hrm' && <HrmSettingsTab />}
-
           {activeTab === 'sms' && <SmsSettingsTab />}
-
-          {activeTab === 'telegram' && <TelegramSettingsTab />}
         </main>
       </div>
     </div>
@@ -363,12 +327,12 @@ export default function OrganizationSettingsPage() {
         <div className="min-h-[400px] flex items-center justify-center p-6">
           <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
             <Loader2 className="w-5 h-5 animate-spin text-brand" />
-            <span>Loading Unified Settings Hub...</span>
+            <span>Loading Organization Settings...</span>
           </div>
         </div>
       }
     >
-      <UnifiedSettingsContent />
+      <GlobalOrganizationSettingsContent />
     </Suspense>
   );
 }
