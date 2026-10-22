@@ -137,7 +137,7 @@ export function MeetingSystemSettingsView() {
             <span className="text-xs text-slate-400 font-semibold">• Adaptive Dynamic Policies</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            Meeting System Settings
+            Setting
           </h1>
           <p className="text-xs text-slate-500 font-medium">
             Configure dynamic operating hours, boardroom capacity gates, Telegram alerts, and facility defects.

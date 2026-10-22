@@ -11,5 +11,4 @@ export * from './transfers';
 export * from './purchase-orders/PurchaseOrdersView';
 export * from './security/InventorySecurityView';
 export * from './reports/InventoryReportsView';
-export * from './settings/StoreSettingsView';
 export * from './SuperAdminInventoryView';

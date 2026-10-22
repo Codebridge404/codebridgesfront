@@ -9,6 +9,12 @@ import { UniversalModuleSidebar, NavSection } from './UniversalModuleSidebar';
 import { ImpersonationBanner, PlatformAnnouncementBanner } from '@/components/ui';
 import { getAuthUser, getAuthToken, isModuleEnabledForOrg, enableModuleForOrg, getModuleDefaultLogo } from '@/lib/api';
 import { useConfirm } from '@/components/common';
+import { PosBusinessProfileModal } from '@/components/pos/onboarding/PosBusinessProfileModal';
+import {
+  setPosBusinessType,
+  getPosBusinessType,
+  PosBusinessTypeId,
+} from '@/lib/posBusinessProfiles';
 
 interface UniversalModuleLayoutProps {
   currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization' | 'meeting-management' | 'meetings' | string;
@@ -37,7 +43,15 @@ export function UniversalModuleLayout({
   const [activeOrg, setActiveOrg] = useState<string>('');
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showPosProfileModal, setShowPosProfileModal] = useState<boolean>(false);
   const router = useRouter();
+
+  const handleConfirmPosProfile = (selectedType: PosBusinessTypeId) => {
+    setPosBusinessType(selectedType, activeOrg);
+    enableModuleForOrg(activeOrg, currentModuleId);
+    setIsEnabled(true);
+    setShowPosProfileModal(false);
+  };
   const confirm = useConfirm();
 
   useEffect(() => {
@@ -145,6 +159,10 @@ export function UniversalModuleLayout({
                     <button
                       type="button"
                       onClick={async () => {
+                        if (currentModuleId === 'pos') {
+                          setShowPosProfileModal(true);
+                          return;
+                        }
                         const confirmed = await confirm({
                           title: `Activate ${moduleTitle}?`,
                           description: `Are you sure you want to activate ${moduleTitle} for workspace "${activeOrg}"? This will enable workspace routing and allow authorized team members to access this module.`,
@@ -168,6 +186,14 @@ export function UniversalModuleLayout({
                   )}
                 </div>
               </div>
+
+              <PosBusinessProfileModal
+                isOpen={showPosProfileModal}
+                currentType={getPosBusinessType(activeOrg)}
+                orgName={activeOrg}
+                onClose={() => setShowPosProfileModal(false)}
+                onConfirm={handleConfirmPosProfile}
+              />
             </div>
           ) : (
             <React.Suspense

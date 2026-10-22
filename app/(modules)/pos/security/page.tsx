@@ -1,10 +1,5 @@
-import { PosAccessManagementView } from '@/components/pos';
-
-export const metadata = {
-  title: 'POS Security & Staff PINs | CodeBridges POS',
-  description: 'Manage terminal access credentials and manager overrides',
-};
+import { redirect } from 'next/navigation';
 
 export default function PosSecurityPage() {
-  return <PosAccessManagementView />;
+  redirect('/pos/settings?tab=security');
 }

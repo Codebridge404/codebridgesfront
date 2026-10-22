@@ -129,7 +129,7 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
           <Shield className="w-7 h-7 text-brand" />
-          Store Configuration & Security Settings
+          Setting
         </h1>
         <p className="text-xs text-slate-500 mt-1">
           Manage system configurations, subscription plan quotas, active device sessions, and account security hardening.

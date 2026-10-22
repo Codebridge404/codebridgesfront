@@ -7,12 +7,20 @@ import { PosAccessStaffTable } from './PosAccessStaffTable';
 import { PosAccessKeypadTester } from './PosAccessKeypadTester';
 import { PosAccessPinModal } from './PosAccessPinModal';
 
-const OPERATOR_ROLES = [
-  'super_admin', 'admin', 'owner', 'outlet_manager', 'manager',
-  'supervisor', 'cashier', 'inventory_clerk', 'accountant', 'staff',
+const POS_OPERATOR_ROLES = [
+  'cashier',
+  'supervisor',
+  'pos_supervisor',
+  'outlet_manager',
+  'store_manager',
+  'manager',
 ];
 
-export function PosAccessManagementView() {
+export interface PosAccessManagementViewProps {
+  embedded?: boolean;
+}
+
+export function PosAccessManagementView({ embedded = false }: PosAccessManagementViewProps = {}) {
   const [user, setUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +49,8 @@ export function PosAccessManagementView() {
 
       const perms: { [userId: string]: any } = {};
       staffList.forEach((s: any) => {
-        const isManager = ['admin', 'super_admin', 'outlet_manager', 'supervisor', 'owner'].includes(s.role);
+        const roleLower = (s.role || '').toLowerCase();
+        const isManager = ['outlet_manager', 'store_manager', 'supervisor', 'pos_supervisor', 'manager'].includes(roleLower);
         perms[s.id] = {
           canOpenDrawer: true,
           canVoidLine: isManager,
@@ -136,37 +145,68 @@ export function PosAccessManagementView() {
 
   const filteredUsers = users.filter((u) => {
     const roleLower = (u.role || '').toLowerCase();
-    const isOperator = OPERATOR_ROLES.includes(roleLower) || (!['customer', 'client', 'guest'].includes(roleLower));
-    const matchesSearch = !searchTerm || u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const isPosOperator = POS_OPERATOR_ROLES.includes(roleLower);
+    if (!isPosOperator) return false;
+
+    const matchesSearch =
+      !searchTerm ||
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole === 'all' || roleLower === selectedRole.toLowerCase();
-    return isOperator && matchesSearch && matchesRole;
+    return matchesSearch && matchesRole;
   });
 
   return (
     <div className="space-y-3 w-full font-sans text-slate-900 pb-6">
       {/* 1. Header Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-brand-subtle border border-brand/20 text-brand flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5" />
+      {embedded ? (
+        <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900">Security &amp; Staff Register PINs</h3>
+              <p className="text-xs text-slate-500 font-medium">
+                4-digit register PIN credentials, supervisor overrides &amp; cashier authorization matrix
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">POS Access &amp; PINs</h1>
-            <p className="text-xs text-slate-500 font-medium">
-              4-digit register PIN credentials, supervisor overrides &amp; drawer security matrix
-            </p>
-          </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={fetchUsers}
-          className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors self-start md:self-auto cursor-pointer"
-          title="Refresh Directory"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={fetchUsers}
+            className="px-3.5 py-2 rounded-2xl border border-slate-300/80 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+            title="Refresh Directory"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand' : ''}`} />
+            <span>Refresh Staff</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-brand-subtle border border-brand/20 text-brand flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight">POS Access &amp; PINs</h1>
+              <p className="text-xs text-slate-500 font-medium">
+                4-digit register PIN credentials, supervisor overrides &amp; drawer security matrix
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={fetchUsers}
+            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors self-start md:self-auto cursor-pointer"
+            title="Refresh Directory"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      )}
 
       {/* 2. Staff Access Matrix (Left 2 cols) & Keypad Tester (Right 1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -186,13 +226,12 @@ export function PosAccessManagementView() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none"
+              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
             >
-              <option value="all">All Roles</option>
-              <option value="cashier">Cashier</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="outlet_manager">Store Manager</option>
-              <option value="admin">Administrator</option>
+              <option value="all">All POS Roles</option>
+              <option value="cashier">Cashiers</option>
+              <option value="supervisor">Supervisors</option>
+              <option value="outlet_manager">Store Managers</option>
             </select>
           </div>
 

@@ -48,12 +48,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/organization/security',
-        destination: '/pos/security',
+        destination: '/pos/settings?tab=security',
         permanent: false,
       },
       {
         source: '/pos/access',
-        destination: '/pos/security',
+        destination: '/pos/settings?tab=security',
         permanent: false,
       },
       {

@@ -1,28 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   openShiftApi,
   closeShiftApi,
-  deleteHeldCartApi,
-  getReceiptApi,
   syncOfflineSalesApi,
   getRoleDisplayName,
 } from '@/lib/api';
 import { getOfflineQueue, clearOfflineQueue } from '@/lib/offlineSync';
-import { ThermalReceiptModal } from '@/components/receipt/ThermalReceiptModal';
-import { SalesReturnModal } from '@/components/returns/SalesReturnModal';
 import {
   PosKpiSummary,
   PosHourlySalesChart,
   PosTenderBreakdownCard,
-  PosRegisterFleetCard,
-  PosTopSellersCard,
-  PosShiftStatusCard,
-  PosQuickActionGrid,
-  PosRecentSalesTable,
-  PosHeldOrdersList,
   DashboardHeroBanner,
   DashboardOfflineBanner,
   OpenShiftModal,
@@ -47,21 +36,14 @@ export function POSDashboard({
   onOpenShiftModal: externalOpenShiftModal,
   onCloseShiftModal: externalCloseShiftModal,
 }: POSDashboardProps) {
-  const router = useRouter();
-
   const {
     user,
     orgName,
     loading,
     activeShift,
     setActiveShift,
-    shiftSummary,
     kpis,
-    recentSales,
-    topSellers,
-    registerFleet,
     hourlyData,
-    heldCarts,
     offlineQueueCount,
     setOfflineQueueCount,
     loadDashboardData,
@@ -76,10 +58,6 @@ export function POSDashboard({
   const [supervisorPinInput, setSupervisorPinInput] = useState('');
   const [showPinPrompt, setShowPinPrompt] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Receipt & Return modals state
-  const [completedSale, setCompletedSale] = useState<any>(null);
-  const [showReturnModal, setShowReturnModal] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   const handleSyncOffline = async () => {
@@ -141,7 +119,7 @@ export function POSDashboard({
   const roleName = getRoleDisplayName(user || 'admin', orgName);
 
   return (
-    <div className="space-y-3 w-full font-sans pb-6">
+    <div className="space-y-4 w-full font-sans pb-6">
       <DashboardOfflineBanner
         offlineQueueCount={offlineQueueCount}
         isSyncing={isSyncing}
@@ -169,83 +147,6 @@ export function POSDashboard({
           <PosTenderBreakdownCard kpis={kpis} />
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PosRegisterFleetCard registers={registerFleet} />
-        <PosTopSellersCard items={topSellers} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PosShiftStatusCard
-          activeShift={activeShift}
-          shiftSummary={shiftSummary}
-          onOpenShift={() => (externalOpenShiftModal ? externalOpenShiftModal() : setShowShiftOpenModal(true))}
-          onCloseShift={() => (externalCloseShiftModal ? externalCloseShiftModal() : setShowShiftCloseModal(true))}
-          onViewShiftHistory={() => router.push('/pos/shifts')}
-        />
-
-        <PosQuickActionGrid
-          onOpenShift={() => (externalOpenShiftModal ? externalOpenShiftModal() : setShowShiftOpenModal(true))}
-          onOpenReturn={() => setShowReturnModal(true)}
-          activeShift={activeShift}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="held-orders-section">
-        <div className="lg:col-span-2">
-          <PosRecentSalesTable
-            sales={recentSales}
-            onViewReceipt={async (id) => {
-              try {
-                const res = await getReceiptApi(String(id), true);
-                setCompletedSale(res.data || { id });
-              } catch {
-                setCompletedSale({ id, grand_total: 0 });
-              }
-            }}
-            onReturnSale={() => setShowReturnModal(true)}
-          />
-        </div>
-
-        <div>
-          <PosHeldOrdersList
-            heldCarts={heldCarts}
-            onResumeCart={(id) => router.push(`/pos/pos-terminal?resumeCart=${id}`)}
-            onDeleteCart={async (id) => {
-              try {
-                await deleteHeldCartApi(String(id));
-                loadDashboardData();
-              } catch (err: any) {
-                alert(err.message || 'Failed to delete held cart');
-              }
-            }}
-          />
-        </div>
-      </div>
-
-      {completedSale && (
-        <ThermalReceiptModal
-          receiptData={{
-            sale: completedSale.sale || completedSale,
-            lines: completedSale.lines || [],
-            outlet: completedSale.outlet || { name: orgName },
-            cashier: completedSale.cashier || { name: user?.name || 'Cashier' },
-            register: completedSale.register || { name: 'REG-01' },
-            payments: completedSale.payments || [],
-            is_reprint: true,
-          }}
-          onClose={() => setCompletedSale(null)}
-        />
-      )}
-
-      <SalesReturnModal
-        isOpen={showReturnModal}
-        onClose={() => setShowReturnModal(false)}
-        onSuccess={() => {
-          setShowReturnModal(false);
-          loadDashboardData();
-        }}
-      />
 
       <OpenShiftModal
         isOpen={showShiftOpenModal}

@@ -15,6 +15,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { updateTenantModulesApi } from '@/lib/api/tenants';
+import { canonicalModuleId } from '@/lib/modules';
 import { cardStyles, badgeStyles, buttonStyles } from '@/lib/theme';
 import { useConfirm } from '@/components/common';
 
@@ -117,7 +118,7 @@ export function OrgModuleFleetCard({
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const handleToggleModule = async (moduleId: string) => {
-    const isCurrentlyEnabled = enabledModules.includes(moduleId);
+    const isCurrentlyEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(moduleId));
     const targetModule = MODULE_DEFINITIONS.find((m) => m.id === moduleId);
     const moduleName = targetModule?.name || moduleId;
     const willEnable = !isCurrentlyEnabled;
@@ -142,8 +143,8 @@ export function OrgModuleFleetCard({
     setTogglingId(moduleId);
     try {
       const updated = isCurrentlyEnabled
-        ? enabledModules.filter((m) => m !== moduleId)
-        : [...enabledModules, moduleId];
+        ? enabledModules.filter((m) => canonicalModuleId(m) !== canonicalModuleId(moduleId))
+        : Array.from(new Set([...enabledModules, canonicalModuleId(moduleId), moduleId]));
 
       await updateTenantModulesApi(updated, orgName);
       if (typeof window !== 'undefined') {
@@ -183,7 +184,7 @@ export function OrgModuleFleetCard({
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {MODULE_DEFINITIONS.map((module) => {
-          const isEnabled = enabledModules.includes(module.id);
+          const isEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(module.id));
           const isBusy = togglingId === module.id;
           const Icon = module.icon;
 

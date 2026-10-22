@@ -260,6 +260,7 @@ export function WorkspaceStaffModal({
               staff={staff}
               loading={loading}
               activeOrgName={activeOrgName}
+              outlets={outlets}
               onToggleStatus={handleToggleStatus}
               onDeleteStaff={handleDeleteStaff}
               onEditStaff={handleOpenEdit}

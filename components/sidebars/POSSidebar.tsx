@@ -3,15 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { RefreshCw, Building2 } from 'lucide-react';
-import {
-  getAuthUser,
-  getActiveShiftApi,
-  getDashboardSummaryApi,
-  getRoleDisplayName,
-} from '@/lib/api';
-import { getOfflineQueue } from '@/lib/offlineSync';
+import { getActiveShiftApi } from '@/lib/api';
 
-import { SidebarHeader } from './SidebarHeader';
 import { SidebarNavList } from './SidebarNavList';
 
 export interface POSSidebarProps {
@@ -23,26 +16,10 @@ export interface POSSidebarProps {
 export type OrganizationSidebarProps = POSSidebarProps;
 export type PosSidebarProps = POSSidebarProps;
 
-function SidebarNavContent() {
-  const [user, setUser] = useState<any>(null);
-  const [orgName, setOrgName] = useState<string>('My Store Organization');
+function SidebarNavContent({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
   const [activeShift, setActiveShift] = useState<any>(null);
-  const [offlineCount, setOfflineCount] = useState<number>(0);
 
   useEffect(() => {
-    const authUser = getAuthUser();
-    setUser(authUser);
-
-    if (typeof window !== 'undefined') {
-      const storedOrg =
-        localStorage.getItem('active_org') ||
-        localStorage.getItem('cb_active_org_name') ||
-        authUser?.tenant_name ||
-        authUser?.company_name;
-      if (storedOrg) setOrgName(storedOrg);
-      setOfflineCount(getOfflineQueue().length);
-    }
-
     async function loadDynamicStatus() {
       try {
         const shiftRes = await getActiveShiftApi();
@@ -58,63 +35,59 @@ function SidebarNavContent() {
 
     loadDynamicStatus();
 
-    const handleOrgChange = (e?: any) => {
-      const updated =
-        e?.detail?.orgName ||
-        localStorage.getItem('active_org') ||
-        localStorage.getItem('cb_active_org_name');
-      if (updated) setOrgName(updated);
-    };
-
     const handleShiftChange = () => {
       loadDynamicStatus();
     };
 
-    window.addEventListener('cb_org_changed', handleOrgChange);
     window.addEventListener('cb_shift_changed', handleShiftChange);
     return () => {
-      window.removeEventListener('cb_org_changed', handleOrgChange);
       window.removeEventListener('cb_shift_changed', handleShiftChange);
     };
   }, []);
 
-  const roleName = getRoleDisplayName(user || 'admin', orgName);
   return (
     <div className="flex flex-col h-full">
-      <SidebarHeader
-        orgName={orgName}
-        roleName={roleName}
-        activeShift={activeShift}
-        offlineCount={offlineCount}
-      />
+      <SidebarNavList activeShift={activeShift} sidebarOpen={sidebarOpen} />
 
-      <SidebarNavList activeShift={activeShift} />
-
-      <div className="p-3 border-t border-slate-100 bg-slate-50/40 text-[11px] text-slate-400 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="font-semibold truncate text-slate-500">Core POS</span>
-          <span className="text-[10px] font-bold text-slate-400 px-1.5 py-0.5 rounded bg-slate-200/60 shrink-0">
-            v2.5
-          </span>
-        </div>
-        <Link
-          href="/organization/dashboard"
-          className="text-[11px] font-bold text-slate-500 hover:text-brand flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
-          title="Return to Organization Dashboard"
-        >
-          <Building2 className="w-3.5 h-3.5" />
-          <span>Workspace</span>
-        </Link>
+      <div className="p-3 border-t border-slate-100 bg-slate-50/40 text-[11px] text-slate-400 flex items-center justify-between shrink-0">
+        {sidebarOpen ? (
+          <>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-semibold truncate text-slate-500">Core POS</span>
+              <span className="text-[10px] font-bold text-slate-400 px-1.5 py-0.5 rounded bg-slate-200/60 shrink-0">
+                v2.5
+              </span>
+            </div>
+            <Link
+              href="/organization/dashboard"
+              className="text-[11px] font-bold text-slate-500 hover:text-brand flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
+              title="Return to Organization Dashboard"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Workspace</span>
+            </Link>
+          </>
+        ) : (
+          <Link
+            href="/organization/dashboard"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-brand hover:bg-slate-100 transition-colors mx-auto"
+            title="Return to Organization Dashboard"
+          >
+            <Building2 className="w-4 h-4" />
+          </Link>
+        )}
       </div>
     </div>
   );
 }
 
-export function POSSidebar({ sidebarOpen }: POSSidebarProps) {
-  if (!sidebarOpen) return null;
-
+export function POSSidebar({ sidebarOpen = true }: POSSidebarProps) {
   return (
-    <aside className="w-64 bg-transparent border-r border-slate-300/80 flex flex-col shrink-0 select-none z-20 overflow-hidden">
+    <aside
+      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 overflow-hidden ${
+        sidebarOpen ? 'w-64' : 'w-[72px]'
+      }`}
+    >
       <Suspense
         fallback={
           <div className="p-4 text-xs text-slate-400 flex items-center gap-2">
@@ -123,7 +96,7 @@ export function POSSidebar({ sidebarOpen }: POSSidebarProps) {
           </div>
         }
       >
-        <SidebarNavContent />
+        <SidebarNavContent sidebarOpen={sidebarOpen} />
       </Suspense>
     </aside>
   );

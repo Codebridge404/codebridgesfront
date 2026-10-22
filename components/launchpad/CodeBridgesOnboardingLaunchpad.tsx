@@ -18,6 +18,13 @@ import {
 } from '@/lib/api';
 import { getPlatformModulesApi } from '@/lib/api/modules';
 import { ICON_MAP } from '@/components/platform/modules/PlatformModuleModal';
+import { PosBusinessProfileModal } from '@/components/pos/onboarding/PosBusinessProfileModal';
+import {
+  setPosBusinessType,
+  getPosBusinessType,
+  PosBusinessTypeId,
+  POS_BUSINESS_PROFILES,
+} from '@/lib/posBusinessProfiles';
 
 export interface CatalogModule {
   id: string;
@@ -47,6 +54,8 @@ export function CodeBridgesOnboardingLaunchpad() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isTogglingModule, setIsTogglingModule] = useState<string | null>(null);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showPosProfileModal, setShowPosProfileModal] = useState(false);
+  const [pendingPosModuleId, setPendingPosModuleId] = useState<string | null>(null);
 
   const loadCatalog = useCallback(async () => {
     try {
@@ -203,11 +212,37 @@ export function CodeBridgesOnboardingLaunchpad() {
     setEnabledModules([]);
   };
 
+  const handleConfirmPosProfile = (selectedType: PosBusinessTypeId) => {
+    if (!pendingPosModuleId) return;
+    setIsTogglingModule(pendingPosModuleId);
+    try {
+      setPosBusinessType(selectedType, activeOrg);
+      const updated = enableModuleForOrg(activeOrg, pendingPosModuleId);
+      setEnabledModules(updated);
+      const profile = POS_BUSINESS_PROFILES[selectedType];
+      toast.success(`POS activated with ${profile?.shortTitle || 'selected'} profile for ${activeOrg}!`);
+    } catch {
+      toast.error('Failed to activate POS module.');
+    } finally {
+      setIsTogglingModule(null);
+      setShowPosProfileModal(false);
+      setPendingPosModuleId(null);
+    }
+  };
+
   const handleToggleModule = async (moduleId: string, enable: boolean) => {
     if (!activeOrg || activeOrg === 'No Organization Yet! Please Create') {
       toast.warning('Please select or create an organization first.');
       return;
     }
+
+    // Intercept POS activation to show specialized business type modal
+    if (enable && (canonicalModuleId(moduleId) === 'pos' || moduleId.includes('pos'))) {
+      setPendingPosModuleId(moduleId);
+      setShowPosProfileModal(true);
+      return;
+    }
+
     const targetMod = catalogModules.find((m) => m.id === moduleId);
     const modName = targetMod?.name || moduleId;
     const logoUrl = targetMod?.logoUrl || getModuleDefaultLogo(moduleId);
@@ -334,6 +369,18 @@ export function CodeBridgesOnboardingLaunchpad() {
           isTogglingModule={isTogglingModule}
           onToggleModule={handleToggleModule}
           onOpenSubscriptionModal={() => setShowSubscriptionModal(true)}
+        />
+
+        <PosBusinessProfileModal
+          isOpen={showPosProfileModal}
+          currentType={getPosBusinessType(activeOrg)}
+          orgName={activeOrg}
+          onClose={() => {
+            setShowPosProfileModal(false);
+            setPendingPosModuleId(null);
+          }}
+          onConfirm={handleConfirmPosProfile}
+          isActivating={isTogglingModule === pendingPosModuleId}
         />
       </main>
     </div>

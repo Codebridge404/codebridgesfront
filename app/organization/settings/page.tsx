@@ -270,9 +270,9 @@ function GlobalOrganizationSettingsContent() {
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand mb-1">
             <Settings className="w-4 h-4" />
-            <span>Organization Workspace Settings</span>
+            <span>Organization Workspace</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Global Workspace Configuration</h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Setting</h1>
           <p className="text-xs text-slate-500 font-medium">
             Company-wide brand identity, regional currency, centralized NBC Bakong KHQR, and SMS alerts
           </p>

@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, getAuthUser } from './client';
 
 // SaaS Multi-Tenancy
 export async function getSuperAdminTenantsApi() {
@@ -84,15 +84,26 @@ export async function getTenantModulesApi(orgName?: string) {
   }
 }
 
-export async function updateTenantModulesApi(modules: string[], orgName?: string) {
+export async function updateTenantModulesApi(modules: string[], orgName?: string, tenantId?: string) {
   try {
+    const user = getAuthUser();
+    const resolvedTenantId =
+      tenantId ||
+      user?.tenant_id ||
+      user?.tenant?.id ||
+      (typeof window !== 'undefined' ? localStorage.getItem('active_tenant_id') : undefined);
+
     return await apiFetch('/tenants/modules', {
       method: 'PUT',
-      body: JSON.stringify({ modules, org_name: orgName }),
+      body: JSON.stringify({
+        modules,
+        org_name: orgName,
+        ...(resolvedTenantId ? { tenant_id: resolvedTenantId } : {}),
+      }),
     });
   } catch (err) {
     console.warn('[Tenants API] Could not update tenant modules in cloud DB:', err);
-    return null;
+    throw err;
   }
 }
 

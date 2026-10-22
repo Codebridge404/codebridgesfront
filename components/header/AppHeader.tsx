@@ -241,16 +241,6 @@ export function AppHeader({
               </Link>
             ) : null}
 
-            {hasOrganization && !isSuperAdmin && (
-              <Link
-                href="/organization/outlets"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
-              >
-                <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                <span>Outlets</span>
-              </Link>
-            )}
-
             {/* Dynamic Notifications Bell */}
             <button
               type="button"
@@ -324,7 +314,7 @@ export function AppHeader({
                     {isSuperAdmin && !impersonating ? (
                       <>
                         <Link href="/super-admin/security/settings" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                          <Settings className="w-4 h-4 text-slate-400" /> Platform Settings
+                          <Settings className="w-4 h-4 text-slate-400" /> Setting
                         </Link>
                         <Link href="/super-admin/security/roles" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
                           <Shield className="w-4 h-4 text-slate-400" /> Dynamic Roles &amp; RBAC
@@ -345,7 +335,7 @@ export function AppHeader({
                           <Users className="w-4 h-4 text-slate-400" /> Staff &amp; Team Roster
                         </Link>
                         <Link href="/organization/settings" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                          <Settings className="w-4 h-4 text-slate-400" /> Workspace Settings
+                          <Settings className="w-4 h-4 text-slate-400" /> Setting
                         </Link>
                       </>
                     ) : (

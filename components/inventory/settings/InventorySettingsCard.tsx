@@ -24,7 +24,7 @@ export function InventorySettingsCard() {
         <div>
           <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
             <Settings className="w-4 h-4 text-brand" />
-            <span>Inventory Settings</span>
+            <span>Setting</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium">Configure replenishment triggers, valuation models, and automated reorder alerts</p>
         </div>

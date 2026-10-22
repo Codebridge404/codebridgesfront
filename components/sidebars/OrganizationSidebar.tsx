@@ -18,13 +18,11 @@ import {
   ChevronDown,
   ChevronRight,
   ExternalLink,
-  Search,
-  X,
   Sparkles,
   LucideIcon,
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/api';
-import { getEnabledModulesForOrg } from '@/lib/modules';
+import { getEnabledModulesForOrg, canonicalModuleId } from '@/lib/modules';
 
 export interface OrganizationSidebarProps {
   sidebarOpen: boolean;
@@ -49,7 +47,6 @@ interface OrgNavGroup {
 
 export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
   const pathname = usePathname();
-  const [navSearch, setNavSearch] = useState('');
   const [orgName, setOrgName] = useState<string>('My Organization');
   const [enabledModules, setEnabledModules] = useState<string[]>([]);
 
@@ -86,16 +83,18 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
 
   const rawNavGroups: OrgNavGroup[] = useMemo(() => {
     const suiteItems: OrgNavItem[] = [];
-    if (enabledModules.includes('pos')) suiteItems.push({ name: 'Point of Sale Fleet', href: '/pos/dashboard', icon: Store, badge: 'Live' });
-    if (enabledModules.includes('inventory')) suiteItems.push({ name: 'Multi-Warehouse Stock', href: '/inventory/dashboard', icon: Boxes });
-    if (enabledModules.includes('meeting-management') || enabledModules.includes('meetings')) {
+    const isModEnabled = (key: string) => enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(key));
+
+    if (isModEnabled('pos')) suiteItems.push({ name: 'Point of Sale Fleet', href: '/pos/dashboard', icon: Store, badge: 'Live' });
+    if (isModEnabled('inventory')) suiteItems.push({ name: 'Multi-Warehouse Stock', href: '/inventory/dashboard', icon: Boxes });
+    if (isModEnabled('meeting-management')) {
       suiteItems.push({ name: 'Meeting System (MMS)', href: '/meetings', icon: Calendar, badge: 'MMS' });
     }
-    if (enabledModules.includes('hrm')) suiteItems.push({ name: 'HR & Workforce Suite', href: '/hrm/dashboard', icon: Briefcase });
-    if (enabledModules.includes('finance') || enabledModules.includes('accounting')) {
+    if (isModEnabled('hrm')) suiteItems.push({ name: 'HR & Workforce Suite', href: '/hrm/dashboard', icon: Briefcase });
+    if (isModEnabled('finance')) {
       suiteItems.push({ name: 'Financial Accounting', href: '/financial/dashboard', icon: DollarSign });
     }
-    if (enabledModules.includes('crm')) suiteItems.push({ name: 'CRM & Customer Loyalty', href: '/crm', icon: UserCheck });
+    if (isModEnabled('crm')) suiteItems.push({ name: 'CRM & Customer Loyalty', href: '/crm', icon: UserCheck });
 
     const groups: OrgNavGroup[] = [
       {
@@ -123,7 +122,7 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
       title: 'Workspace Governance',
       items: [
         {
-          name: 'Workspace Profile & Settings',
+          name: 'Setting',
           href: '/organization/settings',
           icon: Settings,
         },
@@ -155,17 +154,6 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
     return pathname === href || pathname.startsWith(href + '/');
   };
 
-  const filteredNavGroups = useMemo(() => {
-    if (!navSearch.trim()) return rawNavGroups;
-    const query = navSearch.toLowerCase().trim();
-    return rawNavGroups
-      .map((g) => ({
-        ...g,
-        items: g.items.filter((item) => item.name.toLowerCase().includes(query)),
-      }))
-      .filter((g) => g.items.length > 0);
-  }, [rawNavGroups, navSearch]);
-
   return (
     <aside
       className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
@@ -196,36 +184,11 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
         )}
       </div>
 
-      {/* Quick Nav Search */}
-      {sidebarOpen && (
-        <div className="px-3 py-1.5">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Quick find module..."
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-slate-100/70 border border-slate-200/60 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
-            />
-            {navSearch && (
-              <button
-                type="button"
-                onClick={() => setNavSearch('')}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Scrollable Navigation List */}
       <nav className="flex-1 px-2.5 py-2 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
-        {filteredNavGroups.map((group) => {
+        {rawNavGroups.map((group) => {
           const isCollapsible = group.collapsible !== false;
-          const isExpanded = !isCollapsible || navSearch ? true : (expandedGroups[group.id] ?? true);
+          const isExpanded = !isCollapsible ? true : (expandedGroups[group.id] ?? true);
 
           return (
             <div key={group.id} className="space-y-1">

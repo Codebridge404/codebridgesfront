@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Receipt, FileText, Check, Printer } from 'lucide-react';
-import { cardStyles } from '@/lib/theme';
+import { Receipt } from 'lucide-react';
 
 interface PosReceiptSettingsTabProps {
   settings: any;
@@ -27,15 +26,20 @@ export function PosReceiptSettingsTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
       {/* Left: Receipt Fields */}
-      <div className={`lg:col-span-7 ${cardStyles.base} p-6 sm:p-7 space-y-5`}>
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-          <Receipt className="w-4 h-4 text-brand" />
-          <h3 className="text-sm font-black text-slate-900">Thermal Receipt Paper Settings</h3>
+      <div className="lg:col-span-7 p-6 sm:p-7 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-5">
+        <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60">
+          <div className="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center">
+            <Receipt className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900">Thermal Receipt Paper Settings</h3>
+            <p className="text-xs text-slate-500 font-medium">Customer slip branding, custom header slogan &amp; return policies</p>
+          </div>
         </div>
 
         <div className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1">
               Receipt Header Subtitle / Slogan
             </label>
             <input
@@ -43,15 +47,15 @@ export function PosReceiptSettingsTab({
               value={settings.receiptHeader || ''}
               onChange={(e) => onChange('receiptHeader', e.target.value)}
               placeholder="e.g. Welcome to Angkor Fresh Mart - Healthy Living Starts Here"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-medium"
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-slate-400"
             />
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[11px] text-slate-400 mt-1">
               Appears directly below the organization/outlet name on every customer receipt slip.
             </p>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1">
               Receipt Footer Note / Return Policy
             </label>
             <textarea
@@ -59,35 +63,35 @@ export function PosReceiptSettingsTab({
               value={settings.receiptFooter || ''}
               onChange={(e) => onChange('receiptFooter', e.target.value)}
               placeholder="e.g. Thank you for your purchase! Goods sold are exchangeable within 7 days with valid receipt."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand font-medium resize-none"
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all resize-none placeholder:text-slate-400"
             />
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[11px] text-slate-400 mt-1">
               Appears at the very bottom of every customer receipt slip.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200/60">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Receipt Paper Width</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Receipt Paper Width</label>
               <select
                 value={settings.paperWidth || '80mm'}
                 onChange={(e) => onChange('paperWidth', e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-transparent border border-slate-300/80 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand cursor-pointer"
               >
-                <option value="80mm">80mm (Standard Countertop POS)</option>
-                <option value="58mm">58mm (Compact Mobile Thermal)</option>
+                <option value="80mm" className="bg-white text-slate-900">80mm (Standard Countertop POS)</option>
+                <option value="58mm" className="bg-white text-slate-900">58mm (Compact Mobile Thermal)</option>
               </select>
             </div>
 
             <div className="flex flex-col justify-end">
-              <label className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+              <label className="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-300/80 bg-transparent cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.autoPrintReceipt ?? true}
                   onChange={(e) => onChange('autoPrintReceipt', e.target.checked)}
-                  className="rounded text-brand focus:ring-brand"
+                  className="w-4 h-4 text-brand rounded focus:ring-brand"
                 />
-                <span className="font-bold text-slate-700">Auto-Print on Checkout</span>
+                <span className="text-xs font-bold text-slate-800">Auto-Print on Checkout</span>
               </label>
             </div>
           </div>
@@ -95,11 +99,11 @@ export function PosReceiptSettingsTab({
       </div>
 
       {/* Right: Thermal Receipt Full Live Preview Paper */}
-      <div className="lg:col-span-5 flex flex-col items-center">
-        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider mb-2 block">
-          Thermal 80mm Printed Preview
+      <div className="lg:col-span-5 p-6 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex flex-col items-center">
+        <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider mb-3 block">
+          Thermal 80mm Live Preview
         </span>
-        <div className="w-[280px] bg-white p-5 border border-slate-300 shadow-md rounded-xl font-mono text-[10px] leading-tight text-slate-900 select-none">
+        <div className="w-[280px] bg-white p-5 border border-slate-300 shadow-md rounded-2xl font-mono text-[10px] leading-tight text-slate-900 select-none">
           {/* Original Badge */}
           <div className="text-center mb-2">
             <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">

@@ -51,7 +51,7 @@ export function PosAccessStaffTable({
             {users.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
-                  No operators found matching your search.
+                  No frontline POS operators (Cashier, Supervisor, Store Manager) found.
                 </td>
               </tr>
             ) : (

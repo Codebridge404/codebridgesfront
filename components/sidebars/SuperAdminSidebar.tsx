@@ -67,7 +67,7 @@ export const platformNavGroups: NavGroup[] = [
     items: [
       { name: 'Dynamic Roles & RBAC', href: '/super-admin/security/roles', icon: Shield },
       { name: 'Immutable Audit Trail', href: '/super-admin/security/audit-logs', icon: Lock },
-      { name: 'Platform Security Settings', href: '/super-admin/security/settings', icon: ShieldCheck },
+      { name: 'Setting', href: '/super-admin/security/settings', icon: ShieldCheck },
       { name: 'Global Support & Desk', href: '/super-admin/support', icon: LifeBuoy },
       { name: 'Admin Profile', href: '/super-admin/security/profile', icon: UserCheck },
     ],

@@ -80,7 +80,7 @@ export function SuperAdminPlatformSettingsView() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                Global Platform Settings
+                Setting
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand text-[10px] font-extrabold border border-brand/20 uppercase">
                 Platform Config

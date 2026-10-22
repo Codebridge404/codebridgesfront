@@ -36,7 +36,7 @@ const CRM_SIDEBAR_SECTIONS = [
     items: [
       { label: 'CRM Reports', href: '/crm?tab=reports', icon: BarChart3 },
       { label: 'CRM Access & RBAC', href: '/crm?tab=access', icon: ShieldCheck },
-      { label: 'CRM Settings', href: '/crm?tab=settings', icon: Settings },
+      { label: 'Setting', href: '/crm?tab=settings', icon: Settings },
     ],
   },
 ];

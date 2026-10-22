@@ -123,7 +123,7 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
       items: [
         { label: 'Stock Valuation & Reports', href: '/inventory/reports', icon: BarChart3 },
         { label: 'Warehouse Access & RBAC', href: '/inventory/security', icon: ShieldCheck },
-        { label: 'Inventory & Store Settings', href: '/inventory/settings', icon: Settings },
+        { label: 'Setting', href: '/inventory/settings', icon: Settings },
       ],
     },
   ];
