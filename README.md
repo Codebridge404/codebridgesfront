@@ -57,8 +57,8 @@ npm install
 ### 2. Environment Configuration
 Create a `.env.local` file in the root directory:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_GATEWAY_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8080/api/v1
+NEXT_PUBLIC_API_GATEWAY_URL=http://127.0.0.1:8080/api/v1
 ```
 
 ### 3. Run Development Server
