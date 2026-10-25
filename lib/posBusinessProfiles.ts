@@ -183,6 +183,17 @@ export function setPosBusinessType(type: PosBusinessTypeId, orgName?: string) {
       localStorage.setItem(`cb_pos_business_type_${orgName}`, type);
     }
 
+    if (currentSettings.outletId) {
+      import('@/lib/api/tenants').then(({ updateOutletTerminalSettingsApi }) => {
+        updateOutletTerminalSettingsApi(currentSettings.outletId, {
+          business_type: type,
+          is_kds_enabled: profile.presets.kdsEnabled,
+          is_cfd_enabled: profile.presets.cfdEnabled,
+          terminal_settings: updatedSettings,
+        }).catch(() => {});
+      });
+    }
+
     window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: updatedSettings }));
     return updatedSettings;
   } catch (err) {

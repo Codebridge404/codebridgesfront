@@ -221,12 +221,42 @@ export async function getOutletTerminalSettingsApi(outletId: number | string) {
 
 export async function updateOutletTerminalSettingsApi(
   outletId: number | string,
-  data: { is_kds_enabled?: boolean; is_cfd_enabled?: boolean; terminal_settings?: any }
+  data: {
+    business_type?: string;
+    is_kds_enabled?: boolean;
+    is_cfd_enabled?: boolean;
+    terminal_settings?: any;
+  }
 ) {
   return await apiFetch(`/outlets/${outletId}/terminal-settings`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
+}
+
+export async function getOutletBusinessProfileApi(outletId: number | string) {
+  try {
+    return await apiFetch(`/outlets/${outletId}/business-profile`);
+  } catch (err) {
+    console.warn('[Outlets API] Failed to fetch business profile:', err);
+    return { status: 'error', data: null };
+  }
+}
+
+export async function updateOutletBusinessProfileApi(outletId: number | string, businessType: string) {
+  return await apiFetch(`/outlets/${outletId}/business-profile`, {
+    method: 'PATCH',
+    body: JSON.stringify({ business_type: businessType }),
+  });
+}
+
+export async function getPosBusinessProfilesCatalogApi() {
+  try {
+    return await apiFetch('/outlets/business-profiles');
+  } catch (err) {
+    console.warn('[Outlets API] Failed to fetch business profiles catalog:', err);
+    return { status: 'error', data: [] };
+  }
 }
 
 // HRM Departments

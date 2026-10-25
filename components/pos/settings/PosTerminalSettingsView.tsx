@@ -30,6 +30,7 @@ import { PosAccessManagementView } from '../access';
 const VALID_POS_TABS: PosSettingsTab[] = ['profile', 'hardware', 'receipt', 'terminals', 'policies', 'security'];
 
 const DEFAULT_SETTINGS = {
+  businessType: 'retail_mart',
   terminalName: 'Register 01 - Main Counter',
   terminalId: 'POS-TERM-001',
   outletId: '',
@@ -120,6 +121,7 @@ function PosTerminalSettingsContent() {
             if (termRes?.status === 'success' && termRes.data) {
               setSettings((prev) => ({
                 ...prev,
+                businessType: termRes.data.business_type || prev.businessType || 'retail_mart',
                 kdsEnabled: termRes.data.is_kds_enabled !== undefined ? Boolean(termRes.data.is_kds_enabled) : prev.kdsEnabled,
                 cfdEnabled: termRes.data.is_cfd_enabled !== undefined ? Boolean(termRes.data.is_cfd_enabled) : prev.cfdEnabled,
                 ...(termRes.data.terminal_settings || {}),
@@ -142,9 +144,11 @@ function PosTerminalSettingsContent() {
     if (settings.outletId) {
       try {
         await updateOutletTerminalSettingsApi(settings.outletId, {
+          business_type: settings.businessType,
           is_kds_enabled: settings.kdsEnabled !== false,
           is_cfd_enabled: settings.cfdEnabled !== false,
           terminal_settings: {
+            businessType: settings.businessType,
             printerType: settings.printerType,
             printerIp: settings.printerIp,
             printerPort: settings.printerPort,
@@ -257,7 +261,12 @@ function PosTerminalSettingsContent() {
         <main className="flex-1 w-full min-w-0">
           {/* Tab 0: Business Profile & Mode */}
           {activeTab === 'profile' && (
-            <PosBusinessProfileTab outletName={settings.outletName || 'Main Store'} />
+            <PosBusinessProfileTab
+              outletId={settings.outletId}
+              outletName={settings.outletName || 'Main Store'}
+              currentType={settings.businessType as any}
+              onProfileChanged={(newType) => handleChange('businessType', newType)}
+            />
           )}
 
           {/* Tab 1: Hardware & Peripherals */}
