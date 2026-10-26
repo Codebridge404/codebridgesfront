@@ -39,6 +39,8 @@ export type { TabsProps, TabItem } from './Tabs';
 
 export { ImpersonationBanner, SecurityAlertBar } from './ImpersonationBanner';
 export { PlatformAnnouncementBanner } from './PlatformAnnouncementBanner';
+export { CreateOrgCalloutBanner } from './CreateOrgCalloutBanner';
+export type { CreateOrgCalloutBannerProps } from './CreateOrgCalloutBanner';
 
 export { ModuleCard } from './ModuleCard';
 export type { ModuleCardProps } from './ModuleCard';
@@ -47,3 +49,16 @@ export { SubscriptionHubModal } from './SubscriptionHubModal';
 
 export { AppIcons } from './icons';
 export type { AppIconKey } from './icons';
+
+export { ConfirmDialog } from '../common/ConfirmDialog';
+export type { ConfirmDialogProps } from '../common/ConfirmDialog';
+export {
+  useConfirm,
+  useModuleConfirm,
+  confirmModuleToggle,
+} from '../common/ConfirmContext';
+export type {
+  ConfirmOptions,
+  ModuleConfirmOptions,
+  ConfirmFn,
+} from '../common/ConfirmContext';

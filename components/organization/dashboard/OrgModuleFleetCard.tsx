@@ -123,20 +123,12 @@ export function OrgModuleFleetCard({
     const moduleName = targetModule?.name || moduleId;
     const willEnable = !isCurrentlyEnabled;
 
-    const confirmed = await confirm({
-      title: willEnable ? `Subscribe to ${moduleName}?` : `Unsubscribe from ${moduleName}?`,
-      description: willEnable
-        ? `Are you sure you want to enable ${moduleName} for "${orgName}"? Authorized team members will gain immediate access to this business service suite.`
-        : `Are you sure you want to deactivate ${moduleName} for "${orgName}"? Active sessions and navigation for this module will be suspended.`,
-      variant: willEnable ? 'brand' : 'warning',
+    const confirmed = await confirm.moduleToggle({
+      moduleName,
+      enable: willEnable,
+      orgName,
       logoUrl: targetModule?.logoUrl || '/module/Workspace.svg',
-      confirmText: willEnable ? 'Confirm & Subscribe' : 'Confirm & Unsubscribe',
-      cancelText: 'Cancel',
-      details: [
-        { label: 'Business Suite', value: moduleName },
-        { label: 'Workspace Organization', value: orgName },
-        { label: 'Target Status', value: willEnable ? 'Active / Subscribed' : 'Deactivated' },
-      ],
+      actionType: 'subscribe',
     });
     if (!confirmed) return;
 

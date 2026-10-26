@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Search, CheckCircle2, ArrowRight, Power, Plus, RefreshCw, X } from 'lucide-react';
-import { CatalogModule } from './CodeBridgesOnboardingLaunchpad';
+import { Search, CheckCircle2, ArrowRight, Power, Plus, RefreshCw, X, ShieldCheck } from 'lucide-react';
+import { CatalogModule } from './types';
 import { ModuleCard } from '@/components/ui';
 
 interface LaunchpadCatalogGridProps {
@@ -86,8 +86,9 @@ export function LaunchpadCatalogGrid({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredCatalog.map((mod) => {
-          const isEnabled = isModuleEnabled(mod.id);
+          {filteredCatalog.map((mod) => {
+            const isCoreModule = mod.id === 'bill-subscription' || (Boolean(mod.isCore) && mod.id !== 'pos-management' && mod.id !== 'inventory-suite');
+          const isEnabled = isCoreModule || isModuleEnabled(mod.id);
           const isProcessing = isTogglingModule === mod.id;
           const isSubscription = mod.id === 'bill-subscription';
           const isTenantUser = userRole !== 'super_admin';
@@ -108,7 +109,12 @@ export function LaunchpadCatalogGrid({
               isSelected={isEnabled}
               footerSlot={
                 <>
-                  {isEnabled ? (
+                  {isCoreModule ? (
+                    <span className="text-[10px] font-black text-brand bg-brand-subtle px-2.5 py-1 rounded-full border border-brand/20 flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-brand" />
+                      <span>Built-in Core</span>
+                    </span>
+                  ) : isEnabled ? (
                     <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>Active</span>
@@ -120,7 +126,28 @@ export function LaunchpadCatalogGrid({
                   )}
 
                   <div className="flex items-center gap-1.5">
-                    {isEnabled ? (
+                    {isCoreModule ? (
+                      isSubscription && isTenantUser ? (
+                        <button
+                          type="button"
+                          onClick={onOpenSubscriptionModal}
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <span>Manage Plan</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      ) : (
+                        <Link
+                          href={launchHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <span>Launch</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      )
+                    ) : isEnabled ? (
                       <>
                         <button
                           type="button"

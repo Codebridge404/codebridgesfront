@@ -249,6 +249,31 @@ export function SalesReturnModal({
                     </span>
                   </div>
 
+                  {/* 7-Day Policy Notice Banner */}
+                  {quoteData.policy_notice && (
+                    <div
+                      className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+                        quoteData.requires_supervisor_approval
+                          ? 'bg-amber-50 border-amber-300 text-amber-900'
+                          : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      }`}
+                    >
+                      <ShieldCheck
+                        className={`w-4 h-4 shrink-0 mt-0.5 ${
+                          quoteData.requires_supervisor_approval ? 'text-amber-600' : 'text-emerald-600'
+                        }`}
+                      />
+                      <div className="flex-1">
+                        <span className="font-extrabold block">
+                          {quoteData.requires_supervisor_approval
+                            ? 'Policy Exception: Supervisor Authorization Required'
+                            : 'Return Policy Active'}
+                        </span>
+                        <span className="text-[11px] leading-relaxed">{quoteData.policy_notice}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <ReturnLineItemsTable
                     lines={quoteData.lines}
                     returnItems={returnItems}
@@ -275,15 +300,27 @@ export function SalesReturnModal({
                     </div>
 
                     <div>
-                      <label className="block text-slate-600 mb-1 font-semibold text-xs flex items-center gap-1">
-                        <ShieldCheck className="w-3.5 h-3.5 text-brand" /> Supervisor PIN (Authorization)
+                      <label className="block text-slate-600 mb-1 font-semibold text-xs flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-brand" /> Supervisor PIN
+                        </span>
+                        {quoteData.requires_supervisor_approval && (
+                          <span className="text-[10px] font-black text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md uppercase">
+                            Mandatory (&gt;7 Days)
+                          </span>
+                        )}
                       </label>
                       <input
                         type="password"
-                        placeholder="Enter Supervisor PIN..."
+                        required={Boolean(quoteData.requires_supervisor_approval)}
+                        placeholder={quoteData.requires_supervisor_approval ? 'Supervisor PIN required (>7d)...' : 'Enter Supervisor PIN...'}
                         value={supervisorPin}
                         onChange={(e) => setSupervisorPin(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                        className={`w-full px-3 py-2 rounded-xl bg-slate-50 border text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 ${
+                          quoteData.requires_supervisor_approval
+                            ? 'border-amber-400 focus:ring-amber-400/40 focus:border-amber-500'
+                            : 'border-slate-200 focus:ring-brand/30 focus:border-brand'
+                        }`}
                       />
                     </div>
                   </div>

@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Printer, X, CheckCircle2 } from 'lucide-react';
+import { Printer, X, CheckCircle2, Mail } from 'lucide-react';
 import { ThermalReceiptPaper } from './ThermalReceiptPaper';
+import { PosDigitalReceiptModal } from '@/components/pos/terminal/PosDigitalReceiptModal';
 
 interface ThermalReceiptModalProps {
   receiptData?: {
@@ -52,6 +53,7 @@ export function ThermalReceiptModal({
   };
 
   const { sale, lines, outlet, cashier, register, payments, is_reprint, print_count, print_badge } = data;
+  const [showDigitalModal, setShowDigitalModal] = React.useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -139,6 +141,14 @@ export function ThermalReceiptModal({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              onClick={() => setShowDigitalModal(true)}
+              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <Mail className="w-3.5 h-3.5 text-indigo-600" />
+              <span>E-Receipt</span>
+            </button>
+            <button
+              type="button"
               onClick={onClose}
               className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs transition-colors cursor-pointer"
             >
@@ -171,25 +181,42 @@ export function ThermalReceiptModal({
         </div>
 
         {/* Modal Bottom Actions */}
-        <div className="p-4 bg-white border-t border-slate-200 flex items-center gap-3 no-print shrink-0">
+        <div className="p-4 bg-white border-t border-slate-200 flex items-center gap-2.5 no-print shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer"
+            className="flex-1 py-3 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer"
           >
             <X className="w-4 h-4 text-slate-400" />
-            <span>Don't Print (Skip)</span>
+            <span>Skip</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDigitalModal(true)}
+            className="flex-1 py-3 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-indigo-200 cursor-pointer"
+          >
+            <Mail className="w-4 h-4 text-indigo-600" />
+            <span>Email/SMS E-Receipt</span>
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="flex-1 py-3 px-4 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs shadow-md shadow-brand/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1.5 py-3 px-3 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs shadow-md shadow-brand/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Print Customer Receipt</span>
+            <span>Print 80mm Slip</span>
           </button>
         </div>
       </motion.div>
+
+      {/* Embedded Digital E-Receipt Dispatcher */}
+      <PosDigitalReceiptModal
+        isOpen={showDigitalModal}
+        onClose={() => setShowDigitalModal(false)}
+        sale={sale}
+        outlet={outlet}
+        onPrintThermal={handlePrint}
+      />
     </div>
   );
 }

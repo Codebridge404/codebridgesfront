@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { ModuleSuiteHeader } from './ModuleSuiteHeader';
 import { UniversalModuleSidebar, NavSection } from './UniversalModuleSidebar';
-import { ImpersonationBanner, PlatformAnnouncementBanner } from '@/components/ui';
+import { ImpersonationBanner, PlatformAnnouncementBanner, CreateOrgCalloutBanner } from '@/components/ui';
 import { getAuthUser, getAuthToken, isModuleEnabledForOrg, enableModuleForOrg, getModuleDefaultLogo } from '@/lib/api';
 import { useConfirm } from '@/components/common';
 import { PosBusinessProfileModal } from '@/components/pos/onboarding/PosBusinessProfileModal';
@@ -14,6 +14,7 @@ import {
   setPosBusinessType,
   getPosBusinessType,
   PosBusinessTypeId,
+  POS_BUSINESS_PROFILES,
 } from '@/lib/posBusinessProfiles';
 
 interface UniversalModuleLayoutProps {
@@ -45,14 +46,24 @@ export function UniversalModuleLayout({
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showPosProfileModal, setShowPosProfileModal] = useState<boolean>(false);
   const router = useRouter();
+  const confirm = useConfirm();
 
-  const handleConfirmPosProfile = (selectedType: PosBusinessTypeId) => {
+  const handleConfirmPosProfile = async (selectedType: PosBusinessTypeId) => {
+    setShowPosProfileModal(false);
+    const profile = POS_BUSINESS_PROFILES[selectedType];
+    const confirmed = await confirm.moduleToggle({
+      moduleName: moduleTitle,
+      enable: true,
+      orgName: activeOrg,
+      logoUrl: getModuleDefaultLogo(currentModuleId),
+      profileTitle: profile?.shortTitle || selectedType,
+    });
+    if (!confirmed) return;
+
     setPosBusinessType(selectedType, activeOrg);
     enableModuleForOrg(activeOrg, currentModuleId);
     setIsEnabled(true);
-    setShowPosProfileModal(false);
   };
-  const confirm = useConfirm();
 
   useEffect(() => {
     const user = getAuthUser();
@@ -108,6 +119,7 @@ export function UniversalModuleLayout({
       {/* 1. Impersonation & Platform Announcement Banners */}
       <ImpersonationBanner />
       <PlatformAnnouncementBanner />
+      <CreateOrgCalloutBanner className="mx-4 mt-2" />
 
       {/* 2. Top Header Bar */}
       <ModuleSuiteHeader
@@ -163,17 +175,11 @@ export function UniversalModuleLayout({
                           setShowPosProfileModal(true);
                           return;
                         }
-                        const confirmed = await confirm({
-                          title: `Activate ${moduleTitle}?`,
-                          description: `Are you sure you want to activate ${moduleTitle} for workspace "${activeOrg}"? This will enable workspace routing and allow authorized team members to access this module.`,
-                          variant: 'brand',
+                        const confirmed = await confirm.moduleToggle({
+                          moduleName: moduleTitle,
+                          enable: true,
+                          orgName: activeOrg,
                           logoUrl: getModuleDefaultLogo(currentModuleId),
-                          confirmText: 'Activate Module',
-                          cancelText: 'Cancel',
-                          details: [
-                            { label: 'Module Suite', value: moduleTitle },
-                            { label: 'Target Workspace', value: activeOrg },
-                          ],
                         });
                         if (!confirmed) return;
                         enableModuleForOrg(activeOrg, currentModuleId);

@@ -16,7 +16,19 @@ import {
   syncOfflineSalesApi,
   getOutletsApi,
 } from '@/lib/api';
-import { getOfflineQueue, saveOfflineSale, clearOfflineQueue } from '@/lib/offlineSync';
+import {
+  cacheCatalog,
+  cacheCategories,
+  getCachedCatalog,
+  getCachedCategories,
+  enqueueOfflineSale,
+  getPendingOfflineSales,
+  clearSyncedOfflineSales,
+  removeOfflineSale,
+  getOfflineQueueCount,
+} from '@/lib/offlineStore';
+import { posAudio } from '@/hooks/usePosAudio';
+import { kickCashDrawer } from '@/lib/hardwareService';
 import { Product } from '@/components/pos';
 import { usePosCart } from './usePosCart';
 
@@ -70,8 +82,21 @@ export function usePosTerminalState() {
       setProducts(formattedProducts);
       const cats = Array.from(new Set(formattedProducts.map((p) => p.category || 'General')));
       setCategories(cats);
+
+      // Cache fresh catalog and categories into IndexedDB for offline resilience
+      await cacheCatalog(formattedProducts);
+      await cacheCategories(cats);
     } catch (err) {
-      console.error('Failed to load catalog:', err);
+      console.warn('Failed to load online catalog, attempting IndexedDB offline cache:', err);
+      // Seamlessly fall back to local IndexedDB cached catalog
+      const cachedProducts = await getCachedCatalog();
+      if (cachedProducts && cachedProducts.length > 0) {
+        setProducts(cachedProducts);
+        const cachedCats = await getCachedCategories();
+        setCategories(cachedCats.length > 0 ? cachedCats : ['General']);
+        setSaleToast(`Loaded ${cachedProducts.length} items from offline storage`);
+        setTimeout(() => setSaleToast(null), 3000);
+      }
     } finally {
       setLoading(false);
     }
@@ -94,16 +119,47 @@ export function usePosTerminalState() {
   };
 
   const autoSyncOfflineQueue = async () => {
-    const queue = getOfflineQueue();
-    if (queue.length === 0) return;
+    const pendingSales = await getPendingOfflineSales();
+    if (pendingSales.length === 0) {
+      setOfflineQueueCount(0);
+      return;
+    }
     try {
       setIsSyncing(true);
-      await syncOfflineSalesApi(queue);
-      clearOfflineQueue();
-      setOfflineQueueCount(0);
-    } catch {
+      const txPayload = pendingSales.map((s) => ({
+        offline_id: s.offline_id,
+        receipt_number: s.receipt_number,
+        outlet_id: s.outlet_id,
+        register_id: s.register_id,
+        created_at: s.created_at,
+        items: s.items.map((it) => ({
+          id: it.id,
+          name: it.name,
+          quantity: it.quantity,
+          price: it.price,
+          variant_id: it.variant_id,
+        })),
+        tenders: s.tenders,
+      }));
+
+      const syncRes: any = await syncOfflineSalesApi(txPayload);
+      if (syncRes && (syncRes.status === 'success' || syncRes.results)) {
+        await clearSyncedOfflineSales();
+        // Fallback cleanup of synced items
+        for (const s of pendingSales) {
+          await removeOfflineSale(s.offline_id);
+        }
+        setOfflineQueueCount(0);
+        posAudio.playCheckoutChime();
+        setSaleToast(`Synced ${pendingSales.length} offline transactions to cloud`);
+        setTimeout(() => setSaleToast(null), 3500);
+      }
+    } catch (syncErr) {
+      console.warn('Offline auto-sync deferred until stable connection:', syncErr);
     } finally {
       setIsSyncing(false);
+      const remaining = await getOfflineQueueCount();
+      setOfflineQueueCount(remaining);
     }
   };
 
@@ -129,7 +185,7 @@ export function usePosTerminalState() {
 
     if (typeof window !== 'undefined') {
       setIsOnline(navigator.onLine);
-      setOfflineQueueCount(getOfflineQueue().length);
+      getOfflineQueueCount().then(setOfflineQueueCount).catch(() => {});
 
       const handleOnline = () => {
         setIsOnline(true);
@@ -186,11 +242,37 @@ export function usePosTerminalState() {
     };
 
     if (!isOnline) {
-      saveOfflineSale(salePayload);
-      setOfflineQueueCount(getOfflineQueue().length);
+      const offlineId = `off-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const receiptNum = `OFF-${Date.now()}`;
+      await enqueueOfflineSale({
+        offline_id: offlineId,
+        receipt_number: receiptNum,
+        outlet_id: salePayload.outlet_id,
+        register_id: salePayload.register_id,
+        items: cartState.cart.map((i) => ({
+          id: i.product_id || i.product?.id || `item-${Date.now()}`,
+          name: i.name,
+          quantity: i.qty,
+          price: i.price,
+        })),
+        tenders: [
+          {
+            tender_type: tenderType,
+            amount: grandTotal,
+          },
+        ],
+        created_at: new Date().toISOString(),
+      });
+      const remainingCount = await getOfflineQueueCount();
+      setOfflineQueueCount(remainingCount);
+      posAudio.playCheckoutChime();
+      if (tenderType === 'cash') {
+        kickCashDrawer().catch(() => {});
+      }
+
       const offlineSale = {
         ...salePayload,
-        receipt_number: `OFF-${Date.now()}`,
+        receipt_number: receiptNum,
         created_at: new Date().toISOString(),
       };
       if (printReceipt) {
@@ -205,6 +287,10 @@ export function usePosTerminalState() {
 
     const res = await createSaleApi(salePayload);
     const saleResult = res.data?.sale || res.sale || salePayload;
+    posAudio.playCheckoutChime();
+    if (tenderType === 'cash') {
+      kickCashDrawer().catch(() => {});
+    }
     if (printReceipt) {
       setCompletedSale(saleResult);
     } else {

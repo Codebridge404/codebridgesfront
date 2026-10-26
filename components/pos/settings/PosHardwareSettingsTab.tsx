@@ -8,6 +8,8 @@ interface PosHardwareSettingsTabProps {
   onChange: (key: string, value: any) => void;
   onTestPrint: () => void;
   testPrintSuccess: boolean;
+  onTestDrawerKick?: () => void;
+  testDrawerSuccess?: boolean;
 }
 
 export function PosHardwareSettingsTab({
@@ -15,6 +17,8 @@ export function PosHardwareSettingsTab({
   onChange,
   onTestPrint,
   testPrintSuccess,
+  onTestDrawerKick,
+  testDrawerSuccess,
 }: PosHardwareSettingsTabProps) {
   return (
     <div className="space-y-6 font-sans">
@@ -121,14 +125,36 @@ export function PosHardwareSettingsTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Cash Drawer */}
         <div className="p-6 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-              <Zap className="w-5 h-5" />
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900">RJ-11 Cash Drawer</h3>
+                <p className="text-xs text-slate-500 font-medium">Printer-kick pulse triggers for cash transactions</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900">RJ-11 Cash Drawer</h3>
-              <p className="text-xs text-slate-500 font-medium">Printer-kick pulse triggers for cash transactions</p>
-            </div>
+
+            {onTestDrawerKick && (
+              <button
+                type="button"
+                onClick={onTestDrawerKick}
+                className="px-3.5 py-1.5 rounded-xl border border-slate-300/80 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                {testDrawerSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span className="text-emerald-600">Pulse Sent!</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Test Drawer Kick</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           <div className="space-y-3">

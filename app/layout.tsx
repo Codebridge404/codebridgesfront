@@ -3,8 +3,9 @@ import "./globals.css";
 import { AppProviders } from "@/components/common";
 
 export const metadata: Metadata = {
-  title: "CodeBridge@ — Multi-Tenant Enterprise Platform",
+  title: "CodeBridge@",
   description: "Unified Multi-Tenant Enterprise Cloud Suite — Launchpad, HRM, CRM, Financial Accounting, Inventory Logistics, Meeting Management (MMS) & Commerce",
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/logo/Codebridge.svg", type: "image/svg+xml" },
@@ -28,6 +29,19 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.warn('SW registration skipped:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

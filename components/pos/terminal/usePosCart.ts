@@ -1,13 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Product, CartItem } from '@/components/pos';
 import { getBarcodeProductApi, validateCouponApi } from '@/lib/api';
+import { savePersistentCart, getPersistentCart, clearPersistentCart, getCachedCatalog } from '@/lib/offlineStore';
+import { posAudio } from '@/hooks/usePosAudio';
 
 export function usePosCart() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponError, setCouponError] = useState('');
+  const isHydratedRef = useRef(false);
+
+  // Restore cart from IndexedDB on initial mount
+  useEffect(() => {
+    let isMounted = true;
+    getPersistentCart().then((saved) => {
+      if (isMounted && saved && Array.isArray(saved.items) && saved.items.length > 0) {
+        setCart(saved.items);
+      }
+      isHydratedRef.current = true;
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Persist cart to IndexedDB and broadcast to Customer-Facing Display (CFD) on every modification
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    savePersistentCart(cart);
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const channel = new BroadcastChannel('cb_pos_cart_channel');
+        channel.postMessage({ type: 'CART_UPDATED', cart, appliedCoupon });
+        channel.close();
+      } catch {}
+    }
+  }, [cart, appliedCoupon]);
 
   const handleAddToCart = (product: Product) => {
     setCart((prev) => {
@@ -46,25 +76,51 @@ export function usePosCart() {
     setCart([]);
     setAppliedCoupon(null);
     setCouponError('');
+    clearPersistentCart();
   };
 
   const handleBarcodeScan = async (barcode: string) => {
+    if (!barcode || !barcode.trim()) return;
+    const cleanBarcode = barcode.trim();
+
     try {
-      const res = await getBarcodeProductApi(barcode);
+      // 1. First attempt rapid local lookup in cached IndexedDB catalog
+      const cached = await getCachedCatalog();
+      const localMatch = cached.find(
+        (p: any) => p.barcode === cleanBarcode || p.sku === cleanBarcode
+      );
+
+      if (localMatch) {
+        posAudio.playSuccessBeep();
+        handleAddToCart({
+          id: localMatch.id,
+          name: localMatch.name,
+          sku: localMatch.sku || `SKU-${localMatch.id}`,
+          price: Number(localMatch.price || localMatch.selling_price || 0),
+          category: localMatch.category || 'General',
+          stock: localMatch.stock || 99,
+          barcode: localMatch.barcode,
+        });
+        return;
+      }
+
+      // 2. Fallback to API if not found in local cache
+      const res = await getBarcodeProductApi(cleanBarcode);
       const product = res.data?.product || res.product;
       if (product) {
+        posAudio.playSuccessBeep();
         handleAddToCart({
           id: product.id,
           name: product.name,
           sku: product.sku,
-          price: Number(product.price),
+          price: Number(product.price || product.selling_price || 0),
           category: product.category,
         });
       } else {
-        alert(`No product found for barcode: ${barcode}`);
+        posAudio.playErrorBeep();
       }
     } catch {
-      alert(`Barcode lookup failed for: ${barcode}`);
+      posAudio.playErrorBeep();
     }
   };
 

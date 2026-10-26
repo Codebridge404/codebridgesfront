@@ -9,6 +9,7 @@ import {
   closeShiftApi,
   recordCashMovementApi,
   getShiftReportApi,
+  getShiftHistoryApi,
 } from '@/lib/api';
 import {
   PosShiftActiveCard,
@@ -59,8 +60,14 @@ export function PosShiftsManagementView() {
         setActiveShift(null);
       }
 
-      const reportRes = await getShiftReportApi('history');
-      const historyList = reportRes?.data?.shifts || reportRes?.shifts || [];
+      let historyList: any[] = [];
+      try {
+        const histRes = await getShiftHistoryApi();
+        historyList = histRes?.data?.shifts || histRes?.shifts || [];
+      } catch {
+        const reportRes = await getShiftReportApi('history');
+        historyList = reportRes?.data?.shifts || reportRes?.shifts || [];
+      }
       setShiftHistory(historyList);
     } catch (err) {
       console.error('Failed to load shifts:', err);

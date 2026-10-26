@@ -177,3 +177,30 @@ export async function createTableApi(data: { name: string; zone?: string; capaci
     body: JSON.stringify(data),
   });
 }
+
+export interface SplitBillPayload {
+  table_id?: string | number;
+  sale_id?: string | number;
+  split_type: 'equal' | 'itemized';
+  splits_count?: number;
+  default_tender_type?: string;
+  splits?: Array<{
+    customer_name?: string;
+    tender_type?: string;
+    customer_id?: string;
+    items?: Array<{
+      product_id: string;
+      name?: string;
+      quantity: number;
+      price?: number;
+    }>;
+  }>;
+}
+
+export async function splitBillApi(data: SplitBillPayload) {
+  return await apiFetch('/sales/split-bill', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+

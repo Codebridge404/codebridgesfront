@@ -105,3 +105,55 @@ export async function receiveTransferApi(id: string) {
     method: 'POST',
   });
 }
+
+export async function disputeTransferApi(
+  id: string | number,
+  data: {
+    dispute_notes: string;
+    items: Array<{
+      product_id: number;
+      disputed_quantity: number;
+      dispute_reason: 'damaged_in_transit' | 'short_shipped' | 'expired_in_transit' | 'wrong_item' | 'crushed_box';
+    }>;
+  }
+) {
+  return await apiFetch(`/inventory/transfers/${id}/dispute`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function resolveTransferDisputeApi(
+  id: string | number,
+  data: {
+    resolution_action: 'accept_shortage' | 'write_off_shrinkage' | 'return_to_origin';
+    resolution_notes: string;
+  }
+) {
+  return await apiFetch(`/inventory/transfers/${id}/resolve-dispute`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// Automated Purchase Re-orders
+export async function getReorderSuggestionsApi(outletId?: string | number) {
+  const query = outletId ? `?outlet_id=${outletId}` : '';
+  return await apiFetch(`/purchase-orders/reorder-suggestions${query}`);
+}
+
+export async function autoReorderPurchaseOrdersApi(data?: { suppliers?: string[]; outlet_id?: string | number }) {
+  return await apiFetch('/purchase-orders/auto-reorder', {
+    method: 'POST',
+    body: JSON.stringify(data || {}),
+  });
+}
+
+export async function getCrossOutletStockApi(params: { product_id?: string | number; search?: string }) {
+  const queryParams: string[] = [];
+  if (params.product_id) queryParams.push(`product_id=${params.product_id}`);
+  if (params.search) queryParams.push(`q=${encodeURIComponent(params.search)}`);
+  const url = `/inventory/nearby-outlets?${queryParams.join('&')}`;
+  return await apiFetch(url);
+}
+

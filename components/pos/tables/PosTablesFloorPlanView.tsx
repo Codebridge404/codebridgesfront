@@ -16,8 +16,10 @@ import {
   Loader2,
   X,
   Store,
+  Split,
 } from 'lucide-react';
 import { getTablesApi, updateTableStatusApi, createTableApi } from '@/lib/api';
+import { PosSplitBillModal } from './PosSplitBillModal';
 
 export interface RestaurantTable {
   id: string | number;
@@ -42,6 +44,7 @@ export function PosTablesFloorPlanView() {
   const [newTableCapacity, setNewTableCapacity] = useState(4);
   const [saving, setSaving] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | number | null>(null);
+  const [splittingTable, setSplittingTable] = useState<RestaurantTable | null>(null);
 
   const fetchTables = async () => {
     try {
@@ -277,14 +280,24 @@ export function PosTablesFloorPlanView() {
                     </select>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => router.push('/pos/pos-terminal')}
-                    className="w-full py-2 rounded-xl bg-slate-100 hover:bg-brand hover:text-white text-slate-700 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Store className="w-3.5 h-3.5" />
-                    <span>Ring in POS Terminal</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push('/pos/pos-terminal')}
+                      className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Store className="w-3.5 h-3.5" />
+                      <span>Ring POS</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSplittingTable(tbl)}
+                      className="py-2 px-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Split className="w-3.5 h-3.5" />
+                      <span>Split Bill</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -366,6 +379,17 @@ export function PosTablesFloorPlanView() {
             </div>
           </form>
         </div>
+      )}
+      {/* Split Bill Modal */}
+      {splittingTable && (
+        <PosSplitBillModal
+          table={splittingTable}
+          onClose={() => setSplittingTable(null)}
+          onSuccess={() => {
+            fetchTables();
+            setSplittingTable(null);
+          }}
+        />
       )}
     </div>
   );

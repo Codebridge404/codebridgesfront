@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Save, X, AlertCircle, Loader2 } from 'lucide-react';
-import { updateProductApi } from '@/lib/api';
+import { Package, Save, X, AlertCircle, Loader2, Plus } from 'lucide-react';
+import { updateProductApi, createCategoryApi } from '@/lib/api';
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -21,6 +21,10 @@ export function EditProductModal({
   brands = [],
   onProductUpdated,
 }: EditProductModalProps) {
+  const [localCategories, setLocalCategories] = useState<any[]>(categories);
+  const [showQuickAddCat, setShowQuickAddCat] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [creatingCat, setCreatingCat] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -35,6 +39,10 @@ export function EditProductModal({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
 
   useEffect(() => {
     if (product) {
@@ -53,6 +61,26 @@ export function EditProductModal({
       setError(null);
     }
   }, [product, categories]);
+
+  const handleQuickCreateCategory = async () => {
+    if (!newCatName.trim()) return;
+    try {
+      setCreatingCat(true);
+      setError(null);
+      const res = await createCategoryApi({ name: newCatName.trim() });
+      const newCat = res?.data || res;
+      if (newCat?.id) {
+        setLocalCategories((prev) => [...prev, newCat]);
+        setFormData((prev) => ({ ...prev, category_id: String(newCat.id) }));
+      }
+      setNewCatName('');
+      setShowQuickAddCat(false);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to create category.');
+    } finally {
+      setCreatingCat(false);
+    }
+  };
 
   if (!isOpen || !product) return null;
 
@@ -154,18 +182,50 @@ export function EditProductModal({
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Category</label>
-              <select
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-slate-700 font-bold">Category</label>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickAddCat(!showQuickAddCat)}
+                  className="text-xs font-bold text-brand hover:underline flex items-center gap-0.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{showQuickAddCat ? 'Choose Existing' : '+ New Category'}</span>
+                </button>
+              </div>
+
+              {showQuickAddCat ? (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    placeholder="New category name..."
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-brand/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleQuickCreateCategory}
+                    disabled={creatingCat || !newCatName.trim()}
+                    className="px-3 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                  >
+                    {creatingCat ? 'Adding...' : 'Add'}
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={formData.category_id}
+                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                >
+                  {localCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                  {localCategories.length === 0 && <option value="">No categories yet</option>}
+                </select>
+              )}
             </div>
 
             <div>

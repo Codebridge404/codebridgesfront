@@ -42,8 +42,27 @@ export async function deleteHeldCartApi(id: string) {
 }
 
 // Receipts & Returns
-export async function getReceiptApi(saleId: string, isReprint: boolean = false) {
+export async function getReceiptApi(saleId: string | number, isReprint: boolean = false) {
   return await apiFetch(`/sales/${saleId}/receipt${isReprint ? '?reprint=1' : ''}`);
+}
+
+export async function sendDigitalReceiptApi(
+  saleId: string | number,
+  payload: {
+    email?: string;
+    phone?: string;
+    channel?: 'email' | 'sms' | 'both';
+    language?: 'en' | 'km';
+  }
+) {
+  return await apiFetch(`/sales/${saleId}/send-receipt`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getReceiptHtmlUrl(saleId: string | number) {
+  return `/api/v1/sales/${saleId}/receipt/html`;
 }
 
 export async function getReturnQuoteApi(saleId: string) {
@@ -80,8 +99,12 @@ export async function updateOnlineOrderStatusApi(id: string, fulfillment_status:
 }
 
 // Kitchen Display System (KDS)
-export async function getKdsTicketsApi() {
-  return await apiFetch('/kds/tickets');
+export async function getKdsTicketsApi(station?: string, outletId?: string | number) {
+  const params = new URLSearchParams();
+  if (station && station !== 'all') params.append('station', station);
+  if (outletId) params.append('outlet_id', String(outletId));
+  const queryString = params.toString();
+  return await apiFetch(`/kds/tickets${queryString ? `?${queryString}` : ''}`);
 }
 
 export async function updateKdsStatusApi(id: string, status: string) {
@@ -89,6 +112,21 @@ export async function updateKdsStatusApi(id: string, status: string) {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
+}
+
+export async function bumpKdsTicketApi(id: string) {
+  return await apiFetch(`/kds/tickets/${id}/bump`, {
+    method: 'POST',
+  });
+}
+
+export function getKdsStreamUrl(station?: string, outletId?: string | number): string {
+  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+  const params = new URLSearchParams();
+  if (station && station !== 'all') params.append('station', station);
+  if (outletId) params.append('outlet_id', String(outletId));
+  const qs = params.toString();
+  return `${base}/kds/stream${qs ? `?${qs}` : ''}`;
 }
 
 // Offline Sales Sync

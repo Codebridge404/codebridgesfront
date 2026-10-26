@@ -259,6 +259,17 @@ export async function getPosBusinessProfilesCatalogApi() {
   }
 }
 
+export async function updateOutletReceiptBrandingApi(
+  outletId: number | string,
+  payload: FormData | { receipt_header?: string; receipt_footer?: string; receipt_logo_url?: string }
+) {
+  const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+  return await apiFetch(`/outlets/${outletId}/receipt-branding`, {
+    method: 'POST',
+    body: isFormData ? payload : JSON.stringify(payload),
+  });
+}
+
 // HRM Departments
 export async function getDepartmentsApi(search?: string) {
   try {

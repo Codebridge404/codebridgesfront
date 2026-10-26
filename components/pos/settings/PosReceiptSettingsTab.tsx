@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Receipt } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Receipt, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
+import { updateOutletReceiptBrandingApi } from '@/lib/api';
 
 interface PosReceiptSettingsTabProps {
   settings: any;
@@ -15,13 +16,63 @@ export function PosReceiptSettingsTab({
   storeName = 'Store Name',
 }: PosReceiptSettingsTabProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (settings.receiptLogoUrl) {
+      setLogoPreview(settings.receiptLogoUrl);
+    } else if (typeof window !== 'undefined') {
       const storedLogo = localStorage.getItem('cb_active_org_logo');
       if (storedLogo) setLogoPreview(storedLogo);
     }
-  }, []);
+  }, [settings.receiptLogoUrl]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Local preview immediately
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setLogoPreview(base64);
+      onChange('receiptLogoUrl', base64);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cb_active_org_logo', base64);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // If outlet is selected, upload to backend branding endpoint
+    if (settings.outletId) {
+      try {
+        setUploadingLogo(true);
+        const formData = new FormData();
+        formData.append('logo', file);
+        if (settings.receiptHeader) formData.append('receipt_header', settings.receiptHeader);
+        if (settings.receiptFooter) formData.append('receipt_footer', settings.receiptFooter);
+
+        const res = await updateOutletReceiptBrandingApi(settings.outletId, formData);
+        if (res?.data?.receipt_logo_url) {
+          onChange('receiptLogoUrl', res.data.receipt_logo_url);
+        }
+      } catch (err) {
+        console.warn('Could not sync receipt logo to backend:', err);
+      } finally {
+        setUploadingLogo(false);
+      }
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoPreview(null);
+    onChange('receiptLogoUrl', '');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cb_active_org_logo');
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
@@ -38,6 +89,43 @@ export function PosReceiptSettingsTab({
         </div>
 
         <div className="space-y-4 text-xs">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Thermal Receipt Logo (Monochrome / Grayscale)
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                onChange={handleLogoUpload}
+                className="hidden"
+                id="receipt-logo-upload"
+              />
+              <label
+                htmlFor="receipt-logo-upload"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer transition-colors border border-slate-300"
+              >
+                <Upload className="w-3.5 h-3.5 text-slate-600" />
+                <span>{uploadingLogo ? 'Uploading Logo...' : 'Upload Receipt Logo'}</span>
+              </label>
+
+              {logoPreview && (
+                <button
+                  type="button"
+                  onClick={handleRemoveLogo}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove Logo</span>
+                </button>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Recommended: High-contrast 1-bit or grayscale PNG logo for clear rendering on 80mm/58mm thermal printers.
+            </p>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Receipt Header Subtitle / Slogan

@@ -11,6 +11,7 @@ interface PosProductGridProps {
   searchQuery: string;
   loading: boolean;
   onAddToCart: (product: Product) => void;
+  onLowStockAlert?: (msg: string) => void;
 }
 
 export function PosProductGrid({
@@ -19,6 +20,7 @@ export function PosProductGrid({
   searchQuery,
   loading,
   onAddToCart,
+  onLowStockAlert,
 }: PosProductGridProps) {
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
@@ -93,7 +95,13 @@ export function PosProductGrid({
             variants={cardVariants}
             whileHover={!isOutOfStock ? { y: -3, scale: 1.02 } : undefined}
             whileTap={!isOutOfStock ? { scale: 0.97 } : undefined}
-            onClick={() => !isOutOfStock && onAddToCart(product)}
+            onClick={() => {
+              if (isOutOfStock) return;
+              if (product.stock !== undefined && product.stock <= 2 && product.stock > 0) {
+                onLowStockAlert?.(`Low Stock Warning: Only ${product.stock} units remaining in inventory for "${product.name}"`);
+              }
+              onAddToCart(product);
+            }}
             className={`p-4 rounded-2xl bg-white border transition-all flex flex-col justify-between cursor-pointer select-none relative group ${
               isOutOfStock
                 ? 'opacity-60 border-slate-200 bg-slate-50 cursor-not-allowed'
@@ -107,15 +115,26 @@ export function PosProductGrid({
               </span>
               {product.stock !== undefined && (
                 <span
-                  className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                  className={`text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
                     isOutOfStock
                       ? 'bg-rose-100 text-rose-700'
+                      : product.stock <= 2
+                      ? 'bg-rose-100 text-rose-700 border border-rose-300 animate-pulse font-black'
                       : product.stock <= 5
                       ? 'bg-amber-100 text-amber-700'
                       : 'bg-emerald-50 text-emerald-700'
                   }`}
                 >
-                  {isOutOfStock ? 'Out of Stock' : `${product.stock} left`}
+                  {isOutOfStock ? (
+                    'Out of Stock'
+                  ) : product.stock <= 2 ? (
+                    <>
+                      <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
+                      <span>Only {product.stock} left!</span>
+                    </>
+                  ) : (
+                    `${product.stock} left`
+                  )}
                 </span>
               )}
             </div>

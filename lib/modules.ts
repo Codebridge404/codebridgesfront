@@ -103,7 +103,9 @@ export const MODULE_ALIASES: Record<string, string> = {
   'financial-management': 'finance',
   'accounting-ledger': 'finance',
   'finance-service': 'finance',
-  'bill-subscription': 'finance',
+  // Bill-Subscription
+  'bill-subscription': 'bill-subscription',
+  'subscription': 'bill-subscription',
 
   // Online Storefront
   'shop': 'shop',
@@ -162,6 +164,9 @@ export function isModuleEnabledForOrg(orgName: string, moduleId: string): boolea
   if (!orgName || orgName === 'No Organization Yet! Please Create') return false;
   const targetCanonical = canonicalModuleId(moduleId);
   if (!targetCanonical) return false;
+
+  // Built-in Core platform utilities (Billing & Subscriptions) are permanently active for all organizations (like Google Payments & Subscriptions)
+  if (targetCanonical === 'bill-subscription') return true;
 
   const enabled = getEnabledModulesForOrg(orgName);
   const canonicalEnabled = enabled.map(canonicalModuleId);

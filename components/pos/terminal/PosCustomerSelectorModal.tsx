@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, UserPlus, X, Check, Star, Wallet, Loader2, User } from 'lucide-react';
+import { Search, UserPlus, X, Check, Star, Wallet, Loader2, User, QrCode } from 'lucide-react';
 import { getCustomersApi, createCustomerApi } from '@/lib/api';
 import { PosCustomer } from './usePosCustomerAndTable';
+import { PosLoyaltyQrScannerModal } from './PosLoyaltyQrScannerModal';
 
 interface PosCustomerSelectorModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function PosCustomerSelectorModal({
   const [customers, setCustomers] = useState<PosCustomer[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [showQrScanner, setShowQrScanner] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [saving, setSaving] = useState(false);
@@ -109,6 +111,15 @@ export function PosCustomerSelectorModal({
                 autoFocus
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setShowQrScanner(true)}
+              className="px-3 py-2 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-600 text-white border border-amber-500 shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+              title="Scan Customer VIP Loyalty Card with WebCam"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Scan VIP QR</span>
+            </button>
             <button
               type="button"
               onClick={() => setIsAddingNew(!isAddingNew)}
@@ -246,6 +257,16 @@ export function PosCustomerSelectorModal({
           )}
         </div>
       </div>
+
+      <PosLoyaltyQrScannerModal
+        isOpen={showQrScanner}
+        onClose={() => setShowQrScanner(false)}
+        onSelectCustomer={(customer) => {
+          onSelectCustomer(customer);
+          setShowQrScanner(false);
+          onClose();
+        }}
+      />
     </div>
   );
 }

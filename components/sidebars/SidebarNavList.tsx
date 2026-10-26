@@ -12,6 +12,7 @@ import {
   BarChart3,
   Settings,
   UtensilsCrossed,
+  Tags,
   LucideIcon,
 } from 'lucide-react';
 
@@ -91,6 +92,11 @@ export function getSidebarNavSections(activeShift: any, businessType?: PosBusine
           label: 'Products & Pricing',
           href: '/pos/products',
           icon: Package,
+        },
+        {
+          label: 'Categories & Taxonomy',
+          href: '/pos/categories',
+          icon: Tags,
         },
       ],
     },

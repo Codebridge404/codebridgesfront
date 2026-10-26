@@ -1,0 +1,20 @@
+{
+  "name": "CodeBridges Cloud POS & ERP",
+  "short_name": "CodeBridge POS",
+  "description": "High-Reliability Offline-First Cloud Point of Sale & Enterprise ERP System",
+  "start_url": "/pos/pos-terminal",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo/Codebridge.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "screenshots": []
+}
