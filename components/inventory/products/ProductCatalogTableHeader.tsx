@@ -17,7 +17,7 @@ export function ProductCatalogTableHeader() {
         </th>
 
         {/* Pinned Column 3: Actions (stay with after category) */}
-        <th className="sticky left-[310px] top-0 z-50 bg-canvas px-2 py-3 text-center font-extrabold text-slate-800 uppercase tracking-wider w-[135px] min-w-[135px] max-w-[135px] border-r border-slate-300/80 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.04)]">
+        <th className="sticky left-[310px] top-0 z-50 bg-canvas px-2 py-3 text-center font-extrabold text-slate-800 uppercase tracking-wider w-[155px] min-w-[155px] max-w-[155px] border-r border-slate-300/80 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.04)]">
           <span>Actions</span>
         </th>
 

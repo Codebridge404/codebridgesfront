@@ -55,6 +55,7 @@ export function PosQuickActionGrid({
       title: 'Launch Cashier Register',
       subtitle: 'Start ringing orders & fast touch sales',
       href: '/pos/pos-terminal',
+      target: '_blank',
       icon: Monitor,
       gradient: 'from-brand to-brand-hover',
       badge: 'Primary Register',
@@ -182,7 +183,12 @@ export function PosQuickActionGrid({
 
           if (act.href) {
             return (
-              <Link key={act.title} href={act.href} target={act.target}>
+              <Link
+                key={act.title}
+                href={act.href}
+                target={act.target}
+                rel={act.target === '_blank' ? 'noopener noreferrer' : undefined}
+              >
                 {content}
               </Link>
             );

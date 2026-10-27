@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
-import { CheckCircle2, Loader2, Moon, Sun, AlertTriangle, Building2, Globe } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertTriangle, Building2 } from 'lucide-react';
 import { ThermalReceiptModal } from '@/components/receipt/ThermalReceiptModal';
 import { SalesReturnModal } from '@/components/returns/SalesReturnModal';
 import { BakongKhqrModal } from '@/components/payments/BakongKhqrModal';
@@ -25,42 +25,62 @@ import { PosCustomerSelectorModal } from './PosCustomerSelectorModal';
 import { PosTableSelectorModal } from './PosTableSelectorModal';
 import { PosSupervisorPinModal } from './PosSupervisorPinModal';
 import { PosCrossOutletStockModal } from './PosCrossOutletStockModal';
-import { usePosLanguage } from '@/lib/i18n';
+import {
+  getPosBusinessType,
+  POS_BUSINESS_PROFILES,
+  PosBusinessTypeId,
+} from '@/lib/posBusinessProfiles';
 
 function PosTerminalContent() {
   const t = usePosTerminalState();
   const custTable = usePosCustomerAndTable();
-  const langState = usePosLanguage();
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
   const [showStockLookupModal, setShowStockLookupModal] = useState(false);
-  const [isNightMode, setIsNightMode] = useState<boolean>(false);
   const [pendingSupervisorAction, setPendingSupervisorAction] = useState<{
     actionName: string;
     onExecute: () => void;
   } | null>(null);
   const [lowStockAlertMsg, setLowStockAlertMsg] = useState<string | null>(null);
+  const [businessType, setBusinessType] = useState<PosBusinessTypeId>('retail_mart');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsNightMode(localStorage.getItem('cb_pos_night_mode') === 'true');
-    }
+    setBusinessType(getPosBusinessType());
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail?.businessType && e.detail.businessType in POS_BUSINESS_PROFILES) {
+        setBusinessType(e.detail.businessType);
+      }
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'cb_pos_terminal_settings' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed.businessType && parsed.businessType in POS_BUSINESS_PROFILES) {
+            setBusinessType(parsed.businessType);
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
-  const toggleNightMode = () => {
-    setIsNightMode((prev) => {
-      const next = !prev;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('cb_pos_night_mode', String(next));
-      }
-      return next;
-    });
-  };
+  const currentProfile = POS_BUSINESS_PROFILES[businessType] || POS_BUSINESS_PROFILES.retail_mart;
+  const tablesEnabled = currentProfile.presets.tablesEnabled;
+
+  // Auto-switch to takeaway counter mode if business operating profile does not use dining tables
+  useEffect(() => {
+    if (!tablesEnabled && custTable.orderType === 'dine_in') {
+      custTable.setOrderType('takeaway');
+    }
+  }, [tablesEnabled, custTable.orderType]);
 
   return (
-    <div className={`h-screen max-h-screen overflow-hidden font-sans flex flex-col select-none transition-colors duration-200 ${
-      isNightMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
-    }`}>
+    <div className="h-screen max-h-screen overflow-hidden font-sans flex flex-col select-none bg-slate-50 text-slate-900">
       {/* Header - Fixed & Pinned at top */}
       <div className="shrink-0 z-40">
         <PosSuiteHeader
@@ -70,6 +90,7 @@ function PosTerminalContent() {
           offlineQueueCount={t.offlineQueueCount}
           isOnline={t.isOnline}
           isSyncing={t.isSyncing}
+          outletName={`${t.user?.outlet_name || 'Main Store'} • ${currentProfile.shortTitle}`}
           onOpenShiftModal={() => (t.activeShift ? t.setShowShiftCloseModal(true) : t.setShowShiftOpenModal(true))}
           onOpenHeldCartsModal={() => t.setShowHeldCartsModal(true)}
           onOpenReturnsModal={() => t.setShowReturnModal(true)}
@@ -106,45 +127,17 @@ function PosTerminalContent() {
                 onSearchChange={t.setSearchQuery}
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setShowStockLookupModal(true)}
-              className={`px-3 py-2.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs ${
-                isNightMode
-                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-              }`}
-              title="Lookup inventory across chain branches"
-            >
-              <Building2 className="w-3.5 h-3.5 text-indigo-500" />
-              <span className="hidden xl:inline">Branch Stock</span>
-            </button>
-            <button
-              type="button"
-              onClick={langState.toggleLanguage}
-              className={`px-3 py-2.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs ${
-                isNightMode
-                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-              }`}
-              title="Switch Language: Khmer / English"
-            >
-              <Globe className="w-3.5 h-3.5 text-blue-500" />
-              <span>{langState.lang === 'en' ? 'ភាសាខ្មែរ' : 'English'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={toggleNightMode}
-              className={`px-3.5 py-2.5 rounded-2xl border text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs ${
-                isNightMode
-                  ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-amber-400/20'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="Toggle High-Contrast Night Bar Mode"
-            >
-              {isNightMode ? <Sun className="w-3.5 h-3.5 text-slate-950" /> : <Moon className="w-3.5 h-3.5 text-indigo-600" />}
-              <span className="hidden sm:inline">{isNightMode ? 'Day Mode' : 'Night Bar Mode'}</span>
-            </button>
+            {t.outletsCount > 1 && (
+              <button
+                type="button"
+                onClick={() => setShowStockLookupModal(true)}
+                className="px-3 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+                title="Lookup inventory across chain branches"
+              >
+                <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="hidden xl:inline">Branch Stock</span>
+              </button>
+            )}
           </div>
 
           <div className="shrink-0">
@@ -178,6 +171,7 @@ function PosTerminalContent() {
             orderType={custTable.orderType}
             onOpenCustomerModal={() => setShowCustomerModal(true)}
             onOpenTableModal={() => setShowTableModal(true)}
+            tablesEnabled={tablesEnabled}
           />
 
           <div className="flex-1 min-h-0">
@@ -214,14 +208,16 @@ function PosTerminalContent() {
         onSelectCustomer={custTable.setSelectedCustomer}
       />
 
-      <PosTableSelectorModal
-        isOpen={showTableModal}
-        onClose={() => setShowTableModal(false)}
-        orderType={custTable.orderType}
-        onSelectOrderType={custTable.setOrderType}
-        selectedTable={custTable.selectedTable}
-        onSelectTable={custTable.setSelectedTable}
-      />
+      {tablesEnabled && (
+        <PosTableSelectorModal
+          isOpen={showTableModal}
+          onClose={() => setShowTableModal(false)}
+          orderType={custTable.orderType}
+          onSelectOrderType={custTable.setOrderType}
+          selectedTable={custTable.selectedTable}
+          onSelectTable={custTable.setSelectedTable}
+        />
+      )}
 
       {/* Checkout and Shift Modals */}
       <PosCheckoutModal
@@ -352,11 +348,28 @@ function PosTerminalContent() {
 }
 
 export function PosTerminalView() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans">
+        <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
+          <Loader2 className="w-5 h-5 animate-spin text-brand" />
+          <span>Initializing POS Terminal Interface...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Suspense
       fallback={
-        <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white font-sans">
-          <div className="flex items-center gap-3 text-xs font-bold">
+        <div className="h-screen w-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans">
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
             <Loader2 className="w-5 h-5 animate-spin text-brand" />
             <span>Initializing POS Terminal Interface...</span>
           </div>

@@ -63,6 +63,7 @@ export function usePosTerminalState() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [saleToast, setSaleToast] = useState<string | null>(null);
   const [activeOutletId, setActiveOutletId] = useState<string | null>(null);
+  const [outletsCount, setOutletsCount] = useState<number>(1);
 
   const loadCatalog = async () => {
     try {
@@ -77,6 +78,8 @@ export function usePosTerminalState() {
         category: p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || 'General',
         stock: p.stock_quantity ?? p.stock ?? 99,
         barcode: p.barcode || '',
+        image_url: p.image_url || p.image || undefined,
+        image: p.image_url || p.image || undefined,
       }));
 
       setProducts(formattedProducts);
@@ -176,9 +179,16 @@ export function usePosTerminalState() {
 
     getOutletsApi()
       .then((res: any) => {
-        const list = res.data || res;
-        if (Array.isArray(list) && list[0]?.id) {
-          setActiveOutletId(String(list[0].id));
+        const list = Array.isArray(res) ? res : res?.data || [];
+        if (Array.isArray(list)) {
+          const count = list.length;
+          setOutletsCount(count);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cb_outlets_count', String(count));
+          }
+          if (list[0]?.id) {
+            setActiveOutletId(String(list[0].id));
+          }
         }
       })
       .catch(() => {});
@@ -366,6 +376,7 @@ export function usePosTerminalState() {
     isSyncing,
     saleToast,
     activeOutletId,
+    outletsCount,
     autoSyncOfflineQueue,
     handleOpenCheckout,
     handleCompleteSale,

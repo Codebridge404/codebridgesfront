@@ -8,6 +8,7 @@ export interface Product {
   stock?: number;
   barcode?: string;
   image?: string;
+  image_url?: string;
 }
 
 export interface CartItem {

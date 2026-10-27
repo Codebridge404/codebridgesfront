@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { Lock, ShieldAlert } from 'lucide-react';
 import { ModuleSuiteHeader } from './ModuleSuiteHeader';
 import { UniversalModuleSidebar, NavSection } from './UniversalModuleSidebar';
 import { ImpersonationBanner, PlatformAnnouncementBanner, CreateOrgCalloutBanner } from '@/components/ui';
 import { getAuthUser, getAuthToken, isModuleEnabledForOrg, enableModuleForOrg, getModuleDefaultLogo } from '@/lib/api';
+import { isEmployee, canUserAccessModule, canUserManageModules } from '@/lib/rbac';
 import { useConfirm } from '@/components/common';
 import { PosBusinessProfileModal } from '@/components/pos/onboarding/PosBusinessProfileModal';
 import {
@@ -43,6 +44,7 @@ export function UniversalModuleLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeOrg, setActiveOrg] = useState<string>('');
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showPosProfileModal, setShowPosProfileModal] = useState<boolean>(false);
   const router = useRouter();
@@ -75,10 +77,17 @@ export function UniversalModuleLayout({
       router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}`);
       return;
     }
-    if (user?.role === 'cashier') {
+    if (user?.role === 'cashier' && currentModuleId === 'pos') {
       router.replace('/cashier/pos-terminal');
       return;
     }
+
+    // Role-Based Module Access Check for Employees
+    if (isEmployee(user) && !canUserAccessModule(user, currentModuleId)) {
+      setIsAuthorized(false);
+      return;
+    }
+    setIsAuthorized(true);
 
     const org =
       typeof window !== 'undefined'
@@ -119,7 +128,7 @@ export function UniversalModuleLayout({
       {/* 1. Impersonation & Platform Announcement Banners */}
       <ImpersonationBanner />
       <PlatformAnnouncementBanner />
-      <CreateOrgCalloutBanner className="mx-4 mt-2" />
+      {!isEmployee(currentUser) && <CreateOrgCalloutBanner className="mx-4 mt-2" />}
 
       {/* 2. Top Header Bar */}
       <ModuleSuiteHeader
@@ -145,7 +154,32 @@ export function UniversalModuleLayout({
         )}
 
         <main className={`flex-1 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden bg-transparent ${mainClassName || 'p-1 sm:p-1.5 lg:p-2'}`}>
-          {!isEnabled ? (
+          {!isAuthorized ? (
+            <div className="h-full flex items-center justify-center p-6">
+              <div className="bg-white p-8 rounded-3xl border border-rose-200/90 shadow-lg max-w-md w-full text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
+                  <ShieldAlert className="w-7 h-7" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight">
+                    Access Restricted
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                    Your staff account does not have permission to access the <strong className="text-slate-800 font-semibold">{moduleTitle}</strong> suite. Please contact your organization administrator to assign this module.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex items-center justify-center">
+                  <Link
+                    href="/launchpad"
+                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-sm"
+                  >
+                    Return to Launchpad
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : !isEnabled ? (
             <div className="h-full flex items-center justify-center p-6">
               <div className="bg-white p-8 rounded-3xl border border-slate-200/90 shadow-lg max-w-md w-full text-center space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
@@ -167,7 +201,7 @@ export function UniversalModuleLayout({
                   >
                     Back to Launchpad
                   </Link>
-                  {(currentUser?.role === 'super_admin' || currentUser?.role === 'organization' || currentUser?.role === 'admin') && (
+                  {canUserManageModules(currentUser) && (
                     <button
                       type="button"
                       onClick={async () => {

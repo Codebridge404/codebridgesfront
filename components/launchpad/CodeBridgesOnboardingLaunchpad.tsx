@@ -25,6 +25,7 @@ import {
   PosBusinessTypeId,
   POS_BUSINESS_PROFILES,
 } from '@/lib/posBusinessProfiles';
+import { isEmployee, canUserAccessModule, canUserManageModules } from '@/lib/rbac';
 import { CatalogModule } from './types';
 
 export function CodeBridgesOnboardingLaunchpad() {
@@ -281,20 +282,32 @@ export function CodeBridgesOnboardingLaunchpad() {
         : user?.tenant_name || (user?.role === 'super_admin' ? 'CodeBridges Platform Core' : 'Personal Account'))
     : 'CodeBridges Ecosystem';
 
-  const activeRunningModules = catalogModules.filter((m) => (m.isCore && m.id === 'bill-subscription') || isModuleEnabled(m.id));
+  const userIsEmployee = isEmployee(user);
+
+  const activeRunningModules = catalogModules.filter((m) => {
+    if (userIsEmployee) {
+      // Employees cannot see bill-subscription
+      if (m.id === 'bill-subscription') return false;
+      // Must be assigned to staff AND enabled in organization
+      return canUserAccessModule(user, m.id, enabledModules) && isModuleEnabled(m.id);
+    }
+    return (m.isCore && m.id === 'bill-subscription') || isModuleEnabled(m.id);
+  });
 
   return (
     <div className="relative min-h-screen bg-canvas font-sans text-slate-900 selection:bg-brand selection:text-white pb-20">
       {/* Interactive Tech Grid, Cursor Spotlight & Aurora Ambient Layer */}
       <LaunchpadTechBackground />
 
-      {/* Google One-Style Subscription & Quota Hub Modal */}
-      <SubscriptionHubModal
-        isOpen={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
-        user={user}
-        activeOrgName={displayOrgName}
-      />
+      {/* Google One-Style Subscription & Quota Hub Modal (Organization Owners & Super Admin Only) */}
+      {!userIsEmployee && (
+        <SubscriptionHubModal
+          isOpen={showSubscriptionModal}
+          onClose={() => setShowSubscriptionModal(false)}
+          user={user}
+          activeOrgName={displayOrgName}
+        />
+      )}
 
       {/* POS Operating Profile Setup Modal */}
       <PosBusinessProfileModal
@@ -317,40 +330,47 @@ export function CodeBridgesOnboardingLaunchpad() {
         {/* Page Title */}
         <div>
           <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-            Ecosystem Services &amp; App Directory
+            {userIsEmployee ? 'Frontline Workspace Portal' : 'Ecosystem Services & App Directory'}
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Browse, launch, and manage active software suites for {displayOrgName}.
+            {userIsEmployee
+              ? `Launch and access assigned operational suites for ${displayOrgName}.`
+              : `Browse, launch, and manage active software suites for ${displayOrgName}.`}
           </p>
         </div>
 
-        {/* Global Onboarding Callout Banner: Prompt personal accounts to create organization */}
-        <CreateOrgCalloutBanner
-          user={user}
-          onOrgCreated={() => loadOrganizations()}
-        />
+        {/* Global Onboarding Callout Banner: Only prompt personal accounts / owners to create organization */}
+        {!userIsEmployee && (
+          <CreateOrgCalloutBanner
+            user={user}
+            onOrgCreated={() => loadOrganizations()}
+          />
+        )}
 
         {/* Section 1: Active Running Modules */}
         <LaunchpadActiveModules
           activeModules={activeRunningModules}
           userRole={user?.role}
+          user={user}
           isTogglingModule={isTogglingModule}
           onToggleModule={handleToggleModule}
           onOpenSubscriptionModal={() => setShowSubscriptionModal(true)}
         />
 
-        {/* Section 2: Platform Ecosystem Catalog */}
-        <LaunchpadCatalogGrid
-          catalogModules={catalogModules}
-          loading={loadingCatalog}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          userRole={user?.role}
-          isModuleEnabled={isModuleEnabled}
-          isTogglingModule={isTogglingModule}
-          onToggleModule={handleToggleModule}
-          onOpenSubscriptionModal={() => setShowSubscriptionModal(true)}
-        />
+        {/* Section 2: Platform Ecosystem Catalog (Restricted to Super Admins & Organization Owners) */}
+        {!userIsEmployee && (
+          <LaunchpadCatalogGrid
+            catalogModules={catalogModules}
+            loading={loadingCatalog}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            userRole={user?.role}
+            isModuleEnabled={isModuleEnabled}
+            isTogglingModule={isTogglingModule}
+            onToggleModule={handleToggleModule}
+            onOpenSubscriptionModal={() => setShowSubscriptionModal(true)}
+          />
+        )}
       </main>
     </div>
   );

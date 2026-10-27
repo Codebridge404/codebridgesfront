@@ -100,13 +100,15 @@ export function usePosCart() {
           category: localMatch.category || 'General',
           stock: localMatch.stock || 99,
           barcode: localMatch.barcode,
+          image_url: localMatch.image_url || localMatch.image,
+          image: localMatch.image_url || localMatch.image,
         });
         return;
       }
 
       // 2. Fallback to API if not found in local cache
       const res = await getBarcodeProductApi(cleanBarcode);
-      const product = res.data?.product || res.product;
+      const product = res.data?.product || res.data || res.product;
       if (product) {
         posAudio.playSuccessBeep();
         handleAddToCart({
@@ -115,6 +117,9 @@ export function usePosCart() {
           sku: product.sku,
           price: Number(product.price || product.selling_price || 0),
           category: product.category,
+          barcode: product.barcode,
+          image_url: product.image_url || product.image,
+          image: product.image_url || product.image,
         });
       } else {
         posAudio.playErrorBeep();

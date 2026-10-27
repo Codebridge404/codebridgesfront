@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Package, Save, X, AlertCircle, Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Package, Save, X, AlertCircle, Loader2, Plus, Camera } from 'lucide-react';
 import { updateProductApi, createCategoryApi } from '@/lib/api';
 
 interface EditProductModalProps {
@@ -25,6 +25,9 @@ export function EditProductModal({
   const [showQuickAddCat, setShowQuickAddCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [creatingCat, setCreatingCat] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -58,9 +61,24 @@ export function EditProductModal({
         min_reorder_point: product.min_reorder_point !== undefined && product.min_reorder_point !== null ? String(product.min_reorder_point) : '0',
         description: product.description || '',
       });
+      setImagePreview(product.image_url || null);
       setError(null);
     }
   }, [product, categories]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose an image file (PNG, JPG, WebP)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleQuickCreateCategory = async () => {
     if (!newCatName.trim()) return;
@@ -106,6 +124,7 @@ export function EditProductModal({
         cost_price: parseFloat(formData.cost_price) || 0,
         min_reorder_point: isNaN(parseInt(formData.min_reorder_point, 10)) ? 0 : Math.max(0, parseInt(formData.min_reorder_point, 10)),
         description: formData.description.trim() || undefined,
+        image_url: imagePreview,
       };
 
       await updateProductApi(product.id, payload);
@@ -121,7 +140,7 @@ export function EditProductModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-brand-subtle text-brand flex items-center justify-center">
@@ -149,6 +168,54 @@ export function EditProductModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-medium">
+          {/* Product Photo Upload Field */}
+          <div>
+            <label className="block text-slate-700 font-bold mb-1">
+              Product Photo <span className="text-slate-400 font-normal">(Uploaded to MinIO S3)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand bg-slate-50 hover:bg-slate-100/80 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-colors shrink-0 relative group"
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera className="w-5 h-5 text-slate-400 group-hover:text-brand" />
+                    <span className="text-[9px] text-slate-400 font-bold mt-0.5">Upload</span>
+                  </>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                >
+                  {imagePreview ? 'Change Photo' : 'Select Image...'}
+                </button>
+                {imagePreview && (
+                  <button
+                    type="button"
+                    onClick={() => setImagePreview(null)}
+                    className="ml-2 text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
+                <p className="text-[10px] text-slate-400 mt-1">PNG, JPG, or WebP up to 10MB</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <label className="block text-slate-700 font-bold mb-1">Product Name *</label>

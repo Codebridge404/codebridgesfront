@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Package, Plus, X, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Package, Plus, X, AlertCircle, Loader2, Camera, Upload } from 'lucide-react';
 import { createProductApi, createCategoryApi } from '@/lib/api';
 
 interface AddProductModalProps {
@@ -23,6 +23,8 @@ export function AddProductModal({
   const [showQuickAddCat, setShowQuickAddCat] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [creatingCat, setCreatingCat] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalCategories(categories);
@@ -42,6 +44,20 @@ export function AddProductModal({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose an image file (PNG, JPG, WebP)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleQuickCreateCategory = async () => {
     if (!newCatName.trim()) return;
@@ -91,11 +107,13 @@ export function AddProductModal({
         cost_price: parseFloat(formData.cost_price) || 0,
         min_reorder_point: isNaN(parseInt(formData.min_reorder_point, 10)) ? 0 : Math.max(0, parseInt(formData.min_reorder_point, 10)),
         description: formData.description.trim() || undefined,
+        image_url: imagePreview || undefined,
       };
 
       await createProductApi(payload);
 
       onProductCreated(payload.name);
+      setImagePreview(null);
       onClose();
 
       // Reset
@@ -148,6 +166,54 @@ export function AddProductModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Product Photo Upload Field */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Product Photo <span className="text-slate-400 font-normal">(Optional — saved to MinIO S3)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 hover:border-brand bg-slate-50 hover:bg-slate-100/80 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-colors shrink-0 relative group"
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera className="w-5 h-5 text-slate-400 group-hover:text-brand" />
+                    <span className="text-[9px] text-slate-400 font-bold mt-0.5">Upload</span>
+                  </>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                >
+                  {imagePreview ? 'Change Photo' : 'Select Image...'}
+                </button>
+                {imagePreview && (
+                  <button
+                    type="button"
+                    onClick={() => setImagePreview(null)}
+                    className="ml-2 text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
+                <p className="text-[10px] text-slate-400 mt-1">PNG, JPG, or WebP up to 10MB</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Product Name <span className="text-rose-500">*</span>

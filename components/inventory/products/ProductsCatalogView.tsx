@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProductCatalogTable } from './ProductCatalogTable';
+import { ProductDetailDrawer } from './ProductDetailDrawer';
 import { AddProductModal } from './AddProductModal';
 import { EditProductModal } from './EditProductModal';
 import { ProductImportModal } from './ProductImportModal';
@@ -21,6 +22,7 @@ export function ProductsCatalogView() {
   // In-Page Modals State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState<any | null>(null);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [adjustingProduct, setAdjustingProduct] = useState<any | null>(null);
   const [viewingMovementsProduct, setViewingMovementsProduct] = useState<any | null>(null);
@@ -105,6 +107,7 @@ export function ProductsCatalogView() {
           setIsAddModalOpen(true);
         }}
         onOpenImportModal={() => setIsImportModalOpen(true)}
+        onViewDetail={(p) => setViewingProduct(p)}
         onEditProduct={(p) => {
           loadCategoriesData();
           loadBrandsData();
@@ -115,7 +118,25 @@ export function ProductsCatalogView() {
         onViewMovements={(p) => setViewingMovementsProduct(p)}
       />
 
-      {/* 2. Reusable In-Page Dynamic Add Product Modal */}
+      {/* 2. Interactive Product Detail Drawer */}
+      <ProductDetailDrawer
+        isOpen={Boolean(viewingProduct)}
+        onClose={() => setViewingProduct(null)}
+        product={viewingProduct}
+        onEdit={(p) => {
+          loadCategoriesData();
+          loadBrandsData();
+          setEditingProduct(p);
+        }}
+        onDelete={handleDeleteProduct}
+        onAdjustStock={(p) => setAdjustingProduct(p)}
+        onViewMovements={(p) => setViewingMovementsProduct(p)}
+        onProductUpdated={() => {
+          loadProductsData();
+        }}
+      />
+
+      {/* 3. Reusable In-Page Dynamic Add Product Modal */}
       <AddProductModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

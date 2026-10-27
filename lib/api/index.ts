@@ -13,3 +13,4 @@ export * from './infrastructure';
 export * from './support';
 export * from './modules';
 export * from '../modules';
+export * from '../rbac';

@@ -10,6 +10,7 @@ import {
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { getAuthUser, logoutApi, getRoleDisplayName } from '@/lib/api';
+import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 
 export interface AppHeaderProps {
   sidebarOpen?: boolean;
@@ -124,12 +125,14 @@ export function AppHeader({
     }
   };
 
-  const isSuperAdmin = user?.role === 'super_admin';
-  const hasOrganization = !!user?.tenant_id || isSuperAdmin;
+  const isSuperAdmin = checkSuperAdmin(user);
+  const isOrg = isOrgAdmin(user);
+  const isEmp = isEmployee(user);
+  const hasOrganization = isOrg || isSuperAdmin;
   const roleTitle = user ? getRoleDisplayName(user, orgName) : '';
   const homeUrl = isSuperAdmin
     ? '/super-admin/dashboard'
-    : hasOrganization
+    : isOrg
     ? '/organization/dashboard'
     : '/launchpad';
   const userInitials = user?.name
@@ -167,7 +170,7 @@ export function AppHeader({
           </div>
           <div className="hidden sm:block leading-tight">
             <span className="font-extrabold text-base tracking-tight text-slate-900 block truncate max-w-[180px] lg:max-w-[240px]">
-              {!user || (isSuperAdmin && !impersonating) || !hasOrganization ? (
+              {!user || (isSuperAdmin && !impersonating) || (!hasOrganization && !isEmp) ? (
                 <>Code<span className="text-brand">Bridges</span></>
               ) : (
                 orgName
@@ -178,8 +181,10 @@ export function AppHeader({
                 ? 'Ecosystem Platform'
                 : isSuperAdmin && !impersonating
                 ? 'Platform Super Admin'
-                : hasOrganization
+                : isOrg
                 ? 'Workspace Operations Hub'
+                : isEmp
+                ? 'Staff Workspace Portal'
                 : 'Personal Account'}
             </span>
           </div>
@@ -323,7 +328,7 @@ export function AppHeader({
                           <FileText className="w-4 h-4 text-slate-400" /> Security Audit Logs
                         </Link>
                       </>
-                    ) : hasOrganization ? (
+                    ) : isOrg ? (
                       <>
                         <Link href="/organization/dashboard" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
                           <Building2 className="w-4 h-4 text-slate-400" /> Workspace Dashboard
@@ -338,7 +343,7 @@ export function AppHeader({
                           <Settings className="w-4 h-4 text-slate-400" /> Setting
                         </Link>
                       </>
-                    ) : (
+                    ) : isEmp ? null : (
                       <>
                         <Link href="/register-tenant" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors">
                           <Plus className="w-4 h-4 text-brand" /> Create Organization
@@ -354,7 +359,7 @@ export function AppHeader({
                         className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors border-t border-slate-100"
                       >
                         <AppIcons.Compass className="w-4 h-4 text-slate-400" />
-                        <span>App Directory Launchpad</span>
+                        <span>{isEmp ? 'Workspace Launchpad' : 'App Directory Launchpad'}</span>
                       </Link>
                     ) : hasOrganization ? (
                       <Link

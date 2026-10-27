@@ -10,6 +10,8 @@ import {
   ShoppingBag,
   Sparkles,
   X,
+  MonitorOff,
+  Settings,
 } from 'lucide-react';
 import { getPersistentCart } from '@/lib/offlineStore';
 import { CfdItemsList } from './CfdItemsList';
@@ -19,6 +21,42 @@ export function PosCustomerDisplayView() {
   const [cart, setCart] = useState<any[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [cfdEnabled, setCfdEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('cb_pos_terminal_settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.cfdEnabled !== undefined) return Boolean(parsed.cfdEnabled);
+        }
+      } catch {}
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail?.cfdEnabled !== undefined) {
+        setCfdEnabled(Boolean(e.detail.cfdEnabled));
+      }
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'cb_pos_terminal_settings' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed.cfdEnabled !== undefined) {
+            setCfdEnabled(Boolean(parsed.cfdEnabled));
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   // Restore cart on initial mount
   useEffect(() => {
@@ -69,6 +107,7 @@ export function PosCustomerDisplayView() {
     qty: Number(i.qty || 1),
     price: Number(i.price || 0),
     subtotal: Number(i.price || 0) * Number(i.qty || 1),
+    image_url: i.product?.image_url || i.product?.image || i.image_url || i.image,
   }));
 
   const subtotal = formattedItems.reduce((acc, item) => acc + item.subtotal, 0);
@@ -79,6 +118,39 @@ export function PosCustomerDisplayView() {
     : 0;
   const tax = Math.max(0, subtotal - discount) * 0.1;
   const grandTotal = Math.max(0, subtotal - discount) + tax;
+
+  if (!cfdEnabled) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col items-center justify-center p-6 select-none">
+        <div className="max-w-md w-full bg-slate-800/90 border border-slate-700/80 rounded-3xl p-8 text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+            <MonitorOff className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white">CFD Screen Disabled</h2>
+            <p className="text-xs text-slate-400 font-medium mt-2 leading-relaxed">
+              Customer-Facing Display is currently suspended in POS Terminal Settings. You can reactivate this screen from POS Settings &gt; Sub-Terminals (CFD).
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <Link
+              href="/pos/pos-terminal"
+              className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-colors"
+            >
+              Open POS Terminal
+            </Link>
+            <Link
+              href="/pos/settings?tab=terminals"
+              className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>POS Settings</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col justify-between p-6 sm:p-8 select-none">

@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Edit3, Trash2, SlidersHorizontal, History } from 'lucide-react';
+import { Edit3, Trash2, SlidersHorizontal, History, Eye } from 'lucide-react';
 
 interface ProductCatalogTableRowProps {
   product: any;
+  onViewDetail?: (product: any) => void;
   onEdit?: (product: any) => void;
   onDelete?: (product: any) => void;
   onAdjustStock?: (product: any) => void;
@@ -13,6 +14,7 @@ interface ProductCatalogTableRowProps {
 
 export function ProductCatalogTableRow({
   product: p,
+  onViewDetail,
   onEdit,
   onDelete,
   onAdjustStock,
@@ -35,20 +37,24 @@ export function ProductCatalogTableRow({
     <tr className="group hover:bg-[#d6e9fa] transition-colors text-xs">
       {/* Pinned Column 1: Product & SKU */}
       <td className="sticky left-0 z-10 bg-canvas group-hover:bg-[#d6e9fa] transition-colors px-3 py-3 w-[190px] min-w-[190px] max-w-[190px]">
-        <div className="flex items-center gap-2.5">
+        <div
+          onClick={() => onViewDetail?.(p)}
+          className="flex items-center gap-2.5 cursor-pointer group/title"
+          title="Click to view product details"
+        >
           {p.image_url ? (
             <img
               src={p.image_url}
               alt={p.name}
-              className="w-7 h-7 rounded-lg object-cover border border-slate-200 shrink-0"
+              className="w-7 h-7 rounded-lg object-cover border border-slate-200 shrink-0 group-hover/title:scale-105 transition-transform"
             />
           ) : (
-            <div className="w-7 h-7 rounded-lg bg-brand-subtle text-brand flex items-center justify-center font-black text-xs shrink-0 border border-brand/20">
+            <div className="w-7 h-7 rounded-lg bg-brand-subtle text-brand flex items-center justify-center font-black text-xs shrink-0 border border-brand/20 group-hover/title:bg-brand group-hover/title:text-white transition-colors">
               {(p.name || 'P')[0]?.toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-black text-slate-900 text-xs truncate" title={p.name}>
+            <div className="font-black text-slate-900 text-xs truncate group-hover/title:text-brand transition-colors" title={p.name}>
               {p.name}
             </div>
             <div className="font-mono text-[10px] text-slate-500 font-bold truncate">
@@ -73,8 +79,18 @@ export function ProductCatalogTableRow({
       </td>
 
       {/* Pinned Column 3: Actions (stay with after category) */}
-      <td className="sticky left-[310px] z-10 bg-canvas group-hover:bg-[#d6e9fa] transition-colors px-2 py-3 w-[135px] min-w-[135px] max-w-[135px] border-r border-slate-300/80 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.04)]">
+      <td className="sticky left-[310px] z-10 bg-canvas group-hover:bg-[#d6e9fa] transition-colors px-2 py-3 w-[155px] min-w-[155px] max-w-[155px] border-r border-slate-300/80 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.04)]">
         <div className="flex items-center justify-center gap-1">
+          {onViewDetail && (
+            <button
+              type="button"
+              onClick={() => onViewDetail(p)}
+              className="p-1.5 rounded-lg bg-slate-200/60 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 transition-colors inline-flex items-center cursor-pointer border border-slate-300/60"
+              title="View Product Specifications & Detail"
+            >
+              <Eye className="w-3 h-3" />
+            </button>
+          )}
           {onAdjustStock && (
             <button
               type="button"

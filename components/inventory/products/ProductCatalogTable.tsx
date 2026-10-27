@@ -18,6 +18,7 @@ interface ProductCatalogTableProps {
   loading: boolean;
   onOpenAddModal: () => void;
   onOpenImportModal?: () => void;
+  onViewDetail?: (product: any) => void;
   onEditProduct?: (product: any) => void;
   onDeleteProduct?: (product: any) => void;
   onAdjustStock?: (product: any) => void;
@@ -31,6 +32,7 @@ export function ProductCatalogTable({
   loading,
   onOpenAddModal,
   onOpenImportModal,
+  onViewDetail,
   onEditProduct,
   onDeleteProduct,
   onAdjustStock,
@@ -256,6 +258,7 @@ export function ProductCatalogTable({
                 <ProductCatalogTableRow
                   key={p.id}
                   product={p}
+                  onViewDetail={onViewDetail}
                   onEdit={onEditProduct}
                   onDelete={onDeleteProduct}
                   onAdjustStock={onAdjustStock}

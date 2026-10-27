@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { Layers, CheckCircle2, ArrowRight, Power, RefreshCw, ShieldCheck } from 'lucide-react';
 import { CatalogModule } from './types';
 import { ModuleCard } from '@/components/ui';
+import { isEmployee, canUserManageModules, UserAuthProfile } from '@/lib/rbac';
 
 interface LaunchpadActiveModulesProps {
   activeModules: CatalogModule[];
   userRole?: string;
+  user?: UserAuthProfile | null;
   isTogglingModule: string | null;
   onToggleModule: (moduleId: string, enable: boolean) => void;
   onOpenSubscriptionModal?: () => void;
@@ -17,17 +19,23 @@ interface LaunchpadActiveModulesProps {
 export function LaunchpadActiveModules({
   activeModules,
   userRole,
+  user,
   isTogglingModule,
   onToggleModule,
   onOpenSubscriptionModal,
 }: LaunchpadActiveModulesProps) {
+  const userIsEmployee = isEmployee(user);
+  const canManage = canUserManageModules(user);
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <h3 className="text-sm font-black text-slate-900 tracking-tight">
-            Active Running Modules ({activeModules.length} Enabled)
+            {userIsEmployee
+              ? `My Assigned Workspace Modules (${activeModules.length} Active)`
+              : `Active Running Modules (${activeModules.length} Enabled)`}
           </h3>
         </div>
       </div>
@@ -37,10 +45,21 @@ export function LaunchpadActiveModules({
           <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
             <Layers className="w-5 h-5" />
           </div>
-          <h4 className="text-xs font-black text-slate-800">No Running Modules Active for this Workspace</h4>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Enable services from the platform catalog below to launch and run them across your store fleet.
-          </p>
+          {userIsEmployee ? (
+            <>
+              <h4 className="text-xs font-black text-slate-800">No Modules Assigned to Your Account</h4>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                You have not been assigned access to any operational suites in this workspace yet. Please contact your organization administrator.
+              </p>
+            </>
+          ) : (
+            <>
+              <h4 className="text-xs font-black text-slate-800">No Running Modules Active for this Workspace</h4>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Enable services from the platform catalog below to launch and run them across your store fleet.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -50,7 +69,7 @@ export function LaunchpadActiveModules({
             const isSubscription = mod.id === 'bill-subscription';
             const isTenantUser = userRole !== 'super_admin';
             const launchHref =
-              mod.id === 'pos-management' && userRole === 'cashier' ? '/cashier/pos-terminal' : mod.href;
+              mod.id === 'pos-management' && (userRole === 'cashier' || userIsEmployee) ? '/cashier/pos-terminal' : mod.href;
 
             return (
               <ModuleCard
@@ -79,7 +98,7 @@ export function LaunchpadActiveModules({
                     )}
 
                     <div className="flex items-center gap-1.5">
-                      {!isCoreModule && (
+                      {!isCoreModule && canManage && (
                         <button
                           type="button"
                           onClick={() => onToggleModule(mod.id, false)}
@@ -95,7 +114,7 @@ export function LaunchpadActiveModules({
                         </button>
                       )}
 
-                      {isSubscription && isTenantUser ? (
+                      {isSubscription && isTenantUser && !userIsEmployee ? (
                         <button
                           type="button"
                           onClick={onOpenSubscriptionModal}
@@ -126,3 +145,4 @@ export function LaunchpadActiveModules({
     </div>
   );
 }
+

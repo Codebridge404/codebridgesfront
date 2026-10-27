@@ -11,6 +11,7 @@ export * from './EditProductModal';
 export * from './ProductImportModal';
 export * from './ProductStockAdjustModal';
 export * from './ProductMovementsModal';
+export * from './ProductDetailDrawer';
 export * from './ProductsCatalogView';
 export * from './productCsvExport';
 export * from './productImportUtils';

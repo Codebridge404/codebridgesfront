@@ -46,6 +46,7 @@ export function getSidebarNavSections(activeShift: any, businessType?: PosBusine
       icon: Store,
       badge: 'Live',
       badgeColor: 'bg-amber-100 text-amber-800',
+      target: '_blank',
     },
     {
       label: 'Shifts & Till Float',
@@ -186,6 +187,7 @@ export function SidebarNavList({ sections, activeShift, lowStockCount, sidebarOp
                 key={iIdx}
                 href={item.href}
                 target={item.target}
+                rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
                 title={!sidebarOpen ? item.label : undefined}
                 className={`flex items-center ${
                   sidebarOpen ? 'justify-between px-3' : 'justify-center px-0 w-11 h-10 mx-auto'
@@ -207,7 +209,7 @@ export function SidebarNavList({ sections, activeShift, lowStockCount, sidebarOp
                 </div>
 
                 {sidebarOpen && (
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {item.badge !== undefined && (
                       <span
                         className={`px-1.5 py-0.5 rounded-md text-[10px] font-black shrink-0 transition-transform duration-200 group-hover:scale-105 ${
@@ -219,8 +221,8 @@ export function SidebarNavList({ sections, activeShift, lowStockCount, sidebarOp
                         {item.badge}
                       </span>
                     )}
-                    {item.target === '_blank' && !item.badge && (
-                      <span className="text-[9px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {item.target === '_blank' && (
+                      <span className="text-[10px] font-bold text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity">
                         ↗
                       </span>
                     )}

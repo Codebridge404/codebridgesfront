@@ -15,8 +15,30 @@ import {
   ArrowRight,
   X,
   Sparkles,
+  Package,
 } from 'lucide-react';
 import { CartItem } from '../types';
+
+function CartItemThumbnail({ item }: { item: CartItem }) {
+  const [imgError, setImgError] = useState(false);
+  const imageUrl = item.product?.image_url || item.product?.image;
+
+  return (
+    <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 flex items-center justify-center">
+      {imageUrl && !imgError ? (
+        <img
+          src={imageUrl}
+          alt={item.name}
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <Package className="w-4 h-4 text-slate-400" />
+      )}
+    </div>
+  );
+}
 
 interface PosCartPanelProps {
   cart: CartItem[];
@@ -128,6 +150,8 @@ export function PosCartPanel({
                 exit={{ opacity: 0, x: -20 }}
                 className="p-3 rounded-xl bg-transparent border border-slate-300/70 flex items-center justify-between gap-3 group hover:bg-slate-200/30 transition-colors"
               >
+                <CartItemThumbnail item={item} />
+
                 <div className="min-w-0 flex-1">
                   <h4 className="font-extrabold text-xs text-slate-900 truncate">
                     {item.name}

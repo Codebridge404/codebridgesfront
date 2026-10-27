@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   RotateCcw,
   X,
+  Settings,
 } from 'lucide-react';
+import Link from 'next/link';
 import { getKdsTicketsApi, updateKdsStatusApi, bumpKdsTicketApi, getKdsStreamUrl } from '@/lib/api';
 import { posAudio } from '@/hooks/usePosAudio';
 
@@ -36,6 +38,43 @@ export function KitchenDisplayView() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
   const [lastBumpedTicket, setLastBumpedTicket] = useState<KdsTicket | null>(null);
   const previousTicketIdsRef = useRef<Set<string | number>>(new Set());
+
+  const [kdsEnabled, setKdsEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('cb_pos_terminal_settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.kdsEnabled !== undefined) return Boolean(parsed.kdsEnabled);
+        }
+      } catch {}
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail?.kdsEnabled !== undefined) {
+        setKdsEnabled(Boolean(e.detail.kdsEnabled));
+      }
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'cb_pos_terminal_settings' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed.kdsEnabled !== undefined) {
+            setKdsEnabled(Boolean(parsed.kdsEnabled));
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   const parseItems = (raw: any): Array<{ name: string; qty: number }> => {
     if (!raw) return [];
@@ -83,6 +122,7 @@ export function KitchenDisplayView() {
 
   // Real-time SSE Stream listener with resilient fallback polling
   useEffect(() => {
+    if (!kdsEnabled) return;
     loadTickets(true);
 
     let eventSource: EventSource | null = null;
@@ -218,6 +258,39 @@ export function KitchenDisplayView() {
     if (statusFilter === 'all') return t.status !== 'bumped';
     return t.status === statusFilter;
   });
+
+  if (!kdsEnabled) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col items-center justify-center p-6 select-none">
+        <div className="max-w-md w-full bg-slate-800/90 border border-slate-700/80 rounded-3xl p-8 text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+            <ChefHat className="w-8 h-8 opacity-60" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white">Kitchen Display Suspended</h2>
+            <p className="text-xs text-slate-400 font-medium mt-2 leading-relaxed">
+              Kitchen Display System (KDS) is currently closed in POS Terminal Settings. You can reactivate this station screen from POS Settings &gt; Sub-Terminals (KDS &amp; CFD).
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <Link
+              href="/pos/dashboard"
+              className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-colors"
+            >
+              POS Dashboard
+            </Link>
+            <Link
+              href="/pos/settings?tab=terminals"
+              className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>POS Settings</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans select-none pb-12">

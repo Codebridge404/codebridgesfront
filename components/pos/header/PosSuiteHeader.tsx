@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -16,7 +16,7 @@ import {
   KeyRound,
   ExternalLink,
 } from 'lucide-react';
-import { logoutApi, getRoleDisplayName } from '@/lib/api';
+import { logoutApi, getRoleDisplayName, getTenantProfileApi, getOutletTerminalSettingsApi } from '@/lib/api';
 
 interface PosSuiteHeaderProps {
   user: any;
@@ -70,12 +70,14 @@ export function PosSuiteHeader({
     'supervisor',
   ].includes(userRole);
 
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [cfdEnabled, setCfdEnabled] = useState<boolean>(false);
+
   const navLinks = [
     ...(isManagerial ? [{ label: 'POS Dashboard', href: '/pos', icon: LayoutDashboard }] : []),
-    { label: 'POS Terminal', href: isManagerial ? '/pos/pos-terminal' : '/cashier/pos-terminal', icon: Monitor },
     { label: 'Orders & Receipts', href: isManagerial ? '/pos/orders' : '/cashier/orders', icon: Receipt },
     { label: 'Shifts & Till Float', href: isManagerial ? '/pos/shifts' : '/cashier/shifts', icon: Clock },
-    { label: 'Customer CFD', href: '/pos/customer-display', icon: Tv, target: '_blank', isExternal: true },
+    ...(mounted && cfdEnabled ? [{ label: 'Customer CFD', href: '/pos/customer-display', icon: Tv, target: '_blank', isExternal: true }] : []),
   ];
 
   // Resolve shift click handler (fallback to onOpenShiftModal if onCloseShiftModal is not distinct)
@@ -88,8 +90,118 @@ export function PosSuiteHeader({
     }
   };
 
+  const [orgLogo, setOrgLogo] = useState<string | null>(null);
+  const [orgName, setOrgName] = useState<string>('');
+  const [logoError, setLogoError] = useState<boolean>(false);
+  const [avatarError, setAvatarError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setAvatarError(false);
+    if (typeof window === 'undefined') return;
+
+    const resolveOrgInfo = () => {
+      const activeName =
+        localStorage.getItem('active_org') ||
+        localStorage.getItem('cb_active_org_name') ||
+        user?.tenant_name ||
+        user?.company_name ||
+        '';
+      setOrgName(activeName);
+
+      const activeLogo =
+        localStorage.getItem('cb_active_org_logo') ||
+        user?.tenant_logo_url ||
+        user?.logo_url ||
+        null;
+      setOrgLogo(activeLogo);
+      setLogoError(false);
+
+      if (!activeLogo && activeName && activeName !== 'No Organization Yet! Please Create') {
+        getTenantProfileApi(activeName)
+          .then((res) => {
+            if (res?.data?.logo_url) {
+              setOrgLogo(res.data.logo_url);
+              localStorage.setItem('cb_active_org_logo', res.data.logo_url);
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    const loadTerminalSettings = async () => {
+      const saved = localStorage.getItem('cb_pos_terminal_settings');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.cfdEnabled !== undefined) {
+            setCfdEnabled(Boolean(parsed.cfdEnabled));
+          }
+        } catch {}
+      }
+
+      const outletId = user?.outlet_id || localStorage.getItem('cb_active_outlet_id');
+      if (outletId) {
+        try {
+          const termRes = await getOutletTerminalSettingsApi(outletId);
+          if (termRes?.status === 'success' && termRes.data) {
+            const isEnabled =
+              termRes.data.is_cfd_enabled !== undefined
+                ? Boolean(termRes.data.is_cfd_enabled)
+                : termRes.data.terminal_settings?.cfdEnabled !== undefined
+                ? Boolean(termRes.data.terminal_settings.cfdEnabled)
+                : true;
+            setCfdEnabled(isEnabled);
+            const current = saved ? JSON.parse(saved) : {};
+            localStorage.setItem(
+              'cb_pos_terminal_settings',
+              JSON.stringify({ ...current, cfdEnabled: isEnabled })
+            );
+          }
+        } catch {}
+      }
+    };
+
+    resolveOrgInfo();
+    loadTerminalSettings();
+
+    const handleOrgChange = (e: any) => {
+      resolveOrgInfo();
+      if (e?.detail?.logoUrl !== undefined) {
+        setOrgLogo(e.detail.logoUrl);
+      }
+    };
+
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail?.cfdEnabled !== undefined) {
+        setCfdEnabled(Boolean(e.detail.cfdEnabled));
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cb_pos_terminal_settings' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed.cfdEnabled !== undefined) {
+            setCfdEnabled(Boolean(parsed.cfdEnabled));
+          }
+        } catch {}
+      }
+    };
+
+    window.addEventListener('cb_org_changed', handleOrgChange);
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('cb_org_changed', handleOrgChange);
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user]);
+
   // Cashier initials
   const cashierName = user?.name || 'Cashier';
+  const cashierAvatar = user?.avatar_url || user?.avatar || user?.profile_image_url || null;
   const cashierInitials = cashierName
     .split(' ')
     .map((n: string) => n[0])
@@ -104,13 +216,22 @@ export function PosSuiteHeader({
         {/* Zone 1: Branding & Register Identity */}
         <div className="flex items-center gap-3 shrink-0">
           <Link href={isManagerial ? '/pos/dashboard' : '/cashier/pos-terminal'} className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center font-extrabold text-white shadow-md shadow-brand/20 group-hover:scale-105 transition-transform">
-              <Monitor className="w-5 h-5" />
+            <div className="w-9 h-9 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+              {orgLogo && !logoError ? (
+                <img
+                  src={orgLogo}
+                  alt={orgName || 'Organization Logo'}
+                  className="w-full h-full object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <Monitor className="w-6 h-6 text-brand" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-sm text-slate-900 tracking-tight group-hover:text-brand transition-colors">
-                  POS Suite
+                  {orgName && orgName !== 'No Organization Yet! Please Create' ? orgName : 'POS Suite'}
                 </span>
                 <span className="text-[10px] font-mono font-extrabold text-brand bg-brand-subtle px-1.5 py-0.5 rounded-md border border-brand/20 shadow-2xs">
                   {terminalCode}
@@ -209,8 +330,17 @@ export function PosSuiteHeader({
           {/* Cashier Identity & Fast PIN Switcher */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-brand text-white font-black text-[11px] flex items-center justify-center shadow-xs shadow-brand/20">
-                {cashierInitials}
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-brand text-white font-black text-[11px] flex items-center justify-center shadow-xs shadow-brand/20 border border-slate-200/60 shrink-0">
+                {cashierAvatar && !avatarError ? (
+                  <img
+                    src={cashierAvatar}
+                    alt={cashierName}
+                    className="w-full h-full object-cover"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <span>{cashierInitials}</span>
+                )}
               </div>
               <div className="text-left hidden lg:block">
                 <p className="text-xs font-black text-slate-900 truncate max-w-[110px] leading-tight">
@@ -248,10 +378,7 @@ export function PosSuiteHeader({
       <div className="px-4 sm:px-6 bg-slate-50/70 border-t border-slate-200/60 flex items-center justify-between gap-2 overflow-x-auto py-1">
         <nav className="flex items-center gap-1">
           {navLinks.map((link) => {
-            const isActive =
-              pathname === link.href ||
-              (link.href === '/cashier/pos-terminal' && (pathname === '/cashier' || pathname === '/pos/pos-terminal')) ||
-              (link.href === '/pos/pos-terminal' && (pathname === '/cashier/pos-terminal' || pathname === '/cashier'));
+            const isActive = pathname === link.href;
             const Icon = link.icon;
 
             return (

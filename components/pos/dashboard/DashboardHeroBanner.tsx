@@ -90,6 +90,8 @@ export function DashboardHeroBanner({
 
           <Link
             href="/pos/pos-terminal"
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-5 py-2.5 rounded-2xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs sm:text-sm shadow-md shadow-brand/20 flex items-center gap-2 transition-all cursor-pointer"
           >
             <Store className="w-4 h-4" />

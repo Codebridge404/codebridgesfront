@@ -90,6 +90,28 @@ export async function deleteProductApi(id: number) {
   });
 }
 
+export async function uploadProductImageApi(id: number | string, file: File | Blob) {
+  const token = getAuthToken();
+  const activeOrg = typeof window !== 'undefined' ? localStorage.getItem('active_org') : null;
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`${getApiUrl()}/products/${id}/image`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(activeOrg ? { 'X-Tenant-Id': activeOrg } : {}),
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok || data.status === 'error') {
+    throw new Error(data.message || 'Failed to upload product image');
+  }
+  return data;
+}
+
 // Categories & Sub Categories
 export async function getCategoriesApi(type?: string, search?: string) {
   let url = '/categories';
