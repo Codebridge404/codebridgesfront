@@ -50,6 +50,9 @@ export { SubscriptionHubModal } from './SubscriptionHubModal';
 export { AppIcons } from './icons';
 export type { AppIconKey } from './icons';
 
+export { GlobalLoader } from './GlobalLoader';
+export type { GlobalLoaderProps, LoaderVariant } from './GlobalLoader';
+
 export { ConfirmDialog } from '../common/ConfirmDialog';
 export type { ConfirmDialogProps } from '../common/ConfirmDialog';
 export {
@@ -62,3 +65,4 @@ export type {
   ModuleConfirmOptions,
   ConfirmFn,
 } from '../common/ConfirmContext';
+
