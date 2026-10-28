@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
 export function PlatformFooter() {
   const currentYear = new Date().getFullYear();
@@ -13,7 +14,7 @@ export function PlatformFooter() {
       </div>
       <div className="flex items-center gap-4 text-slate-400 font-medium">
         <span>Enterprise Edition</span>
-        <span>v2.5</span>
+        <span>{SYSTEM_VERSION_DISPLAY}</span>
       </div>
     </footer>
   );

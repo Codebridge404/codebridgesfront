@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getAuthUser } from '@/lib/api';
 import { getEnabledModulesForOrg, canonicalModuleId } from '@/lib/modules';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
 export interface OrganizationSidebarProps {
   sidebarOpen: boolean;
@@ -272,7 +273,7 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
           <div className="flex items-center justify-between text-[10px]">
             <div className="flex items-center gap-1.5 truncate">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-              <span className="font-bold text-slate-500 truncate">Org Engine v2.5</span>
+              <span className="font-bold text-slate-500 truncate">Org Engine {SYSTEM_VERSION_DISPLAY}</span>
             </div>
             <span className="font-mono font-bold text-[9px] bg-slate-200/80 text-slate-700 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
               Active

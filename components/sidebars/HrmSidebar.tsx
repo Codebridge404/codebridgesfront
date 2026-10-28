@@ -18,6 +18,7 @@ import {
   LucideIcon,
 } from 'lucide-react';
 import { getEmployeesApi } from '@/lib/api';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
 interface NavItem {
   label: string;
@@ -148,7 +149,7 @@ function HrmSidebarContent({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-semibold truncate text-slate-500">HRM Suite</span>
               <span className="text-[10px] font-bold text-slate-400 px-1.5 py-0.5 rounded bg-slate-200/60 shrink-0">
-                v2.0
+                {SYSTEM_VERSION_DISPLAY}
               </span>
             </div>
             <Link

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
 interface Particle {
   x: number;
@@ -242,7 +243,7 @@ export function AuthTechBackground() {
       <div className="hidden md:flex justify-between items-center absolute top-0 inset-x-0 px-8 py-4 text-[10px] font-mono tracking-widest text-slate-400/80">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>SYS.SECURITY // IDENTITY-GATEWAY v3.2</span>
+          <span>SYS.SECURITY // IDENTITY-GATEWAY {SYSTEM_VERSION_DISPLAY}</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
             ZERO-TRUST ENCRYPTED
           </span>

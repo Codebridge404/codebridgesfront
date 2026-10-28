@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { RefreshCw, Building2 } from 'lucide-react';
 import { getActiveShiftApi } from '@/lib/api';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
 import { SidebarNavList } from './SidebarNavList';
 
@@ -55,7 +56,7 @@ function SidebarNavContent({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-semibold truncate text-slate-500">Core POS</span>
               <span className="text-[10px] font-bold text-slate-400 px-1.5 py-0.5 rounded bg-slate-200/60 shrink-0">
-                v2.5
+                {SYSTEM_VERSION_DISPLAY}
               </span>
             </div>
             <Link

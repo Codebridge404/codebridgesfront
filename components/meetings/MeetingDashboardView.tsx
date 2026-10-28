@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 import {
   CalendarClock,
   DoorOpen,
@@ -131,7 +132,7 @@ export function MeetingDashboardView() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-              MMS Corporate Suite v1.5
+              MMS Corporate Suite {SYSTEM_VERSION_DISPLAY}
             </span>
             <span className="text-xs text-slate-400 font-semibold">• Zero-Conflict Engine</span>
           </div>
