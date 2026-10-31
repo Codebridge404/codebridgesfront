@@ -82,7 +82,11 @@ export function LaunchpadCatalogGrid({
         </div>
       ) : filteredCatalog.length === 0 ? (
         <div className="bg-white/85 backdrop-blur-xl rounded-3xl border border-slate-200/80 p-8 text-center shadow-2xs space-y-2">
-          <p className="text-xs text-slate-500 font-medium">No services found matching &quot;{searchTerm}&quot;.</p>
+          <p className="text-xs text-slate-500 font-medium">
+            {searchTerm.trim()
+              ? `No services found matching "${searchTerm}".`
+              : 'No integrated platform services currently available in your catalog.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

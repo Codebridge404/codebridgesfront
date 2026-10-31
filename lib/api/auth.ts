@@ -1,4 +1,4 @@
-import { apiFetch, getAuthToken, setAuthToken, setAuthUser, removeAuthToken } from './client';
+import { apiFetch, getAuthToken, setAuthToken, setRefreshToken, setAuthUser, removeAuthToken } from './client';
 
 export async function loginApi(email: string, password: string) {
   const res = await apiFetch('/auth/login', {
@@ -6,11 +6,20 @@ export async function loginApi(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
 
-  if (res.token) {
-    setAuthToken(res.token);
-    setAuthUser(res.user);
+  const authToken = res?.token || res?.access_token || res?.data?.token || res?.data?.access_token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
+  const user = res?.user || res?.data?.user;
+
+  if (authToken) {
+    setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
+    if (user) {
+      setAuthUser(user);
+    }
     if (typeof window !== 'undefined') {
-      const orgName = res.user?.tenant_name || res.user?.company_name;
+      const orgName = user?.tenant_name || user?.company_name;
       if (orgName) {
         localStorage.setItem('active_org', orgName);
         window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName } }));
@@ -32,11 +41,20 @@ export async function quickSwitchApi(pin_code: string, outlet_id?: string) {
     body: JSON.stringify({ pin_code, outlet_id }),
   });
 
-  if (res.token) {
-    setAuthToken(res.token);
-    setAuthUser(res.user);
+  const authToken = res?.token || res?.access_token || res?.sanctum_token || res?.data?.token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
+  const user = res?.user || res?.data?.user;
+
+  if (authToken) {
+    setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
+    if (user) {
+      setAuthUser(user);
+    }
     if (typeof window !== 'undefined') {
-      const orgName = res.user?.tenant_name || res.user?.company_name;
+      const orgName = user?.tenant_name || user?.company_name;
       if (orgName) {
         localStorage.setItem('active_org', orgName);
         window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName } }));
@@ -58,9 +76,18 @@ export async function registerApi(userData: { name: string; email?: string; pass
     body: JSON.stringify(userData),
   });
 
-  if (res.token) {
-    setAuthToken(res.token);
-    setAuthUser(res.user);
+  const authToken = res?.token || res?.access_token || res?.data?.token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
+  const user = res?.user || res?.data?.user;
+
+  if (authToken) {
+    setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
+    if (user) {
+      setAuthUser(user);
+    }
     if (typeof window !== 'undefined') {
       localStorage.removeItem('active_org');
       localStorage.removeItem('cb_active_org_name');
@@ -140,9 +167,14 @@ export async function acceptInviteApi(data: { token: string; name: string; passw
     body: JSON.stringify(data),
   });
 
-  if (res.token) {
-    setAuthToken(res.token);
-    setAuthUser(res.user);
+  const authToken = res?.token || res?.access_token || res?.data?.token;
+  const user = res?.user || res?.data?.user;
+
+  if (authToken) {
+    setAuthToken(authToken);
+    if (user) {
+      setAuthUser(user);
+    }
   }
 
   return res;

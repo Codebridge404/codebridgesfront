@@ -5,15 +5,15 @@
 
 export const cardStyles = {
   // Standard container card with rounded-2xl, glassmorphic fill, and subtle border
-  base: 'bg-white/85 backdrop-blur-xl rounded-2xl border border-slate-200/80 shadow-2xs',
+  base: 'bg-white/60 backdrop-blur-xl rounded-2xl border border-white/60 shadow-2xs',
   // Interactive card with hover translation and elevated shadow
-  interactive: 'bg-white/85 backdrop-blur-xl rounded-2xl border border-slate-200/80 hover:border-slate-300/90 hover:shadow-xs transition-all cursor-pointer select-none',
+  interactive: 'bg-white/60 backdrop-blur-xl rounded-2xl border border-white/60 hover:border-slate-300/90 hover:bg-white/75 hover:shadow-xs transition-all cursor-pointer select-none',
   // Compact card (used in dense administrative grids)
-  compact: 'bg-white/85 backdrop-blur-xl rounded-xl border border-slate-200/80 transition-all select-none',
+  compact: 'bg-white/60 backdrop-blur-xl rounded-xl border border-white/60 transition-all select-none',
   // Selected state card
-  selected: 'border-brand bg-brand-subtle/70 shadow-2xs ring-1 ring-brand/30',
+  selected: 'border-brand bg-brand-subtle/80 shadow-2xs ring-1 ring-brand/30',
   // Muted/dashed card for dropzones or empty slots
-  dashed: 'border-2 border-dashed border-slate-300/80 rounded-2xl p-8 text-center bg-white/40',
+  dashed: 'border-2 border-dashed border-slate-300/80 rounded-2xl p-8 text-center bg-white/30 backdrop-blur-md',
 };
 
 export const badgeStyles = {

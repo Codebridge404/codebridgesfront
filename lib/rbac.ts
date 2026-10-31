@@ -111,7 +111,29 @@ export function isOrgAdmin(user?: UserAuthProfile | null): boolean {
 export function isEmployee(user?: UserAuthProfile | null): boolean {
   if (!user) return false;
   if (isSuperAdmin(user) || isOrgAdmin(user)) return false;
-  return true;
+  const parent = user.parent_role?.toLowerCase();
+  const slug = (user.role_slug || user.role || '').toLowerCase();
+  if (parent === 'employee') return true;
+  return [
+    'employee',
+    'cashier',
+    'inventory_clerk',
+    'accountant',
+    'outlet_manager',
+    'supervisor',
+    'staff',
+    'clerk',
+    'finance',
+    'inventory',
+  ].includes(slug);
+}
+
+/**
+ * Returns true if the user is a personal/individual account (not yet bound to an organization).
+ */
+export function isPersonalUser(user?: UserAuthProfile | null): boolean {
+  if (!user) return false;
+  return !isSuperAdmin(user) && !isOrgAdmin(user) && !isEmployee(user);
 }
 
 /**

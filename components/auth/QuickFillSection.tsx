@@ -34,7 +34,7 @@ export function QuickFillSection({ onQuickFill }: QuickFillSectionProps) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           type="button"
-          onClick={() => onQuickFill('vibolsen2002@gmail.com', 'Vibol@2020')}
+          onClick={() => onQuickFill('codebridge2026@gmail.com', 'Code@2026')}
           className="px-2 py-1.5 text-xs font-bold rounded-xl bg-brand-subtle hover:bg-brand-border/40 text-brand border border-brand/20 transition-colors text-center shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
         >
           <ShieldCheck className="w-3.5 h-3.5 text-brand" />

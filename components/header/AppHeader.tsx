@@ -11,6 +11,7 @@ import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { getAuthUser, logoutApi, getRoleDisplayName } from '@/lib/api';
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
+import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
 
 export interface AppHeaderProps {
   sidebarOpen?: boolean;
@@ -31,6 +32,7 @@ export function AppHeader({
   const [orgName, setOrgName] = useState<string>('CodeBridges');
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [impersonating, setImpersonating] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -126,13 +128,18 @@ export function AppHeader({
   };
 
   const isSuperAdmin = checkSuperAdmin(user);
-  const isOrg = isOrgAdmin(user);
   const isEmp = isEmployee(user);
-  const hasOrganization = isOrg || isSuperAdmin;
+  const hasOrganization = Boolean(
+    user?.tenant_id &&
+    (!isSuperAdmin || impersonating) &&
+    user?.tenant_id !== 1 &&
+    user?.tenant_id !== '1'
+  );
+  const isOrg = (isOrgAdmin(user) || !isEmp) && hasOrganization;
   const roleTitle = user ? getRoleDisplayName(user, orgName) : '';
   const homeUrl = isSuperAdmin
     ? '/super-admin/dashboard'
-    : isOrg
+    : hasOrganization
     ? '/organization/dashboard'
     : '/launchpad';
   const userInitials = user?.name
@@ -235,16 +242,46 @@ export function AppHeader({
                 <AppIcons.Compass className="w-3.5 h-3.5 text-brand" />
                 <span className="hidden sm:inline">Launchpad</span>
               </Link>
+            ) : isSuperAdmin ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/super-admin/dashboard"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand text-xs font-bold transition-colors border border-brand/20"
+                  title="Platform Super Admin Console"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Admin Panel</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateOrgModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-extrabold transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="Create Organization Workspace"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create Organization</span>
+                </button>
+              </div>
             ) : hasOrganization ? (
               <Link
-                href={homeUrl}
+                href="/organization/dashboard"
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand text-xs font-bold transition-colors border border-brand/20"
-                title="Return to Dashboard"
+                title="Return to Workspace Dashboard"
               >
-                {isSuperAdmin ? <Shield className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
+                <Building2 className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
-            ) : null}
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCreateOrgModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-extrabold transition-all shadow-xs cursor-pointer active:scale-95"
+                title="Create Organization Workspace"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create Organization</span>
+              </button>
+            )}
 
             {/* Dynamic Notifications Bell */}
             <button
@@ -318,6 +355,16 @@ export function AppHeader({
 
                     {isSuperAdmin && !impersonating ? (
                       <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setShowCreateOrgModal(true);
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4 text-brand" /> Create Organization
+                        </button>
                         <Link href="/super-admin/security/settings" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
                           <Settings className="w-4 h-4 text-slate-400" /> Setting
                         </Link>
@@ -330,6 +377,16 @@ export function AppHeader({
                       </>
                     ) : isOrg ? (
                       <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setShowCreateOrgModal(true);
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4 text-brand" /> Create New Organization
+                        </button>
                         <Link href="/organization/dashboard" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
                           <Building2 className="w-4 h-4 text-slate-400" /> Workspace Dashboard
                         </Link>
@@ -345,9 +402,16 @@ export function AppHeader({
                       </>
                     ) : isEmp ? null : (
                       <>
-                        <Link href="/register-tenant" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setShowCreateOrgModal(true);
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors cursor-pointer"
+                        >
                           <Plus className="w-4 h-4 text-brand" /> Create Organization
-                        </Link>
+                        </button>
                       </>
                     )}
 
@@ -361,14 +425,23 @@ export function AppHeader({
                         <AppIcons.Compass className="w-4 h-4 text-slate-400" />
                         <span>{isEmp ? 'Workspace Launchpad' : 'App Directory Launchpad'}</span>
                       </Link>
-                    ) : hasOrganization ? (
+                    ) : isSuperAdmin ? (
                       <Link
-                        href={homeUrl}
+                        href="/super-admin/dashboard"
                         onClick={() => setShowProfileDropdown(false)}
                         className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
                       >
-                        {isSuperAdmin ? <Shield className="w-4 h-4 text-brand" /> : <Building2 className="w-4 h-4 text-brand" />}
-                        <span>Return to Dashboard</span>
+                        <Shield className="w-4 h-4 text-brand" />
+                        <span>Platform Super Admin</span>
+                      </Link>
+                    ) : hasOrganization ? (
+                      <Link
+                        href="/organization/dashboard"
+                        onClick={() => setShowProfileDropdown(false)}
+                        className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
+                      >
+                        <Building2 className="w-4 h-4 text-brand" />
+                        <span>Organization Dashboard</span>
                       </Link>
                     ) : null}
                   </div>
@@ -388,6 +461,18 @@ export function AppHeader({
           </>
         )}
       </div>
+
+      {/* 1-Click Create Organization Modal */}
+      {showCreateOrgModal && (
+        <CreateOrgModal
+          isOpen={showCreateOrgModal}
+          onClose={() => setShowCreateOrgModal(false)}
+          onOrgCreated={() => {
+            setShowCreateOrgModal(false);
+            router.push('/organization/dashboard');
+          }}
+        />
+      )}
     </header>
   );
 }

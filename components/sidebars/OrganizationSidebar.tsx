@@ -123,7 +123,7 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
       title: 'Workspace Governance',
       items: [
         {
-          name: 'Setting',
+          name: 'Organization Settings',
           href: '/organization/settings',
           icon: Settings,
         },

@@ -61,7 +61,7 @@ export default function OrganizationLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-canvas text-slate-800 flex flex-col font-sans">
+    <div className="relative h-screen w-screen overflow-hidden bg-transparent text-slate-800 flex flex-col font-sans">
       <ImpersonationBanner />
       <PlatformAnnouncementBanner />
 
@@ -72,12 +72,12 @@ export default function OrganizationLayout({ children }: { children: React.React
         handleLogout={handleLogout}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        <Suspense fallback={<aside className="h-full w-64 bg-white border-r border-slate-200" />}>
+      <div className="flex-1 flex overflow-hidden relative z-10">
+        <Suspense fallback={<aside className="h-full w-64 bg-transparent border-r border-slate-200/80" />}>
           <OrganizationSidebar sidebarOpen={sidebarOpen} userRole={user?.role} />
         </Suspense>
 
-        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden bg-canvas p-1 sm:p-1.5 lg:p-2">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden bg-transparent p-3 sm:p-5 lg:p-6">
           {children}
         </main>
       </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppProviders } from "@/components/common";
+import { LaunchpadTechBackground } from "@/components/launchpad/LaunchpadTechBackground";
 
 export const metadata: Metadata = {
   title: "CodeBridge@",
@@ -27,7 +28,8 @@ export default function RootLayout({
       className="h-full antialiased font-sans"
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-canvas text-slate-800 relative selection:bg-brand selection:text-white" suppressHydrationWarning>
+        <LaunchpadTechBackground />
         <AppProviders>{children}</AppProviders>
         <script
           dangerouslySetInnerHTML={{

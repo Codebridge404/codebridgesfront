@@ -21,9 +21,23 @@ export function setAuthToken(token: string) {
   }
 }
 
+export function getRefreshToken(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('pos_refresh_token');
+  }
+  return null;
+}
+
+export function setRefreshToken(token: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('pos_refresh_token', token);
+  }
+}
+
 export function removeAuthToken() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('pos_token');
+    localStorage.removeItem('pos_refresh_token');
     localStorage.removeItem('pos_user');
     localStorage.removeItem('active_org');
     localStorage.removeItem('cb_active_org_name');
@@ -64,7 +78,47 @@ export function getAuthUser(): any | null {
   return null;
 }
 
-export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+async function parseResponseData(response: Response): Promise<any> {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      return await response.json();
+    } catch {
+      return null;
+    }
+  } else {
+    try {
+      const text = await response.text();
+      return text ? { message: text } : null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string | null) => void> = [];
+
+function subscribeTokenRefresh(cb: (token: string | null) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string | null) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+function handleSessionExpired() {
+  if (typeof window !== 'undefined') {
+    removeAuthToken();
+    if (!window.location.pathname.startsWith('/login')) {
+      const currentPath = window.location.pathname;
+      window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+    }
+  }
+}
+
+export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
   const token = getAuthToken();
   const baseUrl = getApiUrl();
 
@@ -103,36 +157,97 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     throw new Error(netErr?.message || 'Network request failed. Please ensure the backend server is reachable.');
   }
 
-  let data: any = null;
-  const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    try {
-      data = await response.json();
-    } catch {
-      data = null;
-    }
-  } else {
-    try {
-      const text = await response.text();
-      data = text ? { message: text } : null;
-    } catch {
-      data = null;
-    }
-  }
+  const data = await parseResponseData(response);
 
   if (!response.ok) {
+    // Check if 401 Unauthorized can be silently resolved via Refresh Token
     if (
       response.status === 401 &&
       typeof window !== 'undefined' &&
       !endpoint.startsWith('/auth/login') &&
-      !endpoint.startsWith('/auth/register')
+      !endpoint.startsWith('/auth/register') &&
+      !endpoint.startsWith('/auth/refresh')
     ) {
-      removeAuthToken();
-      if (!window.location.pathname.startsWith('/login')) {
-        const currentPath = window.location.pathname;
-        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      const refreshToken = getRefreshToken();
+
+      if (refreshToken) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            subscribeTokenRefresh(async (newToken) => {
+              if (newToken) {
+                try {
+                  headers['Authorization'] = `Bearer ${newToken}`;
+                  const retryRes = await fetch(`${baseUrl}${endpoint}`, { ...options, headers });
+                  const retryData = await parseResponseData(retryRes);
+                  if (!retryRes.ok) {
+                    const errMsg = retryData?.message || retryData?.error || `Request failed with status ${retryRes.status}`;
+                    reject(new Error(errMsg));
+                  } else {
+                    resolve(retryData);
+                  }
+                } catch (retryErr) {
+                  reject(retryErr);
+                }
+              } else {
+                reject(new Error('Session expired. Please log in again.'));
+              }
+            });
+          });
+        }
+
+        isRefreshing = true;
+        try {
+          const refreshRes = await fetch(`${baseUrl}/auth/refresh`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+
+          const refreshData = await parseResponseData(refreshRes);
+          const newAuthToken =
+            refreshData?.token ||
+            refreshData?.access_token ||
+            refreshData?.data?.token ||
+            refreshData?.data?.access_token;
+          const newRefreshToken =
+            refreshData?.refresh_token ||
+            refreshData?.data?.refresh_token;
+
+          if (refreshRes.ok && newAuthToken) {
+            setAuthToken(newAuthToken);
+            if (newRefreshToken) {
+              setRefreshToken(newRefreshToken);
+            }
+            onRefreshed(newAuthToken);
+
+            // Transparently retry original request with the fresh token
+            headers['Authorization'] = `Bearer ${newAuthToken}`;
+            const retryRes = await fetch(`${baseUrl}${endpoint}`, { ...options, headers });
+            const retryData = await parseResponseData(retryRes);
+            if (!retryRes.ok) {
+              const errMsg = retryData?.message || retryData?.error || `Request failed with status ${retryRes.status}`;
+              throw new Error(errMsg);
+            }
+            return retryData;
+          } else {
+            onRefreshed(null);
+            handleSessionExpired();
+          }
+        } catch {
+          onRefreshed(null);
+          handleSessionExpired();
+        } finally {
+          isRefreshing = false;
+        }
+      } else {
+        handleSessionExpired();
       }
     }
+
     const errMsg = data?.message || data?.error || (data?.errors ? Object.values(data.errors).flat().join(', ') : `Request failed with status ${response.status}`);
     throw new Error(errMsg);
   }
