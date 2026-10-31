@@ -269,6 +269,7 @@ export function CodeBridgesOnboardingLaunchpad() {
   };
 
   const isModuleEnabled = (modId: string) => {
+    if (!isAuthenticated || !user) return false;
     const targetCanonical = canonicalModuleId(modId);
     if (!targetCanonical) return false;
     if (targetCanonical === 'bill-subscription') return true;
@@ -284,15 +285,21 @@ export function CodeBridgesOnboardingLaunchpad() {
 
   const userIsEmployee = isEmployee(user);
 
-  const activeRunningModules = catalogModules.filter((m) => {
-    if (userIsEmployee) {
-      // Employees cannot see bill-subscription
-      if (m.id === 'bill-subscription') return false;
-      // Must be assigned to staff AND enabled in organization
-      return canUserAccessModule(user, m.id, enabledModules) && isModuleEnabled(m.id);
-    }
-    return (m.isCore && m.id === 'bill-subscription') || isModuleEnabled(m.id);
-  });
+  const activeRunningModules = (!isAuthenticated || !user)
+    ? []
+    : catalogModules.filter((m) => {
+        if (userIsEmployee) {
+          // Employees cannot see bill-subscription
+          if (m.id === 'bill-subscription') return false;
+          // Must be assigned to staff AND enabled in organization
+          return canUserAccessModule(user, m.id, enabledModules) && isModuleEnabled(m.id);
+        }
+        return (m.isCore && m.id === 'bill-subscription') || isModuleEnabled(m.id);
+      });
+
+  const visibleCatalogModules = (!isAuthenticated || !user)
+    ? catalogModules.filter((m) => m.id !== 'bill-subscription')
+    : catalogModules;
 
   return (
     <div className="relative min-h-screen bg-canvas font-sans text-slate-900 selection:bg-brand selection:text-white pb-20">
@@ -300,7 +307,7 @@ export function CodeBridgesOnboardingLaunchpad() {
       <LaunchpadTechBackground />
 
       {/* Google One-Style Subscription & Quota Hub Modal (Organization Owners & Super Admin Only) */}
-      {!userIsEmployee && (
+      {isAuthenticated && user && !userIsEmployee && (
         <SubscriptionHubModal
           isOpen={showSubscriptionModal}
           onClose={() => setShowSubscriptionModal(false)}
@@ -360,7 +367,7 @@ export function CodeBridgesOnboardingLaunchpad() {
         {/* Section 2: Platform Ecosystem Catalog (Restricted to Super Admins & Organization Owners) */}
         {!userIsEmployee && (
           <LaunchpadCatalogGrid
-            catalogModules={catalogModules}
+            catalogModules={visibleCatalogModules}
             loading={loadingCatalog}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
