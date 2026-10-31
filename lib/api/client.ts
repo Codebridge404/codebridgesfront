@@ -157,7 +157,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
     throw new Error(netErr?.message || 'Network request failed. Please ensure the backend server is reachable.');
   }
 
-  let data = await parseResponseData(response);
+  const data = await parseResponseData(response);
 
   if (!response.ok) {
     // Check if 401 Unauthorized can be silently resolved via Refresh Token
