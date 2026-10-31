@@ -57,20 +57,20 @@ export function OrgKpiSummary({
         return (
           <div
             key={idx}
-            className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow flex items-center justify-between"
+            className="p-5 rounded-2xl backdrop-blur-xl bg-white/60 dark:bg-slate-900/40 border border-white/60 dark:border-white/10 shadow-xs hover:shadow-md hover:bg-white/75 transition-all flex items-center justify-between"
           >
             <div className="space-y-1">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                 {card.label}
               </p>
-              <p className={`font-black text-slate-900 tracking-tight ${card.isText ? 'text-lg truncate max-w-[150px]' : 'text-2xl'}`}>
+              <p className={`font-black text-slate-900 dark:text-white tracking-tight ${card.isText ? 'text-lg truncate max-w-[150px]' : 'text-2xl'}`}>
                 {loading ? '...' : card.value}
               </p>
-              <p className="text-xs font-semibold text-slate-500">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {card.sub}
               </p>
             </div>
-            <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 ${card.color}`}>
+            <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 backdrop-blur-md shadow-2xs ${card.color}`}>
               <Icon className="w-6 h-6" />
             </div>
           </div>

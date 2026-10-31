@@ -1,4 +1,4 @@
-import { apiFetch, getAuthToken, setAuthToken, setAuthUser, removeAuthToken } from './client';
+import { apiFetch, getAuthToken, setAuthToken, setRefreshToken, setAuthUser, removeAuthToken } from './client';
 
 export async function loginApi(email: string, password: string) {
   const res = await apiFetch('/auth/login', {
@@ -7,10 +7,14 @@ export async function loginApi(email: string, password: string) {
   });
 
   const authToken = res?.token || res?.access_token || res?.data?.token || res?.data?.access_token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
   const user = res?.user || res?.data?.user;
 
   if (authToken) {
     setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
     if (user) {
       setAuthUser(user);
     }
@@ -38,10 +42,14 @@ export async function quickSwitchApi(pin_code: string, outlet_id?: string) {
   });
 
   const authToken = res?.token || res?.access_token || res?.sanctum_token || res?.data?.token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
   const user = res?.user || res?.data?.user;
 
   if (authToken) {
     setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
     if (user) {
       setAuthUser(user);
     }
@@ -69,10 +77,14 @@ export async function registerApi(userData: { name: string; email?: string; pass
   });
 
   const authToken = res?.token || res?.access_token || res?.data?.token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
   const user = res?.user || res?.data?.user;
 
   if (authToken) {
     setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
     if (user) {
       setAuthUser(user);
     }

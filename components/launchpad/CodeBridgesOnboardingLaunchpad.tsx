@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Store } from 'lucide-react';
+import { Store, Building2, ChevronDown, Check, Plus } from 'lucide-react';
 import { AppHeader } from '@/components/header/AppHeader';
 import { LaunchpadActiveModules } from './LaunchpadActiveModules';
 import { LaunchpadCatalogGrid } from './LaunchpadCatalogGrid';
-import { LaunchpadTechBackground } from './LaunchpadTechBackground';
 import { SubscriptionHubModal, CreateOrgCalloutBanner } from '@/components/ui';
+import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
 import { useConfirm, useToast } from '@/components/common';
 import {
   getAuthToken, getAuthUser, clearAuthToken, logoutApi,
@@ -44,6 +44,9 @@ export function CodeBridgesOnboardingLaunchpad() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showPosProfileModal, setShowPosProfileModal] = useState(false);
   const [pendingPosModuleId, setPendingPosModuleId] = useState<string | null>(null);
+  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
+  const orgDropdownRef = useRef<HTMLDivElement>(null);
 
   const loadCatalog = useCallback(async () => {
     try {
@@ -120,21 +123,15 @@ export function CodeBridgesOnboardingLaunchpad() {
     const orgList: OrgItem[] = [];
     const isOwner = currentUser.role === 'super_admin';
     const tenantName = currentUser.tenant_name || currentUser.company_name;
-    if (tenantName) {
+    if (tenantName && tenantName !== 'CodeBridges Platform Hub' && tenantName !== 'CodeBridges Platform') {
       orgList.push({
         id: currentUser.tenant_id || 'primary-company',
         name: tenantName,
         type: 'Company',
       });
-    } else if (isOwner) {
-      orgList.push({
-        id: 'primary-company',
-        name: 'CodeBridges Platform Hub',
-        type: 'Company',
-      });
     }
 
-    if (currentUser.outlet_id || currentUser.role === 'organization' || isOwner) {
+    if (currentUser.outlet_id || currentUser.role === 'organization') {
       try {
         const res = await getOutletsApi();
         const data = Array.isArray(res) ? res : res?.data || [];
@@ -146,9 +143,11 @@ export function CodeBridgesOnboardingLaunchpad() {
       try {
         const res = await getSuperAdminTenantsApi();
         const data = Array.isArray(res) ? res : res?.data || [];
-        data.forEach((t: any) => {
-          if (!orgList.some((o) => o.name === t.name)) orgList.push({ id: t.id, name: t.name, type: 'Company' });
-        });
+        data
+          .filter((t: any) => t.id !== 1 && t.name !== 'CodeBridges Platform' && t.slug !== 'codebridge-platform')
+          .forEach((t: any) => {
+            if (!orgList.some((o) => o.name === t.name)) orgList.push({ id: t.id, name: t.name, type: 'Company' });
+          });
       } catch {}
     }
 
@@ -189,6 +188,39 @@ export function CodeBridgesOnboardingLaunchpad() {
       window.removeEventListener('cb_modules_catalog_changed', loadCatalog);
     };
   }, [loadCatalog]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (orgDropdownRef.current && !orgDropdownRef.current.contains(e.target as Node)) {
+        setShowOrgDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectOrg = (orgItem: OrgItem) => {
+    setActiveOrg(orgItem.name);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('active_org', orgItem.name);
+      localStorage.setItem('cb_active_org_name', orgItem.name);
+      window.dispatchEvent(
+        new CustomEvent('cb_org_changed', {
+          detail: { orgName: orgItem.name },
+        })
+      );
+    }
+    refreshEnabledModules(orgItem.name);
+    setShowOrgDropdown(false);
+  };
+
+  const handleOrgCreated = async (newOrg: { id: string | number; name: string; type: 'Personal' | 'Company' }) => {
+    setShowCreateOrgModal(false);
+    toast.success(`Organization "${newOrg.name}" registered successfully!`);
+    await loadOrganizations();
+    setActiveOrg(newOrg.name);
+    refreshEnabledModules(newOrg.name);
+  };
 
   const handleLogout = async () => {
     try { await logoutApi(); } catch {}
@@ -302,10 +334,7 @@ export function CodeBridgesOnboardingLaunchpad() {
     : catalogModules;
 
   return (
-    <div className="relative min-h-screen bg-canvas font-sans text-slate-900 selection:bg-brand selection:text-white pb-20">
-      {/* Interactive Tech Grid, Cursor Spotlight & Aurora Ambient Layer */}
-      <LaunchpadTechBackground />
-
+    <div className="relative min-h-screen bg-transparent font-sans text-slate-900 selection:bg-brand selection:text-white pb-20">
       {/* Google One-Style Subscription & Quota Hub Modal (Organization Owners & Super Admin Only) */}
       {isAuthenticated && user && !userIsEmployee && (
         <SubscriptionHubModal
@@ -313,6 +342,15 @@ export function CodeBridgesOnboardingLaunchpad() {
           onClose={() => setShowSubscriptionModal(false)}
           user={user}
           activeOrgName={displayOrgName}
+        />
+      )}
+
+      {/* Create Organization Modal */}
+      {showCreateOrgModal && (
+        <CreateOrgModal
+          isOpen={showCreateOrgModal}
+          onClose={() => setShowCreateOrgModal(false)}
+          onOrgCreated={handleOrgCreated}
         />
       )}
 
@@ -334,23 +372,115 @@ export function CodeBridgesOnboardingLaunchpad() {
 
       {/* 2. Main Page Body */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* Page Title */}
-        <div>
-          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-            {userIsEmployee ? 'Frontline Workspace Portal' : 'Ecosystem Services & App Directory'}
-          </h1>
-          <p className="text-xs text-slate-500 font-medium mt-1">
-            {userIsEmployee
-              ? `Launch and access assigned operational suites for ${displayOrgName}.`
-              : `Browse, launch, and manage active software suites for ${displayOrgName}.`}
-          </p>
+        {/* Workspace Hub & Organization Switcher Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
+          <div>
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+              {userIsEmployee ? 'Frontline Workspace Portal' : 'Ecosystem Services & App Directory'}
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              {userIsEmployee
+                ? `Launch and access assigned operational suites for ${displayOrgName}.`
+                : `Browse, launch, and manage active software suites for ${displayOrgName}.`}
+            </p>
+          </div>
+
+          {/* Interactive Organization Switcher & Create Org Action */}
+          {isAuthenticated && !userIsEmployee && (
+            <div className="flex items-center gap-2.5 shrink-0 relative" ref={orgDropdownRef}>
+              {userOrganizations.length > 0 ? (
+                <>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowOrgDropdown(!showOrgDropdown)}
+                      className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-brand/40 shadow-2xs hover:shadow-xs transition-all text-xs font-bold text-slate-800 cursor-pointer"
+                    >
+                      <Building2 className="w-4 h-4 text-brand" />
+                      <span className="truncate max-w-[140px] sm:max-w-[200px]">
+                        {activeOrg || 'Select Organization'}
+                      </span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showOrgDropdown && (
+                      <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="px-3.5 py-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                          Switch Organization / Outlet
+                        </div>
+                        <div className="max-h-60 overflow-y-auto py-1">
+                          {userOrganizations.map((org) => {
+                            const isSelected = org.name === activeOrg;
+                            return (
+                              <button
+                                key={`${org.type}-${org.id}-${org.name}`}
+                                type="button"
+                                onClick={() => handleSelectOrg(org)}
+                                className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-brand/5 text-brand font-bold'
+                                    : 'text-slate-700 hover:bg-slate-50 font-medium'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Building2 className={`w-4 h-4 shrink-0 ${isSelected ? 'text-brand' : 'text-slate-400'}`} />
+                                  <div className="truncate">
+                                    <div className="truncate">{org.name}</div>
+                                    <span className="text-[10px] text-slate-400 capitalize">{org.type}</span>
+                                  </div>
+                                </div>
+                                {isSelected && <Check className="w-4 h-4 text-brand shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="pt-1.5 px-2 pb-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowOrgDropdown(false);
+                              setShowCreateOrgModal(true);
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand text-xs font-bold transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Create New Organization</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateOrgModal(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
+                    title="Register a new workspace / organization"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Organization</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateOrgModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-black rounded-xl shadow-xs transition-all cursor-pointer active:scale-95 animate-pulse hover:animate-none"
+                  title="Create your organization to enable modules"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Organization</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Global Onboarding Callout Banner: Only prompt personal accounts / owners to create organization */}
         {!userIsEmployee && (
           <CreateOrgCalloutBanner
             user={user}
-            onOrgCreated={() => loadOrganizations()}
+            onOrgCreated={handleOrgCreated}
           />
         )}
 

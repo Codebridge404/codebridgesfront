@@ -87,44 +87,48 @@ export function OrganizationDashboard() {
 
   return (
     <div className="space-y-4 w-full font-sans pb-10 text-slate-900">
-      {/* 1. OONE Enterprise Organization Identity Hero Card */}
-      <div className={`${cardStyles.base} p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-6`}>
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-brand-subtle border border-brand-border/60 flex items-center justify-center shrink-0">
+      {/* 1. Transparent Glassmorphic Organization Identity Hero Card */}
+      <div className="backdrop-blur-2xl bg-white/60 dark:bg-slate-900/40 border border-white/60 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Ambient subtle lighting */}
+        <div className="pointer-events-none absolute -top-12 -right-12 w-64 h-64 bg-brand/10 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-white/80 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs backdrop-blur-md">
             <AppIcons.Organization className="w-7 h-7 text-brand" />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {orgName}
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                Executive Dashboard
               </h1>
-              <span className={badgeStyles.brand}>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brand-subtle text-brand border border-brand/20 backdrop-blur-md inline-flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-brand" />
-                {roleTitle}
+                {orgName} &bull; {roleTitle}
               </span>
-              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1">
+              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50/90 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1.5 backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Live Workspace
               </span>
             </div>
-            <p className={typography.bodyText}>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               Centralized workspace operations hub. Manage store branches, staff roles, and independent business modules.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 relative z-10">
           <button
             type="button"
             onClick={() => setIsStaffModalOpen(true)}
-            className={buttonStyles.primary}
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs shadow-md shadow-brand/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
             <UserPlus className="w-4 h-4" />
             <span>Manage Staff</span>
           </button>
           <Link
             href="/organization/outlets"
-            className={buttonStyles.secondary}
+            className="px-4 py-2.5 rounded-xl bg-white/80 hover:bg-white border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs backdrop-blur-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
             <Building2 className="w-4 h-4 text-slate-500" />
             <span>Store Outlets</span>

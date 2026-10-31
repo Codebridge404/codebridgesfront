@@ -251,3 +251,5 @@ export function LaunchpadTechBackground() {
     </div>
   );
 }
+
+export const GlobalTechBackground = LaunchpadTechBackground;

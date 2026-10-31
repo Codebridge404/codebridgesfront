@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -16,8 +16,12 @@ import {
   LogIn,
   Calendar,
   Loader2,
+  Store,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { getPlatformModulesApi, PlatformModuleRecord } from '@/lib/api/modules';
+import { ICON_MAP } from '@/components/platform/modules/PlatformModuleModal';
+import { canonicalModuleId } from '@/lib/modules';
 
 interface TenantDetailDrawerProps {
   tenant: any | null;
@@ -28,16 +32,6 @@ interface TenantDetailDrawerProps {
   onEditQuotas?: (tenant: any) => void;
 }
 
-const AVAILABLE_MODULES = [
-  { id: 'pos', name: 'Point of Sale (POS)', icon: Monitor, color: 'bg-brand-subtle text-brand' },
-  { id: 'inventory', name: 'Stock & Inventory', icon: Boxes, color: 'bg-amber-50 text-amber-600' },
-  { id: 'meeting-management', name: 'Meeting System (MMS)', icon: Calendar, color: 'bg-purple-50 text-purple-600' },
-  { id: 'finance', name: 'Finance & Accounts', icon: DollarSign, color: 'bg-emerald-50 text-emerald-600' },
-  { id: 'hrm', name: 'HR & Workforce', icon: Briefcase, color: 'bg-rose-50 text-rose-600' },
-  { id: 'crm', name: 'CRM & Pipeline', icon: Users, color: 'bg-blue-50 text-blue-600' },
-  { id: 'shop', name: 'E-Commerce Storefront', icon: ShoppingBag, color: 'bg-orange-50 text-orange-600' },
-];
-
 export function TenantDetailDrawer({
   tenant,
   isOpen,
@@ -47,9 +41,31 @@ export function TenantDetailDrawer({
   onEditQuotas,
 }: TenantDetailDrawerProps) {
   const [enabledModules, setEnabledModules] = useState<string[]>([]);
+  const [availableModules, setAvailableModules] = useState<PlatformModuleRecord[]>([]);
   const [savingModule, setSavingModule] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    let mounted = true;
+    getPlatformModulesApi()
+      .then((records) => {
+        if (!mounted) return;
+        if (Array.isArray(records)) {
+          setAvailableModules(
+            records.filter(
+              (r) => r.is_active !== false && !['kds-kitchen', 'cfd-display', 'kds', 'cfd'].includes(r.id)
+            )
+          );
+        }
+      })
+      .catch(() => {
+        if (mounted) setAvailableModules([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (tenant) {
       let mods = tenant.enabled_modules;
       if (typeof mods === 'string') {
@@ -66,9 +82,10 @@ export function TenantDetailDrawer({
   if (!isOpen || !tenant) return null;
 
   const handleModuleClick = async (modId: string) => {
-    const next = enabledModules.includes(modId)
-      ? enabledModules.filter((m) => m !== modId)
-      : [...enabledModules, modId];
+    const isCurrentlyEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(modId));
+    const next = isCurrentlyEnabled
+      ? enabledModules.filter((m) => canonicalModuleId(m) !== canonicalModuleId(modId))
+      : Array.from(new Set([...enabledModules, canonicalModuleId(modId), modId]));
     setEnabledModules(next);
     setSavingModule(true);
     try {
@@ -76,7 +93,7 @@ export function TenantDetailDrawer({
         method: 'PUT',
         body: JSON.stringify({ tenant_id: tenant.id, modules: next }),
       });
-      onToggleModule?.(tenant.id, modId, next.includes(modId));
+      onToggleModule?.(tenant.id, modId, next.some((m) => canonicalModuleId(m) === canonicalModuleId(modId)));
     } catch (err) {
       console.error('Failed to sync module entitlement:', err);
     } finally {
@@ -217,9 +234,9 @@ export function TenantDetailDrawer({
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {AVAILABLE_MODULES.map((mod) => {
-                  const isEnabled = enabledModules.includes(mod.id);
-                  const IconComp = mod.icon;
+                {availableModules.map((mod) => {
+                  const isEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(mod.id));
+                  const IconComp = ICON_MAP[mod.icon] || Store;
                   return (
                     <button
                       key={mod.id}
@@ -232,8 +249,12 @@ export function TenantDetailDrawer({
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 font-bold ${mod.color}`}>
-                          <IconComp className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 font-bold bg-white border border-slate-200/80 p-1">
+                          {mod.logo_url ? (
+                            <img src={mod.logo_url} alt={mod.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <IconComp className="w-4 h-4 text-brand" />
+                          )}
                         </div>
                         <span className="font-bold text-xs text-slate-800 truncate">{mod.name}</span>
                       </div>

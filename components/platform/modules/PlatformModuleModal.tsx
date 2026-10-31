@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import {
   X, Check, Loader2, Sparkles, Store, Boxes, Users, DollarSign,
   Briefcase, Zap, CalendarClock, UtensilsCrossed, Tv, ShoppingBag,
-  Layers, Activity, Shield, Sliders, Cpu, Globe, Bot, Monitor, LucideIcon
+  Layers, Activity, Shield, Sliders, Cpu, Globe, Bot, Monitor,
+  HeartHandshake, CircleDollarSign, Calendar, LucideIcon
 } from 'lucide-react';
 import { ModuleCard } from '@/components/ui';
 import { PlatformModuleRecord, createPlatformModuleApi, updatePlatformModuleApi } from '@/lib/api/modules';
@@ -12,7 +13,7 @@ import { PlatformModuleRecord, createPlatformModuleApi, updatePlatformModuleApi 
 export const ICON_MAP: Record<string, LucideIcon> = {
   Store, Boxes, Users, DollarSign, Briefcase, Zap, CalendarClock,
   UtensilsCrossed, Tv, ShoppingBag, Layers, Activity, Shield, Sliders,
-  Cpu, Globe, Bot, Monitor,
+  Cpu, Globe, Bot, Monitor, HeartHandshake, CircleDollarSign, Calendar,
 };
 
 const COLOR_PRESETS = [

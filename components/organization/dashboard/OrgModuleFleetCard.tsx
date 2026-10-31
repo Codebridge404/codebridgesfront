@@ -1,23 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Store,
-  Boxes,
-  Briefcase,
-  DollarSign,
-  UserCheck,
-  ShoppingBag,
   ExternalLink,
-  CheckCircle2,
   Power,
-  Calendar,
+  Plus,
+  CheckCircle2,
+  ArrowRight,
+  RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 import { updateTenantModulesApi } from '@/lib/api/tenants';
+import { getPlatformModulesApi } from '@/lib/api/modules';
+import { ICON_MAP } from '@/components/platform/modules/PlatformModuleModal';
 import { canonicalModuleId } from '@/lib/modules';
-import { cardStyles, badgeStyles, buttonStyles } from '@/lib/theme';
+import { badgeStyles } from '@/lib/theme';
 import { useConfirm } from '@/components/common';
+import { ModuleCard } from '@/components/ui';
+import { CatalogModule } from '@/components/launchpad/types';
 
 interface OrgModuleFleetCardProps {
   orgName: string;
@@ -25,109 +27,58 @@ interface OrgModuleFleetCardProps {
   onModulesUpdated: (updated: string[]) => void;
 }
 
-interface ServiceModuleConfig {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  href: string;
-  icon: any;
-  logoUrl: string;
-  accent: string;
-}
-
-const MODULE_DEFINITIONS: ServiceModuleConfig[] = [
-  {
-    id: 'pos',
-    name: 'Point of Sale Fleet',
-    category: 'Retail & Frontline',
-    description: 'Cloud cashier registers, shifts & till float, customer display, and kitchen display (KDS).',
-    href: '/pos/dashboard',
-    icon: Store,
-    logoUrl: '/module/pos.svg',
-    accent: 'border-[#DDD6FE] bg-[#F5F3FF] text-[#7C3AED]',
-  },
-  {
-    id: 'inventory',
-    name: 'Multi-Warehouse Stock',
-    category: 'Supply Chain',
-    description: 'Multi-hub stock levels, purchase orders, vendor catalogs, and inter-branch transfers.',
-    href: '/inventory/dashboard',
-    icon: Boxes,
-    logoUrl: '/module/invetory.svg',
-    accent: 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]',
-  },
-  {
-    id: 'meeting-management',
-    name: 'Meeting System (MMS)',
-    category: 'Workplace & Operations',
-    description: 'Conference room booking, digital door signage kiosks, minute logging, and Telegram alerts.',
-    href: '/meetings',
-    icon: Calendar,
-    logoUrl: '/module/meeting-time.svg',
-    accent: 'border-[#E9D5FF] bg-[#FAF5FF] text-[#9333EA]',
-  },
-  {
-    id: 'hrm',
-    name: 'HR & Workforce Suite',
-    category: 'People & Payroll',
-    description: 'Employee rostering, biometric clock-in attendance, leave requests, and payroll.',
-    href: '/hrm/dashboard',
-    icon: Briefcase,
-    logoUrl: '/module/hr.svg',
-    accent: 'border-[#FECDD3] bg-[#FFF1F2] text-[#E11D48]',
-  },
-  {
-    id: 'finance',
-    name: 'Financial Accounting',
-    category: 'Financial Ledger',
-    description: 'General ledger, charts of accounts, tax reporting, journal entries, and reconciliation.',
-    href: '/financial/dashboard',
-    icon: DollarSign,
-    logoUrl: '/module/financial.svg',
-    accent: 'border-[#A7F3D0] bg-[#ECFDF5] text-[#059669]',
-  },
-  {
-    id: 'crm',
-    name: 'CRM & Customer Loyalty',
-    category: 'Growth & Retention',
-    description: 'Lead tracking, customer conversion history, store credit, and loyalty points rewards.',
-    href: '/crm',
-    icon: UserCheck,
-    logoUrl: '/module/management.svg',
-    accent: 'border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]',
-  },
-  {
-    id: 'shop',
-    name: 'Digital Storefront (E-Shop)',
-    category: 'Omnichannel Commerce',
-    description: 'Online web shop, digital order fulfillment, synchronized catalog, and payment gateways.',
-    href: '/shop',
-    icon: ShoppingBag,
-    logoUrl: '/module/pos.svg',
-    accent: 'border-[#FED7AA] bg-[#FFF7ED] text-[#EA580C]',
-  },
-];
-
 export function OrgModuleFleetCard({
   orgName,
   enabledModules,
   onModulesUpdated,
 }: OrgModuleFleetCardProps) {
   const confirm = useConfirm();
+  const [modules, setModules] = useState<CatalogModule[]>([]);
+  const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  const handleToggleModule = async (moduleId: string) => {
+  const loadModules = useCallback(async () => {
+    try {
+      setLoading(true);
+      const records = await getPlatformModulesApi();
+      const mapped: CatalogModule[] = records
+        .filter((r) => r.is_active !== false && !['kds-kitchen', 'cfd-display', 'kds', 'cfd'].includes(r.id))
+        .map((r) => ({
+          id: r.id,
+          name: r.name,
+          monogram: r.monogram,
+          category: r.category,
+          description: r.description,
+          bgPill: r.bg_pill || 'bg-brand-subtle text-brand',
+          cardBg: r.card_bg || undefined,
+          icon: ICON_MAP[r.icon] || Store,
+          logoUrl: r.logo_url || undefined,
+          href: r.href,
+          isCore: r.id === 'bill-subscription' || (Boolean(r.is_core) && r.id !== 'pos-management' && r.id !== 'inventory-suite'),
+        }));
+      setModules(mapped);
+    } catch (err) {
+      console.error('Failed to load platform modules for fleet card:', err);
+      setModules([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadModules();
+  }, [loadModules]);
+
+  const handleToggleModule = async (module: CatalogModule) => {
+    const moduleId = module.id;
     const isCurrentlyEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(moduleId));
-    const targetModule = MODULE_DEFINITIONS.find((m) => m.id === moduleId);
-    const moduleName = targetModule?.name || moduleId;
     const willEnable = !isCurrentlyEnabled;
 
     const confirmed = await confirm.moduleToggle({
-      moduleName,
+      moduleName: module.name,
       enable: willEnable,
       orgName,
-      logoUrl: targetModule?.logoUrl || '/module/Workspace.svg',
+      logoUrl: module.logoUrl || '/module/Workspace.svg',
       actionType: 'subscribe',
     });
     if (!confirmed) return;
@@ -152,17 +103,19 @@ export function OrgModuleFleetCard({
   };
 
   return (
-    <div className={`${cardStyles.base} p-6 sm:p-7 space-y-5`}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+    <div className="bg-transparent border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 sm:p-7 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-slate-900 tracking-tight">Independent Business Service Suites</h3>
+            <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+              Subscribed Modules Hub
+            </h3>
             <span className={badgeStyles.brand}>
               {enabledModules.length} Subscribed
             </span>
           </div>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Subscribe or unsubscribe to individual services independently for {orgName}
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            Subscribe or unsubscribe to individual services dynamically for {orgName}
           </p>
         </div>
         <Link
@@ -174,84 +127,109 @@ export function OrgModuleFleetCard({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {MODULE_DEFINITIONS.map((module) => {
-          const isEnabled = enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(module.id));
-          const isBusy = togglingId === module.id;
-          const Icon = module.icon;
+      {loading ? (
+        <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400 bg-white/40 dark:bg-slate-900/20 backdrop-blur-md rounded-2xl border border-slate-200/60 dark:border-white/10">
+          <RefreshCw className="w-6 h-6 animate-spin text-brand" />
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Loading ecosystem modules from cloud database...</span>
+        </div>
+      ) : modules.length === 0 ? (
+        <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-white/10 p-8 text-center shadow-2xs space-y-2">
+          <p className="text-xs text-slate-500 font-medium">
+            No integrated platform services currently available in your catalog.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {modules.map((module) => {
+            const isEnabled = module.isCore || enabledModules.some((m) => canonicalModuleId(m) === canonicalModuleId(module.id));
+            const isBusy = togglingId === module.id;
 
-          return (
-            <div
-              key={module.id}
-              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
-                isEnabled
-                  ? 'bg-slate-50/50 border-slate-200/90 shadow-2xs hover:shadow-xs'
-                  : 'bg-white border-slate-200/60 opacity-85 hover:opacity-100'
-              }`}
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 p-1.5 flex items-center justify-center shrink-0 shadow-2xs">
-                    <img src={module.logoUrl} alt={module.name} className="w-7 h-7 object-contain" />
-                  </div>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 ${
-                      isEnabled
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
-                    }`}
-                  >
-                    {isEnabled ? (
-                      <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Subscribed
-                      </>
+            return (
+              <ModuleCard
+                key={module.id}
+                name={module.name}
+                category={module.category}
+                icon={module.icon}
+                logoUrl={module.logoUrl}
+                description={module.description}
+                cardBg={module.cardBg}
+                size="standard"
+                statusDot={isEnabled}
+                isSelected={isEnabled}
+                footerSlot={
+                  <>
+                    {module.isCore ? (
+                      <span className="text-[10px] font-black text-brand bg-brand-subtle px-2.5 py-1 rounded-full border border-brand/20 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-brand" />
+                        <span>Built-in Core</span>
+                      </span>
+                    ) : isEnabled ? (
+                      <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>Active</span>
+                      </span>
                     ) : (
-                      <>
-                        <Power className="w-3 h-3 text-slate-400" />
-                        Available
-                      </>
+                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        Not Activated
+                      </span>
                     )}
-                  </span>
-                </div>
 
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{module.category}</p>
-                  <h4 className="font-extrabold text-sm text-slate-900">{module.name}</h4>
-                  <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-1 leading-relaxed">
-                    {module.description}
-                  </p>
-                </div>
-              </div>
+                    <div className="flex items-center gap-1.5">
+                      {module.isCore ? (
+                        <Link
+                          href={module.href}
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <span>Launch</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      ) : isEnabled ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleModule(module)}
+                            disabled={isBusy}
+                            title="Deactivate Module"
+                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {isBusy ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Power className="w-3.5 h-3.5" />
+                            )}
+                          </button>
 
-              <div className="pt-4 mt-3 border-t border-slate-200/60 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  disabled={isBusy}
-                  onClick={() => handleToggleModule(module.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                    isEnabled
-                      ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/80 active:scale-[0.98]'
-                      : buttonStyles.primary
-                  }`}
-                >
-                  {isBusy ? 'Saving...' : isEnabled ? 'Unsubscribe' : 'Subscribe'}
-                </button>
-
-                {isEnabled && (
-                  <Link
-                    href={module.href}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-brand transition-colors"
-                  >
-                    <span>Launch</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </Link>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                          <Link
+                            href={module.href}
+                            className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                          >
+                            <span>Launch</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleModule(module)}
+                          disabled={isBusy}
+                          className="px-3 py-1.5 rounded-xl bg-brand-subtle hover:bg-brand text-brand hover:text-white border border-brand/20 font-extrabold text-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
+                        >
+                          {isBusy ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Plus className="w-3.5 h-3.5" />
+                          )}
+                          <span>Enable Service</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                }
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

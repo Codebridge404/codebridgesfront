@@ -295,7 +295,7 @@ export default function OrganizationStaffPage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Workspace Staff &amp; Access Control
+            Staff Roster &amp; Roles
           </h1>
           <p className="text-xs text-slate-500 font-medium max-w-2xl">
             Centralized management for employee accounts, frontline register PIN credentials, RBAC module capabilities, and store branch assignments.

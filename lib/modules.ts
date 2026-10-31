@@ -109,6 +109,8 @@ export const MODULE_ALIASES: Record<string, string> = {
 
   // Online Storefront
   'shop': 'shop',
+  'shop-storefront': 'shop',
+  'storefront': 'shop',
 
   // Platform Telemetry
   'telemetry-hub': 'telemetry-hub',
