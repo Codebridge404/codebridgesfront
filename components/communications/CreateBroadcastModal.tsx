@@ -1,46 +1,58 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send } from 'lucide-react';
-import { Broadcast } from './types';
+import { Send, Loader2 } from 'lucide-react';
+import { createPlatformAnnouncementApi } from '@/lib/api/support';
+import { useToast } from '@/components/common';
 
 interface CreateBroadcastModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (broadcast: Broadcast) => void;
-  broadcastCount: number;
+  onSuccess: () => void;
 }
 
 export function CreateBroadcastModal({
   isOpen,
   onClose,
-  onSubmit,
-  broadcastCount,
+  onSuccess,
 }: CreateBroadcastModalProps) {
+  const toast = useToast();
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
-  const [newType, setNewType] = useState<'announcement' | 'maintenance' | 'release_notes'>('announcement');
+  const [newType, setNewType] = useState<'info' | 'maintenance' | 'warning' | 'alert'>('info');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim()) return;
 
-    const created: Broadcast = {
-      id: `BRD-${String(broadcastCount + 1).padStart(2, '0')}`,
-      title: newTitle,
-      type: newType,
-      content: newContent,
-      status: 'published',
-      targetAudience: 'All Active Merchants',
-      publishedAt: 'Just now',
-    };
+    try {
+      setIsSubmitting(true);
+      const severityMap: Record<string, 'info' | 'warning' | 'critical'> = {
+        info: 'info',
+        maintenance: 'warning',
+        warning: 'warning',
+        alert: 'critical',
+      };
+      await createPlatformAnnouncementApi({
+        title: newTitle.trim(),
+        message: newContent.trim(),
+        severity: severityMap[newType] || 'info',
+        target_audience: 'all_tenants',
+      });
 
-    onSubmit(created);
-    setNewTitle('');
-    setNewContent('');
-    onClose();
+      toast.success('Broadcast announcement published successfully.');
+      setNewTitle('');
+      setNewContent('');
+      onSuccess();
+      onClose();
+    } catch {
+      toast.error('Failed to publish broadcast announcement.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,11 +66,12 @@ export function CreateBroadcastModal({
             <select
               value={newType}
               onChange={(e: any) => setNewType(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand cursor-pointer"
             >
-              <option value="announcement">Platform Announcement</option>
+              <option value="info">Platform Announcement (Info)</option>
               <option value="maintenance">Scheduled Maintenance Alert</option>
-              <option value="release_notes">Product Release Notes / Changelog</option>
+              <option value="warning">System Warning</option>
+              <option value="alert">Critical Platform Alert</option>
             </select>
           </div>
 
@@ -90,16 +103,27 @@ export function CreateBroadcastModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs cursor-pointer"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs cursor-pointer hover:bg-slate-200 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-black text-xs shadow-md shadow-brand/20 flex items-center gap-1.5 cursor-pointer"
+              disabled={isSubmitting}
+              className="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-black text-xs shadow-md shadow-brand/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Publish Broadcast</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Publishing...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Publish Broadcast</span>
+                </>
+              )}
             </button>
           </div>
         </form>

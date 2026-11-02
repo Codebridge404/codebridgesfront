@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiFetch, getAuthUser } from '@/lib/api';
+import { modalContent, scrimFade, appleSpring } from '@/lib/animations';
 import {
   CreateOrgModalHeader,
   WorkspaceTypeSelector,
@@ -95,11 +96,11 @@ export function CreateOrgModal({
         throw new Error(res?.message || 'Failed to create organization. Invalid server response.');
       }
 
-      // 2. Update active organization in local session
+      // 2. Update active organization and set role to organization directly in local session
       if (typeof window !== 'undefined') {
         const currentUserStr = localStorage.getItem('pos_user');
         const currentUserObj = currentUserStr ? JSON.parse(currentUserStr) : {};
-        const updatedRole = currentUserObj.role === 'super_admin' ? 'super_admin' : 'organization';
+        const updatedRole = 'organization';
         const updatedUser = {
           ...currentUserObj,
           tenant_id: createdOrgData.id || currentUserObj.tenant_id,
@@ -162,20 +163,21 @@ export function CreateOrgModal({
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={scrimFade}
+            initial="initial"
+            animate="animate"
+            exit="exit"
             onClick={handleClose}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-950/45 backdrop-blur-md"
           />
 
           {/* Modal Dialog Card */}
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 15 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-10 text-slate-800 my-auto max-h-[92vh] flex flex-col"
+            variants={modalContent}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="relative w-full max-w-lg bg-white/90 backdrop-blur-2xl backdrop-saturate-190 rounded-3xl shadow-2xl border border-white/60 overflow-hidden z-10 text-slate-800 my-auto max-h-[92vh] flex flex-col"
           >
             {/* Header Component */}
             <CreateOrgModalHeader onClose={handleClose} />

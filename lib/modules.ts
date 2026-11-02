@@ -178,6 +178,62 @@ export function isModuleEnabledForOrg(orgName: string, moduleId: string): boolea
 /**
  * Enable module and persist immediately into Backend Cloud Database & Local Cache.
  */
+export async function enableModuleForOrgAsync(orgName: string, moduleId: string): Promise<string[]> {
+  if (typeof window === 'undefined' || !orgName || orgName === 'No Organization Yet! Please Create') return [];
+  const targetCanonical = canonicalModuleId(moduleId);
+  if (!targetCanonical) return [];
+
+  const current = getEnabledModulesForOrg(orgName);
+  const canonicalList = current.map(canonicalModuleId);
+
+  if (!canonicalList.includes(targetCanonical)) {
+    const updated = Array.from(new Set([...current, targetCanonical, moduleId]));
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated } }));
+
+    try {
+      const res = await updateTenantModulesApi(updated, orgName);
+      if (res?.success && Array.isArray(res.modules)) {
+        localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(res.modules));
+        window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated: res.modules } }));
+        return res.modules;
+      }
+    } catch (err) {
+      console.warn('[modules] Failed to persist module to cloud DB:', err);
+      throw err;
+    }
+
+    return updated;
+  }
+  return current;
+}
+
+export async function disableModuleForOrgAsync(orgName: string, moduleId: string): Promise<string[]> {
+  if (typeof window === 'undefined' || !orgName) return [];
+  const targetCanonical = canonicalModuleId(moduleId);
+  if (!targetCanonical) return [];
+
+  const current = getEnabledModulesForOrg(orgName);
+  const updated = current.filter((id) => canonicalModuleId(id) !== targetCanonical);
+
+  localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated } }));
+
+  try {
+    const res = await updateTenantModulesApi(updated, orgName);
+    if (res?.success && Array.isArray(res.modules)) {
+      localStorage.setItem(`${STORAGE_KEY_PREFIX}${orgName}`, JSON.stringify(res.modules));
+      window.dispatchEvent(new CustomEvent('cb_modules_changed', { detail: { orgName, updated: res.modules } }));
+      return res.modules;
+    }
+  } catch (err) {
+    console.warn('[modules] Failed to persist module disable to cloud DB:', err);
+    throw err;
+  }
+
+  return updated;
+}
+
 export function enableModuleForOrg(orgName: string, moduleId: string): string[] {
   if (typeof window === 'undefined' || !orgName || orgName === 'No Organization Yet! Please Create') return [];
   const targetCanonical = canonicalModuleId(moduleId);

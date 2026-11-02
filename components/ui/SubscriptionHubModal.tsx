@@ -75,17 +75,17 @@ export function SubscriptionHubModal({
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative z-10 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden backdrop-blur-2xl bg-white/85 dark:bg-slate-900/85 border border-white/60 dark:border-white/10 rounded-3xl shadow-2xl"
+          className="relative z-10 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden backdrop-blur-2xl bg-white/85 border border-white/60 rounded-3xl shadow-2xl"
         >
           {/* Modal Header */}
-          <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between shrink-0 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md">
+          <div className="px-6 py-5 border-b border-slate-200/60 flex items-center justify-between shrink-0 bg-white/40 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md shadow-brand/20">
                 <AppIcons.Billing className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Subscription &amp; Quotas</h3>
+                  <h3 className="text-base font-extrabold text-slate-900">Subscription &amp; Quotas</h3>
                   <span className="px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand border border-brand/20 text-[10px] font-bold backdrop-blur-md">
                     {activeOrgName || 'Active Workspace'}
                   </span>
@@ -105,7 +105,7 @@ export function SubscriptionHubModal({
           </div>
 
           {/* Tab Navigation */}
-          <div className="px-6 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center gap-4 text-xs font-bold text-slate-500 shrink-0 bg-white/20 backdrop-blur-sm">
+          <div className="px-6 border-b border-slate-200/60 flex items-center gap-4 text-xs font-bold text-slate-500 shrink-0 bg-white/20 backdrop-blur-sm">
             <button
               type="button"
               onClick={() => setActiveTab('quotas')}

@@ -117,7 +117,7 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
 
   return (
     <aside
-      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col justify-between p-2.5 select-none shrink-0 overflow-hidden ${
+      className={`h-full bg-transparent border-r border-slate-200/80 transition-all duration-300 flex flex-col justify-between p-2.5 select-none shrink-0 overflow-hidden ${
         sidebarOpen ? 'w-64' : 'w-[72px]'
       }`}
     >

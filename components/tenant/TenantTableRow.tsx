@@ -50,7 +50,7 @@ export function TenantTableRow({
   return (
     <tr
       onClick={() => onOpenDrawer(tenant)}
-      className="hover:bg-slate-200/40 transition-colors border-b border-slate-300/60 cursor-pointer"
+      className="hover:bg-slate-50/60 transition-colors border-b border-slate-100/80 cursor-pointer"
     >
       {/* Company Column */}
       <td className="px-5 py-3.5">

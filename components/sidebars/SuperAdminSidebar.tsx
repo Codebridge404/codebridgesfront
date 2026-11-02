@@ -3,10 +3,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { appleSpring } from '@/lib/animations';
 import {
   LayoutDashboard, Building2, Layers, CreditCard, Users, BarChart3, LifeBuoy,
   ShieldCheck, Sliders, DollarSign, Key, Lock, Server, Receipt, UserCheck, Shield,
-  ChevronDown, ChevronRight, ExternalLink, Search, X, Sparkles, LucideIcon,
+  ChevronDown, ChevronRight, ExternalLink, Search, X, Sparkles, LucideIcon, Settings,
 } from 'lucide-react';
 import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
@@ -64,12 +66,11 @@ export const platformNavGroups: NavGroup[] = [
   },
   {
     id: 'security-governance',
-    title: 'Security, Audits & Support',
+    title: 'Security & Governance',
     items: [
+      { name: 'Platform Settings', href: '/super-admin/settings', icon: Settings },
       { name: 'Dynamic Roles & RBAC', href: '/super-admin/security/roles', icon: Shield },
       { name: 'Immutable Audit Trail', href: '/super-admin/security/audit-logs', icon: Lock },
-      { name: 'Setting', href: '/super-admin/security/settings', icon: ShieldCheck },
-      { name: 'Global Support & Desk', href: '/super-admin/support', icon: LifeBuoy },
       { name: 'Admin Profile', href: '/super-admin/security/profile', icon: UserCheck },
     ],
   },
@@ -123,7 +124,7 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
 
   return (
     <aside
-      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
+      className={`h-full bg-transparent border-r border-slate-200/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 ${
         sidebarOpen ? 'w-64' : 'w-[72px]'
       }`}
     >
@@ -167,7 +168,7 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
               <button
                 type="button"
                 onClick={() => setNavSearch('')}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -189,14 +190,14 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
                   <button
                     type="button"
                     onClick={() => toggleGroup(group.id)}
-                    className="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors group cursor-pointer"
+                    className="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-slate-700 active:scale-[0.98] transition-all group cursor-pointer"
                   >
                     <span className="truncate">{group.title}</span>
                     <div className="flex items-center gap-1">
-                      <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-100 px-1 rounded">
+                      <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-100/80 px-1 rounded">
                         {group.items.length}
                       </span>
-                      {isExpanded ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronRight className="w-3 h-3 text-slate-400" />}
+                      {isExpanded ? <ChevronDown className="w-3 h-3 text-slate-400 transition-transform duration-200" /> : <ChevronRight className="w-3 h-3 text-slate-400 transition-transform duration-200" />}
                     </div>
                   </button>
                 ) : (
@@ -205,47 +206,61 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
                   </div>
                 )
               ) : (
-                <div className="h-px bg-slate-100 my-2 mx-1" />
+                <div className="h-px bg-slate-200/50 my-2 mx-1" />
               )}
 
-              {(isExpanded || !sidebarOpen) && (
-                <div className="space-y-0.5">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const active = isItemActive(item.href);
+              <AnimatePresence initial={false}>
+                {(isExpanded || !sidebarOpen) && (
+                  <motion.div
+                    initial={isCollapsible && sidebarOpen ? { height: 0, opacity: 0 } : false}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={isCollapsible && sidebarOpen ? { height: 0, opacity: 0 } : undefined}
+                    transition={appleSpring}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isItemActive(item.href);
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        title={!sidebarOpen ? item.name : undefined}
-                        className={`group relative flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs transition-all duration-150 ${
-                          active
-                            ? 'bg-gradient-to-r from-brand to-brand-hover text-white font-black shadow-sm shadow-brand/25'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-bold'
-                        } ${!sidebarOpen ? 'justify-center px-0 w-11 h-10 mx-auto' : ''}`}
-                      >
-                        {active && <span className="absolute -left-1.5 top-1.5 bottom-1.5 w-1 rounded-r-full bg-brand shadow-xs" />}
-                        <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${active ? 'text-white' : 'text-slate-400 group-hover:text-brand'}`} />
-                        {sidebarOpen && <span className="truncate tracking-tight flex-1">{item.name}</span>}
-                        {sidebarOpen && item.badge && (
-                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto shrink-0 ${active ? 'bg-white/25 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
-                            {item.badge}
-                          </span>
-                        )}
-                        {sidebarOpen && item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400 opacity-70 ml-auto shrink-0" />}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          title={!sidebarOpen ? item.name : undefined}
+                          className={`group relative flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs active:scale-[0.97] transition-transform duration-100 ${
+                            active
+                              ? 'text-white font-black'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60 font-bold'
+                          } ${!sidebarOpen ? 'justify-center px-0 w-11 h-10 mx-auto' : ''}`}
+                        >
+                          {active && (
+                            <motion.div
+                              layoutId="activeAdminNavIndicator"
+                              className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand to-brand-hover shadow-sm shadow-brand/25 -z-0"
+                              transition={appleSpring}
+                            />
+                          )}
+                          <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 relative z-10 ${active ? 'text-white' : 'text-slate-400 group-hover:text-brand'}`} />
+                          {sidebarOpen && <span className="truncate tracking-tight flex-1 relative z-10">{item.name}</span>}
+                          {sidebarOpen && item.badge && (
+                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto shrink-0 relative z-10 ${active ? 'bg-white/25 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                              {item.badge}
+                            </span>
+                          )}
+                          {sidebarOpen && item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400 opacity-70 ml-auto shrink-0 relative z-10" />}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-200/80 bg-slate-50/70">
+      <div className="p-3 border-t border-slate-200/80 bg-transparent">
         {sidebarOpen ? (
           <div className="flex items-center justify-between text-[10px]">
             <div className="flex items-center gap-1.5 truncate">

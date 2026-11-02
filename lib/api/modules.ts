@@ -8,6 +8,7 @@ export interface PlatformModuleRecord {
   description: string;
   icon: string;
   logo_url?: string | null;
+  logo_data?: string | null;
   href: string;
   bg_pill?: string | null;
   card_bg?: string | null;

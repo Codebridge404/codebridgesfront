@@ -53,39 +53,51 @@ function SuperAdminDashboardContent() {
 
   return (
     <div className="space-y-3 w-full pb-6">
-      {/* 1. OONE Royal Iris Purple Hero Banner */}
-      <div className="bg-gradient-to-r from-brand via-brand-hover to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-[0_10px_30px_rgba(91,77,251,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      {/* 1. Transparent Glassmorphic Platform Operations Cockpit Hero Card */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-xs hover:border-slate-300/80 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden select-none">
         {/* Soft Ambient Blur Glows */}
-        <div className="absolute -right-10 -top-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute right-1/3 -bottom-10 w-48 h-48 bg-brand-border/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="pointer-events-none absolute -top-12 -right-12 w-64 h-64 bg-brand/10 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
 
-        <div className="space-y-2 relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold uppercase tracking-wider text-white">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>CodeBridges Cloud Platform Engine</span>
+        <div className="flex items-center gap-3.5 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-brand-subtle text-brand border border-brand-border/60 flex items-center justify-center shrink-0 shadow-2xs">
+            <Zap className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Platform Operations & Executive Cockpit
-          </h1>
-          <p className="text-xs sm:text-sm text-purple-100 font-medium leading-relaxed">
-            Centralized multi-tenant orchestration, real-time microservices telemetry, dynamic MRR cohorts, and ecosystem provisioning.
-          </p>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Platform Operations &amp; Executive Cockpit
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brand-subtle text-brand border border-brand/20 inline-flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-brand" />
+                CodeBridges Cloud Platform Engine
+              </span>
+              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Fleet
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              Centralized multi-tenant orchestration, real-time microservices telemetry, dynamic MRR cohorts, and ecosystem provisioning.
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 relative z-10">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0 relative z-10">
           <button
             type="button"
             onClick={() => refetch()}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs backdrop-blur-md border border-white/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] disabled:opacity-60"
+            title="Refresh live platform telemetry"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-brand ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh Telemetry</span>
           </button>
 
           <Link
             href="/super-admin/platform/tenants"
-            className="px-4 py-2.5 rounded-xl bg-white text-brand font-extrabold text-xs hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs shadow-md shadow-brand/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
             <Building2 className="w-4 h-4" />
             <span>Manage Tenants</span>
@@ -93,9 +105,9 @@ function SuperAdminDashboardContent() {
 
           <Link
             href="/super-admin/platform/modules"
-            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
-            <Layers className="w-4 h-4" />
+            <Layers className="w-4 h-4 text-slate-500" />
             <span>Module Registry</span>
           </Link>
         </div>

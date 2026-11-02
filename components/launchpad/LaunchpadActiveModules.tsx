@@ -11,6 +11,7 @@ interface LaunchpadActiveModulesProps {
   activeModules: CatalogModule[];
   userRole?: string;
   user?: UserAuthProfile | null;
+  hasOrganization?: boolean;
   isTogglingModule: string | null;
   onToggleModule: (moduleId: string, enable: boolean) => void;
   onOpenSubscriptionModal?: () => void;
@@ -20,6 +21,7 @@ export function LaunchpadActiveModules({
   activeModules,
   userRole,
   user,
+  hasOrganization,
   isTogglingModule,
   onToggleModule,
   onOpenSubscriptionModal,
@@ -31,10 +33,12 @@ export function LaunchpadActiveModules({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
           <h3 className="text-sm font-black text-slate-900 tracking-tight">
             {userIsEmployee
               ? `My Assigned Workspace Modules (${activeModules.length} Active)`
+              : userRole === 'super_admin'
+              ? `Platform Core Services (${activeModules.length} Active)`
               : `Active Running Modules (${activeModules.length} Enabled)`}
           </h3>
         </div>
@@ -50,6 +54,13 @@ export function LaunchpadActiveModules({
               <h4 className="text-xs font-black text-slate-800">No Modules Assigned to Your Account</h4>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
                 You have not been assigned access to any operational suites in this workspace yet. Please contact your organization administrator.
+              </p>
+            </>
+          ) : !hasOrganization && user && userRole !== 'super_admin' ? (
+            <>
+              <h4 className="text-xs font-black text-slate-800">No Organization Workspace Created Yet</h4>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Create your organization workspace above to activate software suites, manage subscriptions, and assign team members.
               </p>
             </>
           ) : (
@@ -104,7 +115,7 @@ export function LaunchpadActiveModules({
                           onClick={() => onToggleModule(mod.id, false)}
                           disabled={isProcessing}
                           title="Deactivate Module"
-                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 active:scale-[0.93] transition-all cursor-pointer disabled:opacity-50"
                         >
                           {isProcessing ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -118,7 +129,7 @@ export function LaunchpadActiveModules({
                         <button
                           type="button"
                           onClick={onOpenSubscriptionModal}
-                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <span>Manage Plan</span>
                           <ArrowRight className="w-3 h-3" />
@@ -128,7 +139,7 @@ export function LaunchpadActiveModules({
                           href={launchHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <span>Launch</span>
                           <ArrowRight className="w-3 h-3" />

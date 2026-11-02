@@ -1,43 +1,49 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Store,
-  Save,
-  CheckCircle2,
-  Shield,
+  ShieldCheck,
   Lock,
+  KeyRound,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   getSessionsApi,
   revokeSessionApi,
   logoutAllDevicesApi,
   toggle2faApi,
-  getQuotaUsageApi,
   getMeApi,
+  updateUserPasswordApi,
 } from '@/lib/api/auth';
-import { QuotaUsageCard } from './QuotaUsageCard';
 import { ActiveSessionsCard } from './ActiveSessionsCard';
 
 export const SuperAdminSecuritySettingsView: React.FC = () => {
-  // Store Settings
-  const [storeName, setStoreName] = useState('Dreams Coffee & Bakery');
-  const [vatTaxRate, setVatTaxRate] = useState('10');
-  const [currencyMode, setCurrencyMode] = useState('USD_KHR');
-  const [saved, setSaved] = useState(false);
-
   // Active Sessions State
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
-
-  // Quota State
-  const [quotaData, setQuotaData] = useState<any>(null);
 
   // 2FA State
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [twoFactorSecret, setTwoFactorSecret] = useState<string | null>(null);
   const [toggling2fa, setToggling2fa] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+
+  // Password Change State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const fetchSessions = async () => {
     try {
@@ -50,17 +56,6 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
       console.warn('Failed to load active sessions:', err);
     } finally {
       setLoadingSessions(false);
-    }
-  };
-
-  const fetchQuota = async () => {
-    try {
-      const res = await getQuotaUsageApi();
-      if (res.status === 'success' && res.data) {
-        setQuotaData(res.data);
-      }
-    } catch (err: any) {
-      console.warn('Failed to load quota usage:', err);
     }
   };
 
@@ -77,15 +72,8 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
 
   useEffect(() => {
     fetchSessions();
-    fetchQuota();
     fetchUserSecurity();
   }, []);
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
 
   const handleRevokeSession = async (id: string | number) => {
     if (!confirm('Are you sure you want to terminate this active device session?')) return;
@@ -102,7 +90,6 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
     try {
       await logoutAllDevicesApi(false);
       fetchSessions();
-      alert('All other devices have been logged out.');
     } catch (err: any) {
       alert(err.message || 'Failed to terminate all sessions.');
     }
@@ -124,126 +111,272 @@ export const SuperAdminSecuritySettingsView: React.FC = () => {
     }
   };
 
+  const handleCopySecret = (secret: string) => {
+    navigator.clipboard.writeText(secret);
+    setCopiedSecret(true);
+    setTimeout(() => setCopiedSecret(false), 2000);
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    if (!currentPassword) {
+      setPasswordError('Please provide your current master password.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters in length.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New password confirmation does not match.');
+      return;
+    }
+
+    setUpdatingPassword(true);
+    try {
+      const res = await updateUserPasswordApi({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+
+      if (res.status === 'success' || res.message) {
+        setPasswordSuccess('Super Admin password successfully updated!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setTimeout(() => setPasswordSuccess(null), 4000);
+      }
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to update master password. Please verify current password.');
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   return (
-    <div className="p-8 space-y-8 max-w-5xl mx-auto font-sans text-slate-800">
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-          <Shield className="w-7 h-7 text-brand" />
-          Setting
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Manage system configurations, subscription plan quotas, active device sessions, and account security hardening.
-        </p>
+    <div className="space-y-6 max-w-5xl mx-auto font-sans text-slate-800 pb-12">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand text-[11px] font-bold uppercase tracking-wider mb-1">
+            <ShieldCheck className="w-3 h-3" /> Security Governance
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <Lock className="w-6 h-6 text-brand" />
+            Security & Device Sessions
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Master administrative account hardening, Two-Factor Authentication (2FA), credential security, and live session management
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border backdrop-blur-md ${
+            twoFactorEnabled
+              ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20'
+              : 'bg-amber-500/10 text-amber-700 border-amber-500/20'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${twoFactorEnabled ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+            {twoFactorEnabled ? '2FA Protected' : '2FA Recommended'}
+          </span>
+        </div>
       </div>
 
-      {saved && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center gap-2"
-        >
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" /> System settings saved successfully!
-        </motion.div>
-      )}
-
-      {/* 1. Multi-Tenant Plan Quotas */}
-      <QuotaUsageCard quotaData={quotaData} />
-
-      {/* 2. Store Configuration Form */}
-      <form onSubmit={handleSave} className="bg-transparent border border-slate-300/80 rounded-3xl p-6 space-y-6">
-        <div className="space-y-4 text-xs">
-          <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <Store className="w-4 h-4 text-brand" />
-            General Store & Taxation Settings
-          </h2>
-
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">Company / Store Name</label>
-            <input
-              type="text"
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Default VAT Tax Rate (%)</label>
-              <input
-                type="number"
-                value={vatTaxRate}
-                onChange={(e) => setVatTaxRate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
-              />
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Operating Currency Mode</label>
-              <select
-                value={currencyMode}
-                onChange={(e) => setCurrencyMode(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-transparent border border-slate-300/80 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand cursor-pointer"
-              >
-                <option value="USD_KHR">Dual Currency ($ USD & ៛ KHR NBC Exchange)</option>
-                <option value="USD">Single Currency ($ USD)</option>
-                <option value="KHR">Single Currency (៛ KHR)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-2 flex justify-end">
-          <button
-            type="submit"
-            className="px-6 py-3 bg-brand hover:bg-brand-hover font-bold text-xs text-white rounded-xl shadow-md shadow-brand/20 transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <Save className="w-4 h-4" /> Save System Settings
-          </button>
-        </div>
-      </form>
-
-      {/* 3. Account Hardening & Two-Factor Authentication */}
-      <div className="bg-transparent border border-slate-300/80 rounded-3xl p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-subtle text-brand flex items-center justify-center border border-brand/20">
-              <Lock className="w-5 h-5" />
+      {/* 1. Account Hardening & Two-Factor Authentication (2FA) */}
+      <div className="bg-white/50 backdrop-blur-2xl backdrop-saturate-180 border border-white/80 rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shadow-xs ${
+              twoFactorEnabled
+                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                : 'bg-brand-subtle text-brand border-brand/20'
+            }`}>
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-slate-900">Two-Factor Authentication (2FA)</h2>
-              <p className="text-xs text-slate-500 font-medium">Add an extra layer of security to your admin account during login.</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-black text-slate-900">Two-Factor Authentication (TOTP 2FA)</h2>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${
+                  twoFactorEnabled
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                }`}>
+                  {twoFactorEnabled ? 'Active' : 'Disabled'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Enforces time-based one-time authentication codes from Google Authenticator, Authy, or 1Password upon login.
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleToggle2FA}
             disabled={toggling2fa}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50 ${
               twoFactorEnabled
-                ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
-                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
+                ? 'bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200/80'
+                : 'bg-brand hover:bg-brand-hover text-white shadow-brand/20'
             }`}
           >
-            {toggling2fa ? 'Updating...' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+            {toggling2fa ? 'Processing...' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA Protection'}
           </button>
         </div>
 
-        {twoFactorSecret && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-900 space-y-1"
-          >
-            <p className="font-extrabold">2FA Enabled Successfully!</p>
-            <p className="font-mono text-[11px] text-emerald-800">
-              Backup Secret Key: <span className="font-black bg-white px-2 py-0.5 rounded border border-emerald-300">{twoFactorSecret}</span>
-            </p>
-          </motion.div>
-        )}
+        {/* 2FA Secret Reveal Box */}
+        <AnimatePresence>
+          {twoFactorSecret && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 text-xs text-emerald-900 space-y-2 backdrop-blur-md"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  Two-Factor Authentication Provisioned Successfully
+                </span>
+                <span className="text-[10px] font-mono text-emerald-600">Store Securely</span>
+              </div>
+              <p className="text-[11px] text-emerald-700 font-medium">
+                Scan the QR code or manually enter the secret string into your authenticator app:
+              </p>
+              <div className="flex items-center gap-2 p-2.5 bg-white/90 rounded-xl border border-emerald-300 font-mono text-xs">
+                <span className="font-black text-slate-900 tracking-wider flex-1 truncate">{twoFactorSecret}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCopySecret(twoFactorSecret)}
+                  className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-sans font-bold text-[10px] rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedSecret ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-700" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy Secret</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* 4. Active Devices & Logged-In Sessions */}
+      {/* 2. Super Admin Credential & Password Mutation */}
+      <div className="bg-white/50 backdrop-blur-2xl backdrop-saturate-180 border border-white/80 rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+        <div className="flex items-center gap-3.5 border-b border-slate-200/60 pb-4">
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20 shadow-xs">
+            <KeyRound className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-slate-900">Update Super Admin Password</h2>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Change the primary root credentials used to access the CodeBridges Super Admin cluster
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          {passwordSuccess && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{passwordSuccess}</span>
+            </div>
+          )}
+
+          {passwordError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{passwordError}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Current Password</label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white/70 border border-slate-200/80 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">New Password</label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white/70 border border-slate-200/80 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white/70 border border-slate-200/80 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all shadow-xs"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              disabled={updatingPassword}
+              className="px-5 py-2.5 bg-brand hover:bg-brand-hover active:scale-95 text-white font-bold text-xs rounded-xl shadow-md shadow-brand/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {updatingPassword ? (
+                <>
+                  <ShieldAlert className="w-3.5 h-3.5 animate-spin" />
+                  <span>Updating Password...</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Update Master Password</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* 3. Active Devices & Logged-In Sessions */}
       <ActiveSessionsCard
         sessions={sessions}
         loadingSessions={loadingSessions}

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, X, Delete, Lock, AlertCircle } from 'lucide-react';
 import { posAudio } from '@/hooks/usePosAudio';
+import { appleSpring, pressSpring } from '@/lib/animations';
 
 interface PosSupervisorPinModalProps {
   actionName: string;
@@ -67,12 +69,18 @@ export function PosSupervisorPinModal({
   }, [pin]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
-      <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200/90 space-y-5">
+    <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 10 }}
+        transition={appleSpring}
+        className="bg-white/90 backdrop-blur-2xl backdrop-saturate-190 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/60 space-y-5"
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
@@ -83,7 +91,7 @@ export function PosSupervisorPinModal({
           <button
             type="button"
             onClick={onCancel}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 active:scale-[0.92] hover:bg-slate-100:bg-slate-800 transition-all cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -91,14 +99,16 @@ export function PosSupervisorPinModal({
 
         {/* PIN Display */}
         <div className="text-center space-y-2 py-2">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2.5">
             {[0, 1, 2, 3].map((idx) => (
-              <div
+              <motion.div
                 key={idx}
-                className={`w-4 h-4 rounded-full border-2 transition-all ${
+                animate={idx < pin.length ? { scale: [1, 1.25, 1.1] } : { scale: 1 }}
+                transition={appleSpring}
+                className={`w-4 h-4 rounded-full border-2 transition-colors ${
                   idx < pin.length
-                    ? 'bg-slate-900 border-slate-900 scale-110'
-                    : 'bg-slate-100 border-slate-300'
+                    ? 'bg-slate-900 border-slate-900'
+                    : 'bg-slate-100/80 border-slate-300'
                 }`}
               />
             ))}
@@ -121,7 +131,7 @@ export function PosSupervisorPinModal({
               key={digit}
               type="button"
               onClick={() => handleDigit(digit)}
-              className="h-13 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200 text-slate-900 text-lg font-black transition-all cursor-pointer shadow-2xs"
+              className="h-13 rounded-2xl bg-slate-100/70 hover:bg-slate-200/70 active:scale-[0.93] active:bg-slate-300/80 border border-slate-200/80 text-slate-900 text-lg font-black transition-all cursor-pointer shadow-2xs"
             >
               {digit}
             </button>
@@ -129,21 +139,21 @@ export function PosSupervisorPinModal({
           <button
             type="button"
             onClick={handleClear}
-            className="h-13 rounded-2xl bg-rose-50 hover:bg-rose-100 active:scale-95 border border-rose-200 text-rose-700 text-xs font-black transition-all cursor-pointer"
+            className="h-13 rounded-2xl bg-rose-50 hover:bg-rose-100 active:scale-[0.93] border border-rose-200 text-rose-700 text-xs font-black transition-all cursor-pointer"
           >
             Clear
           </button>
           <button
             type="button"
             onClick={() => handleDigit('0')}
-            className="h-13 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200 text-slate-900 text-lg font-black transition-all cursor-pointer shadow-2xs"
+            className="h-13 rounded-2xl bg-slate-100/70 hover:bg-slate-200/70 active:scale-[0.93] active:bg-slate-300/80 border border-slate-200/80 text-slate-900 text-lg font-black transition-all cursor-pointer shadow-2xs"
           >
             0
           </button>
           <button
             type="button"
             onClick={handleBackspace}
-            className="h-13 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 border border-slate-200 text-slate-700 flex items-center justify-center transition-all cursor-pointer"
+            className="h-13 rounded-2xl bg-slate-100/70 hover:bg-slate-200/70 active:scale-[0.93] border border-slate-200/80 text-slate-700 flex items-center justify-center transition-all cursor-pointer"
             title="Backspace"
           >
             <Delete className="w-5 h-5" />
@@ -155,12 +165,12 @@ export function PosSupervisorPinModal({
           type="button"
           onClick={handleVerify}
           disabled={pin.length < 4}
-          className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-brand text-white text-xs font-black shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+          className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-brand active:scale-[0.97] text-white text-xs font-black shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
         >
           <Lock className="w-4 h-4" />
           <span>Authorize Override</span>
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

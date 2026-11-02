@@ -1,30 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Sliders,
-  Key,
-  ShieldCheck,
-  Save,
-  CheckCircle2,
-  Globe,
-} from 'lucide-react';
-import { GeneralSettingsTab } from './GeneralSettingsTab';
+import { Settings, CheckCircle2, Loader2 } from 'lucide-react';
 import { IntegrationsSettingsTab } from './IntegrationsSettingsTab';
 import { SecuritySettingsTab } from './SecuritySettingsTab';
+import { PlatformSettingsSubSidebar, PlatformSettingsTab } from './PlatformSettingsSubSidebar';
 
-export function SuperAdminPlatformSettingsView() {
-  const [activeTab, setActiveTab] = useState<'general' | 'integrations' | 'security'>('general');
+const VALID_TABS: PlatformSettingsTab[] = ['integrations', 'policies'];
+
+function SuperAdminPlatformSettingsContent() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') as PlatformSettingsTab | null;
+
+  const [activeTab, setActiveTab] = useState<PlatformSettingsTab>(() => {
+    if (tabParam && VALID_TABS.includes(tabParam)) return tabParam;
+    return 'integrations';
+  });
+
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Platform Form State
-  const [platformName, setPlatformName] = useState('CodeBridges Enterprise');
-  const [supportEmail, setSupportEmail] = useState('support@codebridges.io');
-  const [defaultCurrency, setDefaultCurrency] = useState('USD');
-  const [defaultTrialDays, setDefaultTrialDays] = useState('14');
-  const [defaultTaxRate, setDefaultTaxRate] = useState('10');
 
   // Integrations State
   const [bakongMerchantId, setBakongMerchantId] = useState('CODEBRIDGES_MASTER_HQ');
@@ -38,22 +35,39 @@ export function SuperAdminPlatformSettingsView() {
   const [enforce2FA, setEnforce2FA] = useState(true);
   const [allowCashierPinSwitch, setAllowCashierPinSwitch] = useState(true);
 
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const switchTab = (tab: PlatformSettingsTab) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.pushState({}, '', url.toString());
+    }
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      showToast('Global platform settings and integration keys saved successfully!');
+      setSaved(true);
+      showToast('Platform settings saved successfully!');
+      setTimeout(() => setSaved(false), 3000);
     }, 600);
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto font-sans pb-12">
+    <div className="w-full font-sans pb-16 space-y-6">
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -69,123 +83,75 @@ export function SuperAdminPlatformSettingsView() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand to-brand-hover p-0.5 shadow-md shadow-brand/15 flex items-center justify-center">
-            <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-              <Sliders className="w-6 h-6 text-brand" />
-            </div>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand mb-1">
+            <Settings className="w-4 h-4" />
+            <span>Platform Governance</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                Setting
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand text-[10px] font-extrabold border border-brand/20 uppercase">
-                Platform Config
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Master configuration for payment gateways, default trial limits, Bakong KHQR credentials, and security policies.
-            </p>
-          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Platform Settings</h1>
+          <p className="text-xs text-slate-500 font-medium">
+            Central payment gateways, Bakong KHQR credentials, and global platform security policies
+          </p>
         </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-98 text-white font-extrabold text-xs shadow-md shadow-brand/20 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-        >
-          <Save className="w-3.5 h-3.5" />
-          <span>{saving ? 'Saving...' : 'Save Settings'}</span>
-        </button>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 w-fit text-xs font-extrabold">
-        <button
-          type="button"
-          onClick={() => setActiveTab('general')}
-          className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeTab === 'general'
-              ? 'bg-slate-900 text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <Globe className="w-3.5 h-3.5" />
-          <span>General Defaults</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('integrations')}
-          className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeTab === 'integrations'
-              ? 'bg-slate-900 text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <Key className="w-3.5 h-3.5" />
-          <span>Master Integrations (Bakong &amp; SMS)</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('security')}
-          className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeTab === 'security'
-              ? 'bg-slate-900 text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Security &amp; PIN Policies</span>
-        </button>
-      </div>
+      {/* Main 2-Column Layout: Sub-Sidebar + Active Global Tab Content */}
+      <div className="flex flex-col md:flex-row items-start gap-8">
+        <PlatformSettingsSubSidebar activeTab={activeTab} onTabChange={switchTab} />
 
-      {/* Form Content */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6">
-        {activeTab === 'general' && (
-          <GeneralSettingsTab
-            platformName={platformName}
-            setPlatformName={setPlatformName}
-            supportEmail={supportEmail}
-            setSupportEmail={setSupportEmail}
-            defaultCurrency={defaultCurrency}
-            setDefaultCurrency={setDefaultCurrency}
-            defaultTrialDays={defaultTrialDays}
-            setDefaultTrialDays={setDefaultTrialDays}
-            defaultTaxRate={defaultTaxRate}
-            setDefaultTaxRate={setDefaultTaxRate}
-          />
-        )}
+        <main className="flex-1 w-full min-w-0">
+          {activeTab === 'integrations' && (
+            <IntegrationsSettingsTab
+              bakongMerchantId={bakongMerchantId}
+              setBakongMerchantId={setBakongMerchantId}
+              bakongBankName={bakongBankName}
+              setBakongBankName={setBakongBankName}
+              bakongSecret={bakongSecret}
+              setBakongSecret={setBakongSecret}
+              smsGatewayProvider={smsGatewayProvider}
+              setSmsGatewayProvider={setSmsGatewayProvider}
+              smsApiKey={smsApiKey}
+              setSmsApiKey={setSmsApiKey}
+              saving={saving}
+              saved={saved}
+              onSave={handleSave}
+            />
+          )}
 
-        {activeTab === 'integrations' && (
-          <IntegrationsSettingsTab
-            bakongMerchantId={bakongMerchantId}
-            setBakongMerchantId={setBakongMerchantId}
-            bakongBankName={bakongBankName}
-            setBakongBankName={setBakongBankName}
-            bakongSecret={bakongSecret}
-            setBakongSecret={setBakongSecret}
-            smsGatewayProvider={smsGatewayProvider}
-            setSmsGatewayProvider={setSmsGatewayProvider}
-            smsApiKey={smsApiKey}
-            setSmsApiKey={setSmsApiKey}
-          />
-        )}
-
-        {activeTab === 'security' && (
-          <SecuritySettingsTab
-            enforce2FA={enforce2FA}
-            setEnforce2FA={setEnforce2FA}
-            allowCashierPinSwitch={allowCashierPinSwitch}
-            setAllowCashierPinSwitch={setAllowCashierPinSwitch}
-            sessionTimeout={sessionTimeout}
-            setSessionTimeout={setSessionTimeout}
-          />
-        )}
+          {activeTab === 'policies' && (
+            <SecuritySettingsTab
+              enforce2FA={enforce2FA}
+              setEnforce2FA={setEnforce2FA}
+              allowCashierPinSwitch={allowCashierPinSwitch}
+              setAllowCashierPinSwitch={setAllowCashierPinSwitch}
+              sessionTimeout={sessionTimeout}
+              setSessionTimeout={setSessionTimeout}
+              saving={saving}
+              saved={saved}
+              onSave={handleSave}
+            />
+          )}
+        </main>
       </div>
     </div>
+  );
+}
+
+export function SuperAdminPlatformSettingsView() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[400px] flex items-center justify-center p-6">
+          <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
+            <Loader2 className="w-5 h-5 animate-spin text-brand" />
+            <span>Loading Platform Settings...</span>
+          </div>
+        </div>
+      }
+    >
+      <SuperAdminPlatformSettingsContent />
+    </Suspense>
   );
 }

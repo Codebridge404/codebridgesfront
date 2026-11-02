@@ -135,7 +135,7 @@ export function LaunchpadCatalogGrid({
                         <button
                           type="button"
                           onClick={onOpenSubscriptionModal}
-                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <span>Manage Plan</span>
                           <ArrowRight className="w-3 h-3" />
@@ -145,7 +145,7 @@ export function LaunchpadCatalogGrid({
                           href={launchHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <span>Launch</span>
                           <ArrowRight className="w-3 h-3" />
@@ -158,7 +158,7 @@ export function LaunchpadCatalogGrid({
                           onClick={() => onToggleModule(mod.id, false)}
                           disabled={isProcessing}
                           title="Deactivate Module"
-                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 active:scale-[0.93] transition-all cursor-pointer disabled:opacity-50"
                         >
                           {isProcessing ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -171,7 +171,7 @@ export function LaunchpadCatalogGrid({
                           <button
                             type="button"
                             onClick={onOpenSubscriptionModal}
-                            className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                            className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                           >
                             <span>Manage</span>
                             <ArrowRight className="w-3 h-3" />
@@ -181,7 +181,7 @@ export function LaunchpadCatalogGrid({
                             href={launchHref}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white font-extrabold text-xs transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                            className="px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.95] text-white font-extrabold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                           >
                             <span>Launch</span>
                             <ArrowRight className="w-3 h-3" />
@@ -193,7 +193,7 @@ export function LaunchpadCatalogGrid({
                         type="button"
                         onClick={() => onToggleModule(mod.id, true)}
                         disabled={isProcessing}
-                        className="px-3 py-1.5 rounded-xl bg-brand-subtle hover:bg-brand text-brand hover:text-white border border-brand/20 font-extrabold text-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-xl bg-brand-subtle hover:bg-brand text-brand hover:text-white border border-brand/20 font-extrabold text-xs active:scale-[0.95] transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         {isProcessing ? (
                           <RefreshCw className="w-3 h-3 animate-spin" />

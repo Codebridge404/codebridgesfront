@@ -1,5 +1,5 @@
-import { SuperAdminSecuritySettingsView } from '@/components/security/settings';
+import { redirect } from 'next/navigation';
 
 export default function AdminStoreSettingsPage() {
-  return <SuperAdminSecuritySettingsView />;
+  redirect('/super-admin/settings?tab=security-sessions');
 }

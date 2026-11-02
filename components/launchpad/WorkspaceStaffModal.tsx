@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Users, Search, UserPlus, ShieldCheck, Check, AlertCircle, ExternalLink } from 'lucide-react';
 import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermissionsApi } from '@/lib/api';
 import { badgeStyles } from '@/lib/theme';
+import { modalContent, scrimFade, appleSpring } from '@/lib/animations';
 import { useConfirm, useToast } from '@/components/common';
 import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/components/security/users';
 import { WorkspaceStaffDirectory } from './staff/WorkspaceStaffDirectory';
@@ -169,42 +171,59 @@ export function WorkspaceStaffModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      {/* Existing Security Modal: Permissions Matrix */}
-      <PermissionsMatrixModal
-        isOpen={showPermissionsModal}
-        permissionsMatrix={permissionsMatrix}
-        onClose={() => setShowPermissionsModal(false)}
-      />
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop Scrim */}
+        <motion.div
+          variants={scrimFade}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          onClick={onClose}
+          className="fixed inset-0 bg-slate-950/45 backdrop-blur-md"
+        />
 
-      {/* Existing Security Modal: Edit User Role & Profile */}
-      <UserFormModal
-        isOpen={!!editingStaff}
-        editingUser={editingStaff}
-        formData={editFormData}
-        setFormData={setEditFormData}
-        onClose={() => setEditingStaff(null)}
-        onSubmit={handleSaveEdit}
-        saving={savingEdit}
-        dynamicRoles={[]}
-      />
+        {/* Existing Security Modal: Permissions Matrix */}
+        <PermissionsMatrixModal
+          isOpen={showPermissionsModal}
+          permissionsMatrix={permissionsMatrix}
+          onClose={() => setShowPermissionsModal(false)}
+        />
 
-      <div className="w-full max-w-2xl rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">Workspace Staff &amp; Access</h2>
-              <span className={badgeStyles.brand}>{staff.length} Active</span>
+        {/* Existing Security Modal: Edit User Role & Profile */}
+        <UserFormModal
+          isOpen={!!editingStaff}
+          editingUser={editingStaff}
+          formData={editFormData}
+          setFormData={setEditFormData}
+          onClose={() => setEditingStaff(null)}
+          onSubmit={handleSaveEdit}
+          saving={savingEdit}
+          dynamicRoles={[]}
+        />
+
+        <motion.div
+          variants={modalContent}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="relative z-10 w-full max-w-2xl rounded-3xl bg-white/90 backdrop-blur-2xl backdrop-saturate-190 border border-white/60 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        >
+          {/* Modal Header */}
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black text-slate-900 tracking-tight">Workspace Staff &amp; Access</h2>
+                <span className={badgeStyles.brand}>{staff.length} Active</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">
+                Manage accounts, cashier credentials, and outlet access for {activeOrgName}
+              </p>
             </div>
-            <p className="text-xs text-slate-500 font-medium">
-              Manage accounts, cashier credentials, and outlet access for {activeOrgName}
-            </p>
+            <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 active:scale-[0.92] hover:bg-slate-100 transition-all cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
         {/* Dynamic Context Banner */}
         {isHrmEnabled && (
@@ -288,7 +307,8 @@ export function WorkspaceStaffModal({
             />
           )}
         </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }

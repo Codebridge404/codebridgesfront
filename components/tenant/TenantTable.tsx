@@ -29,21 +29,21 @@ export function TenantTable({
   onDelete,
 }: TenantTableProps) {
   return (
-    <div className="bg-transparent rounded-2xl border border-slate-300/80 overflow-hidden font-sans">
+    <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:border-slate-300/80 transition-all overflow-hidden font-sans">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-transparent border-b border-slate-300/60 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-              <th className="px-5 py-3">Store Organization</th>
-              <th className="px-4 py-3">Workspace Owner</th>
-              <th className="px-4 py-3">Client Tier</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Subscription</th>
-              <th className="px-4 py-3">Quotas (Stores/Reg/Users)</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+            <tr className="bg-slate-50/60 border-b border-slate-200/80 text-[10px] uppercase font-black text-slate-500 tracking-wider">
+              <th className="px-5 py-3.5">Store Organization</th>
+              <th className="px-4 py-3.5">Workspace Owner</th>
+              <th className="px-4 py-3.5">Client Tier</th>
+              <th className="px-4 py-3.5">Status</th>
+              <th className="px-4 py-3.5">Subscription</th>
+              <th className="px-4 py-3.5">Quotas (Stores/Reg/Users)</th>
+              <th className="px-4 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/80 bg-transparent">
+          <tbody className="divide-y divide-slate-100 bg-transparent">
             {loading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-bold">

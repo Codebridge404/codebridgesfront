@@ -35,11 +35,27 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                    console.warn('SW registration skipped:', err);
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                  // In local development, unregister service workers to prevent dev server / HMR loops
+                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (var r of registrations) {
+                      r.unregister();
+                    }
                   });
-                });
+                  if ('caches' in window) {
+                    caches.keys().then(function(keys) {
+                      for (var k of keys) {
+                        caches.delete(k);
+                      }
+                    });
+                  }
+                } else {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                      console.warn('SW registration skipped:', err);
+                    });
+                  });
+                }
               }
             `,
           }}

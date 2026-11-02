@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { appleSpring, pressSpring } from '@/lib/animations';
 import {
   ShoppingBag,
   Trash2,
@@ -89,9 +90,9 @@ export function PosCartPanel({
   };
 
   return (
-    <div className="bg-transparent border border-slate-300/80 rounded-2xl flex flex-col h-full overflow-hidden">
+    <div className="bg-white/80 backdrop-blur-2xl backdrop-saturate-190 border border-white/60 shadow-lg rounded-2xl flex flex-col h-full overflow-hidden">
       {/* Cart Header */}
-      <div className="p-4 border-b border-slate-300/60 flex items-center justify-between shrink-0 bg-transparent">
+      <div className="p-4 border-b border-slate-200/70 flex items-center justify-between shrink-0 bg-transparent">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-brand text-white flex items-center justify-center font-bold shadow-xs shadow-brand/20">
             <ShoppingBag className="w-4 h-4" />
@@ -112,7 +113,7 @@ export function PosCartPanel({
               type="button"
               onClick={onOpenHoldModal}
               title="Hold this cart"
-              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 active:scale-[0.93] text-amber-700 border border-amber-200 text-xs font-bold transition-all cursor-pointer"
             >
               <PauseCircle className="w-4 h-4" />
             </button>
@@ -120,7 +121,7 @@ export function PosCartPanel({
               type="button"
               onClick={onClearCart}
               title="Clear basket"
-              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 active:scale-[0.93] text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -132,7 +133,7 @@ export function PosCartPanel({
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2.5 custom-scrollbar">
         {cart.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100/80 flex items-center justify-center text-slate-400">
               <ShoppingBag className="w-6 h-6" />
             </div>
             <p className="text-xs font-bold text-slate-700">Basket is empty</p>
@@ -145,10 +146,18 @@ export function PosCartPanel({
             {cart.map((item, idx) => (
               <motion.div
                 key={`${item.product_id}-${idx}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="p-3 rounded-xl bg-transparent border border-slate-300/70 flex items-center justify-between gap-3 group hover:bg-slate-200/30 transition-colors"
+                layout
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95, transition: appleSpring }}
+                transition={appleSpring}
+                drag="x"
+                dragConstraints={{ left: -60, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -45) onRemoveItem(idx);
+                }}
+                className="p-3 rounded-xl bg-white/70 border border-white/80 shadow-2xs flex items-center justify-between gap-3 group hover:bg-white/90 transition-colors"
               >
                 <CartItemThumbnail item={item} />
 
@@ -166,7 +175,7 @@ export function PosCartPanel({
                   <button
                     type="button"
                     onClick={() => onUpdateQty(idx, -1)}
-                    className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 active:scale-[0.92] text-slate-700 flex items-center justify-center transition-all cursor-pointer"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
@@ -176,7 +185,7 @@ export function PosCartPanel({
                   <button
                     type="button"
                     onClick={() => onUpdateQty(idx, 1)}
-                    className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 active:scale-[0.92] text-slate-700 flex items-center justify-center transition-all cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
@@ -192,7 +201,7 @@ export function PosCartPanel({
                 <button
                   type="button"
                   onClick={() => onRemoveItem(idx)}
-                  className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 transition-opacity p-1"
+                  className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 transition-opacity p-1 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -204,7 +213,7 @@ export function PosCartPanel({
 
       {/* Cart Footer: Discount, Totals & Checkout */}
       {cart.length > 0 && (
-        <div className="p-4 border-t border-slate-300/60 bg-transparent shrink-0 space-y-3">
+        <div className="p-4 border-t border-slate-200/70 bg-slate-50/50 backdrop-blur-sm shrink-0 space-y-3">
           {/* Coupon Input */}
           {appliedCoupon ? (
             <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
@@ -218,7 +227,7 @@ export function PosCartPanel({
               <button
                 type="button"
                 onClick={onRemoveCoupon}
-                className="text-emerald-700 hover:text-rose-600 p-0.5"
+                className="text-emerald-700 hover:text-rose-600 p-0.5 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -238,7 +247,7 @@ export function PosCartPanel({
               <button
                 type="submit"
                 disabled={!couponInput.trim()}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-extrabold text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.95] text-slate-800 border border-slate-200 font-extrabold text-xs transition-all disabled:opacity-50 cursor-pointer"
               >
                 Apply
               </button>
@@ -279,7 +288,7 @@ export function PosCartPanel({
             <button
               type="button"
               onClick={() => onOpenCheckout('cash')}
-              className="py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:scale-[0.95] border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <Banknote className="w-3.5 h-3.5 text-emerald-600" />
               <span>Cash</span>
@@ -287,7 +296,7 @@ export function PosCartPanel({
             <button
               type="button"
               onClick={() => onOpenCheckout('khqr')}
-              className="py-2 rounded-xl bg-brand-subtle hover:bg-brand/10 border border-brand/20 text-brand text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="py-2 rounded-xl bg-brand-subtle hover:bg-brand/10 active:scale-[0.95] border border-brand/20 text-brand text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <QrCode className="w-3.5 h-3.5 text-brand" />
               <span>KHQR</span>
@@ -295,7 +304,7 @@ export function PosCartPanel({
             <button
               type="button"
               onClick={() => onOpenCheckout('card')}
-              className="py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="py-2 rounded-xl bg-blue-50 hover:bg-blue-100 active:scale-[0.95] border border-blue-200 text-blue-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <CreditCard className="w-3.5 h-3.5 text-blue-600" />
               <span>Card</span>
@@ -304,12 +313,12 @@ export function PosCartPanel({
 
           {/* Primary Charge Button */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.01, transition: appleSpring }}
+            whileTap={{ scale: 0.98, transition: pressSpring }}
             type="button"
             disabled={isProcessing}
             onClick={() => onOpenCheckout('cash')}
-            className="w-full py-3 rounded-2xl bg-brand hover:bg-brand-hover text-white font-black text-sm shadow-md shadow-brand/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full py-3 rounded-2xl bg-brand hover:bg-brand-hover active:scale-[0.98] text-white font-black text-sm shadow-md shadow-brand/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <span>Charge ${grandTotal.toFixed(2)}</span>
             <ArrowRight className="w-4 h-4" />

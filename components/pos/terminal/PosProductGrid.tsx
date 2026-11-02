@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Package, Plus, AlertTriangle } from 'lucide-react';
 import { Product } from '../types';
+import { appleSpring, pressSpring } from '@/lib/animations';
 
 interface PosProductGridProps {
   products: Product[];
@@ -38,8 +39,8 @@ function PosProductCard({
       initial="hidden"
       animate="visible"
       variants={cardVariants}
-      whileHover={!isOutOfStock ? { y: -3, scale: 1.02 } : undefined}
-      whileTap={!isOutOfStock ? { scale: 0.97 } : undefined}
+      whileHover={!isOutOfStock ? { y: -3, scale: 1.02, transition: appleSpring } : undefined}
+      whileTap={!isOutOfStock ? { scale: 0.96, transition: pressSpring } : undefined}
       onClick={() => {
         if (isOutOfStock) return;
         if (product.stock !== undefined && product.stock <= 2 && product.stock > 0) {
@@ -49,10 +50,10 @@ function PosProductCard({
         }
         onAddToCart(product);
       }}
-      className={`p-3.5 rounded-2xl bg-white border transition-all flex flex-col justify-between cursor-pointer select-none relative group ${
+      className={`p-3.5 rounded-2xl backdrop-blur-xl border transition-all flex flex-col justify-between cursor-pointer select-none relative group active:brightness-95 ${
         isOutOfStock
-          ? 'opacity-60 border-slate-200 bg-slate-50 cursor-not-allowed'
-          : 'border-slate-200/90 shadow-xs hover:shadow-md hover:border-brand/40'
+          ? 'opacity-60 border-slate-200 bg-slate-50/80 cursor-not-allowed'
+          : 'bg-white/85 border-white/80 shadow-xs hover:shadow-lg hover:border-brand/40'
       }`}
     >
       {/* Top Category Tag & Stock */}

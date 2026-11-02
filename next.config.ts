@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/',
+        destination: '/launchpad',
+        permanent: false,
+      },
+      {
         source: '/organization',
         destination: '/organization/dashboard',
         permanent: false,

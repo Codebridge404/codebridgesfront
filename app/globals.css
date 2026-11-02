@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
@@ -97,12 +98,7 @@
   --radius-xl: var(--radius-xl);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 body {
   background-color: #F8FAFD;
@@ -207,13 +203,13 @@ main [class*="grid"] > .bg-slate-50[class*="rounded-"]:not(.fixed, .fixed *, [cl
 }
 
 /* ==========================================================================
-   Header & Search Bar Global Design System
+   Header & Search Bar Global Design System (Apple Fluid Glassmorphism)
    ========================================================================== */
 header {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
 }
 
 header h1, header h2, header h3, header .font-black, header span.font-extrabold {
@@ -293,3 +289,18 @@ main .fixed table, main [class*="fixed"] table, main [role="dialog"] table {
 main .fixed thead, main [class*="fixed"] thead, main [role="dialog"] thead {
   background-color: #F8FAFC !important;
 }
+
+/* ==========================================================================
+   Apple Accessibility & Fluid Physics Overrides
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+

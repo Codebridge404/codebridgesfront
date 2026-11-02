@@ -126,7 +126,7 @@ export function UniversalModuleSidebar({
 }: UniversalModuleSidebarProps) {
   return (
     <aside
-      className={`h-full bg-transparent border-r border-slate-300/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 overflow-hidden ${
+      className={`h-full bg-transparent border-r border-slate-200/80 transition-all duration-300 flex flex-col shrink-0 select-none z-20 overflow-hidden ${
         sidebarOpen ? 'w-64' : 'w-[72px]'
       }`}
     >
@@ -135,7 +135,7 @@ export function UniversalModuleSidebar({
       </Suspense>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-200/80 bg-slate-50/40 shrink-0">
+      <div className="p-3 border-t border-slate-200/80 bg-transparent shrink-0">
         {sidebarOpen ? (
           <div className="flex items-center justify-between text-[11px] text-slate-400">
             <div className="flex items-center gap-1.5 min-w-0">

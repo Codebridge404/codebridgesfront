@@ -5,9 +5,11 @@ import {
   X, Check, Loader2, Sparkles, Store, Boxes, Users, DollarSign,
   Briefcase, Zap, CalendarClock, UtensilsCrossed, Tv, ShoppingBag,
   Layers, Activity, Shield, Sliders, Cpu, Globe, Bot, Monitor,
-  HeartHandshake, CircleDollarSign, Calendar, LucideIcon
+  HeartHandshake, CircleDollarSign, Calendar, LucideIcon,
+  Upload, Image as ImageIcon, Trash2
 } from 'lucide-react';
 import { ModuleCard } from '@/components/ui';
+import { useToast } from '@/components/common';
 import { PlatformModuleRecord, createPlatformModuleApi, updatePlatformModuleApi } from '@/lib/api/modules';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
@@ -15,6 +17,17 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   UtensilsCrossed, Tv, ShoppingBag, Layers, Activity, Shield, Sliders,
   Cpu, Globe, Bot, Monitor, HeartHandshake, CircleDollarSign, Calendar,
 };
+
+export const PRESET_MODULE_LOGOS = [
+  { label: 'POS Terminal', path: '/module/pos.svg' },
+  { label: 'Inventory Suite', path: '/module/invetory.svg' },
+  { label: 'Staff & HRM', path: '/module/hr.svg' },
+  { label: 'Accounting & Finance', path: '/module/financial.svg' },
+  { label: 'Customer Loyalty CRM', path: '/module/management.svg' },
+  { label: 'Billing Subscription', path: '/module/subscription.svg' },
+  { label: 'Meetings MMS', path: '/module/meeting-time.svg' },
+  { label: 'Workspace Multi-Tenant', path: '/module/Workspace.svg' },
+];
 
 const COLOR_PRESETS = [
   { id: 'blue', name: 'Brand Blue', pill: 'bg-brand-subtle text-brand', card: 'bg-blue-50/70 border-blue-200/90 hover:border-blue-400' },
@@ -48,6 +61,7 @@ interface PlatformModuleModalProps {
 }
 
 export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: PlatformModuleModalProps) {
+  const toast = useToast();
   const isEditing = Boolean(module);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -62,6 +76,12 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Icon / Logo Branding Mode: 'upload' | 'preset' | 'vector'
+  const [iconMode, setIconMode] = useState<'upload' | 'preset' | 'vector'>('vector');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoData, setLogoData] = useState<string | null>(null);
+  const [customUrl, setCustomUrl] = useState('');
+
   useEffect(() => {
     if (module) {
       setName(module.name);
@@ -73,6 +93,22 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
       setIcon(module.icon || 'Store');
       setIsCore(Boolean(module.is_core));
       setIsActive(Boolean(module.is_active));
+      setLogoUrl(module.logo_url || null);
+      setLogoData(null);
+
+      if (module.logo_url) {
+        if (module.logo_url.startsWith('/module/')) {
+          setIconMode('preset');
+          setCustomUrl('');
+        } else {
+          setIconMode('upload');
+          setCustomUrl(module.logo_url);
+        }
+      } else {
+        setIconMode('vector');
+        setCustomUrl('');
+      }
+
       const matchedTheme = COLOR_PRESETS.find((p) => p.card === module.card_bg) || COLOR_PRESETS[0];
       setColorTheme(matchedTheme.id);
     } else {
@@ -86,6 +122,10 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
       setColorTheme(COLOR_PRESETS[0].id);
       setIsCore(false);
       setIsActive(true);
+      setLogoUrl(null);
+      setLogoData(null);
+      setIconMode('vector');
+      setCustomUrl('');
     }
     setError(null);
   }, [module, isOpen]);
@@ -103,6 +143,28 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image file must be smaller than 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setLogoData(result);
+      setLogoUrl(result);
+      setError(null);
+    };
+    reader.onerror = () => {
+      setError('Failed to read image file.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const currentTheme = COLOR_PRESETS.find((p) => p.id === colorTheme) || COLOR_PRESETS[0];
   const IconComp = ICON_MAP[icon] || Store;
 
@@ -115,7 +177,25 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
     setLoading(true);
     setError(null);
 
-    const payload = {
+    // Determine final logo payload
+    let resolvedLogoUrl: string | null | undefined = undefined;
+    let resolvedLogoData: string | undefined = undefined;
+
+    if (iconMode === 'vector') {
+      resolvedLogoUrl = null;
+    } else if (iconMode === 'preset') {
+      resolvedLogoUrl = logoUrl;
+    } else if (iconMode === 'upload') {
+      if (logoData) {
+        resolvedLogoData = logoData;
+      } else if (customUrl.trim()) {
+        resolvedLogoUrl = customUrl.trim();
+      } else {
+        resolvedLogoUrl = logoUrl;
+      }
+    }
+
+    const payload: Partial<PlatformModuleRecord> & { logo_data?: string } = {
       id: slug || undefined,
       name: name.trim(),
       monogram: monogram.trim() || name.slice(0, 3).toUpperCase(),
@@ -127,6 +207,8 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
       card_bg: currentTheme.card,
       is_core: isCore,
       is_active: isActive,
+      logo_url: resolvedLogoUrl,
+      logo_data: resolvedLogoData,
     };
 
     try {
@@ -135,17 +217,30 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
         : await createPlatformModuleApi(payload);
 
       if (res?.success) {
+        toast.success(
+          isEditing
+            ? `Module "${name.trim()}" has been updated successfully!`
+            : `Module "${name.trim()}" has been registered to the platform!`,
+          isEditing ? 'Module Updated' : 'Module Registered'
+        );
         onSaved();
         onClose();
       } else {
-        setError(res?.message || 'Failed to save module. Please verify input.');
+        const msg = res?.message || 'Failed to save module. Please verify input.';
+        setError(msg);
+        toast.error(msg, 'Save Failed');
       }
     } catch (err: any) {
-      setError(err?.message || 'Network error occurred while saving.');
+      const msg = err?.message || 'Network error occurred while saving.';
+      setError(msg);
+      toast.error(msg, 'Network Error');
     } finally {
       setLoading(false);
     }
   };
+
+  // Preview logo url to display on card
+  const previewLogoUrl = iconMode !== 'vector' ? (logoData || logoUrl || undefined) : undefined;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans animate-in fade-in duration-150">
@@ -255,24 +350,173 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
                 />
               </div>
 
-              {/* Icon Selection */}
-              <div>
-                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-600 mb-1.5">Card Semantic Icon</label>
-                <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-2xl max-h-28 overflow-y-auto">
-                  {Object.entries(ICON_MAP).map(([key, Comp]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setIcon(key)}
-                      title={key}
-                      className={`p-2 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                        icon === key ? 'bg-brand text-white shadow-xs scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/70'
-                      }`}
-                    >
-                      <Comp className="w-4 h-4" />
-                    </button>
-                  ))}
+              {/* Module Icon & Branding Section */}
+              <div className="space-y-2 pt-1 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
+                    Module Icon &amp; Branding Graphic
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Upload image, select preset SVG, or use vector icon
+                  </span>
                 </div>
+
+                {/* Mode Selector Tabs */}
+                <div className="flex p-1 bg-slate-100 rounded-xl text-xs font-bold gap-1 border border-slate-200/80">
+                  <button
+                    type="button"
+                    onClick={() => setIconMode('upload')}
+                    className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
+                      iconMode === 'upload' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload Image</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIconMode('preset')}
+                    className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
+                      iconMode === 'preset' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Ecosystem SVGs</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIconMode('vector')}
+                    className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
+                      iconMode === 'vector' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Vector Icons</span>
+                  </button>
+                </div>
+
+                {/* Mode 1: Upload Custom Image / Enter Logo URL */}
+                {iconMode === 'upload' && (
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      {/* Thumbnail preview */}
+                      <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center overflow-hidden shrink-0 p-1">
+                        {logoData || logoUrl ? (
+                          <img
+                            src={logoData || logoUrl || ''}
+                            alt="Logo preview"
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <ImageIcon className="w-6 h-6 text-slate-300" />
+                        )}
+                      </div>
+
+                      {/* File input button & info */}
+                      <div className="flex-1 w-full space-y-1">
+                        <div className="flex items-center gap-2">
+                          <label className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-brand text-xs font-bold text-slate-700 shadow-2xs cursor-pointer inline-flex items-center gap-1.5 transition-all active:scale-98">
+                            <Upload className="w-3.5 h-3.5 text-brand" />
+                            <span>Choose Image File...</span>
+                            <input
+                              type="file"
+                              accept="image/png,image/svg+xml,image/jpeg,image/webp"
+                              onChange={handleFileChange}
+                              className="hidden"
+                            />
+                          </label>
+                          {(logoData || logoUrl) && (
+                            <button
+                              type="button"
+                              onClick={() => { setLogoData(null); setLogoUrl(null); setCustomUrl(''); }}
+                              className="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                              title="Remove custom logo"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          Supports SVG, PNG, WebP, JPG (Max 5MB). Live preview automatically renders on the card.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Or enter direct URL */}
+                    <div className="pt-2 border-t border-slate-200/60">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Or enter direct image URL / path:</label>
+                      <input
+                        type="text"
+                        value={customUrl}
+                        onChange={(e) => {
+                          setCustomUrl(e.target.value);
+                          setLogoUrl(e.target.value || null);
+                          setLogoData(null);
+                        }}
+                        placeholder="https://... or /module/custom.svg"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-brand outline-hidden"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Mode 2: Ecosystem SVGs Preset Selector */}
+                {iconMode === 'preset' && (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                    <p className="text-[10px] font-bold text-slate-500">Pick an official ecosystem graphic:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {PRESET_MODULE_LOGOS.map((p) => {
+                        const isChosen = (logoUrl === p.path) && !logoData;
+                        return (
+                          <button
+                            key={p.path}
+                            type="button"
+                            onClick={() => {
+                              setLogoUrl(p.path);
+                              setLogoData(null);
+                              setCustomUrl(p.path);
+                            }}
+                            className={`p-2 rounded-xl border flex items-center gap-2 transition-all cursor-pointer text-left ${
+                              isChosen
+                                ? 'bg-white border-brand ring-2 ring-brand/20 shadow-xs'
+                                : 'bg-white/80 border-slate-200 hover:border-slate-300 hover:bg-white'
+                            }`}
+                          >
+                            <div className="w-6 h-6 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center p-0.5 shrink-0">
+                              <img src={p.path} alt={p.label} className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-800 truncate">{p.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mode 3: Semantic Vector Icons */}
+                {iconMode === 'vector' && (
+                  <div>
+                    <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-2xl max-h-28 overflow-y-auto">
+                      {Object.entries(ICON_MAP).map(([key, Comp]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setIcon(key);
+                            setLogoUrl(null);
+                            setLogoData(null);
+                          }}
+                          title={key}
+                          className={`p-2 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                            icon === key ? 'bg-brand text-white shadow-xs scale-105' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/70'
+                          }`}
+                        >
+                          <Comp className="w-4 h-4" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Color Preset Palette */}
@@ -319,7 +563,7 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
             </div>
 
             {/* Right Column: Live Card Preview (5 cols) */}
-            <div className="lg:col-span-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/90 space-y-3">
+            <div className="lg:col-span-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/90 space-y-3 sticky top-0">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Card Preview</span>
                 <span className="text-[10px] font-bold text-brand bg-brand-subtle px-2 py-0.5 rounded-full">Launchpad Ready</span>
@@ -328,6 +572,7 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
                 name={name || 'Sample Module Title'}
                 category={category || 'Category Domain'}
                 icon={IconComp}
+                logoUrl={previewLogoUrl}
                 description={description || 'Module card description will appear here on the Launchpad.'}
                 cardBg={currentTheme.card}
                 size="standard"

@@ -95,7 +95,7 @@ export function UserTable({
             <tbody className="divide-y divide-slate-300/60 font-medium text-slate-700 bg-transparent">
               {users.map((user, idx) => (
                 <motion.tr
-                  key={user.id}
+                  key={user.id ? `user-row-${user.id}-${idx}` : idx}
                   custom={idx}
                   initial="hidden"
                   animate="visible"

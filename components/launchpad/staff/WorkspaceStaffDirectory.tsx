@@ -315,10 +315,10 @@ export function WorkspaceStaffDirectory({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredStaff.map((member) => {
+                {filteredStaff.map((member, idx) => {
                   const isActive = member.is_active !== false;
                   return (
-                    <tr key={member.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={`staff-dir-row-${member.id ?? idx}-${idx}`} className="hover:bg-slate-50/70 transition-colors">
                       {/* Name & Identity */}
                       <td className="py-3.5 px-5">
                         <div className="flex items-center gap-3">
@@ -445,11 +445,11 @@ export function WorkspaceStaffDirectory({
       ) : (
         /* Cards Grid View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredStaff.map((member) => {
+          {filteredStaff.map((member, idx) => {
             const isActive = member.is_active !== false;
             return (
               <div
-                key={member.id}
+                key={`staff-dir-card-${member.id ?? idx}-${idx}`}
                 className="p-5 rounded-3xl border border-slate-300/80 bg-white hover:border-brand/40 hover:shadow-xs transition-all space-y-4 flex flex-col justify-between"
               >
                 <div className="space-y-3">

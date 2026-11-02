@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <Suspense fallback={<aside className="h-full w-64 bg-white border-r border-slate-200" />}>
+        <Suspense fallback={<aside className="h-full w-64 bg-transparent border-r border-slate-200/80" />}>
           <SuperAdminSidebar sidebarOpen={sidebarOpen} userRole="super_admin" />
         </Suspense>
 

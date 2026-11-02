@@ -35,8 +35,19 @@ The modern, ultra-responsive web frontend and Point-of-Sale (POS) management sui
 - **UI Library**: [React 19](https://react.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + Custom Glassmorphic Design System
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Animations & Physics Engine**: [Framer Motion](https://www.framer.com/motion/) + Apple Fluid Spring Physics (`appleSpring`, `momentumSpring`, `rubberband()`)
 - **QR & Payment Processing**: `bakong-khqr`, `qrcode`
+
+---
+
+## 🎨 Apple Fluid Design System Architecture
+
+CodeBridges adopts Apple's fluid interface design principles (*WWDC Designing Fluid Interfaces*):
+- **Critically Damped Springs ($\zeta = 1.0$)**: Eliminates linear easing curves. Found in [`lib/animations.ts`](lib/animations.ts) with `stiffness: 380, damping: 38`. Used for modals, sheets, and view transitions.
+- **Underdamped Momentum Springs ($\zeta \approx 0.8$)**: Natural bounce for interactive micro-actions (`whileTap={{ scale: 0.96 }}`).
+- **Translucent Materials**: Multi-layer frosted glass chrome (`backdrop-filter: blur(24px) saturate(190%)`) with light-catching edge borders.
+- **Direct 1:1 Touch Manipulation**: Continuous finger tracking and boundary rubber-banding via [`lib/motion/gesturePhysics.ts`](lib/motion/gesturePhysics.ts).
+- **Zero Mock Data Standard**: 100% dynamic integration with live backend microservices and MySQL 8.4 database engines; multi-tenant scoping (`tenant_id`) enforced across all queries.
 
 ---
 

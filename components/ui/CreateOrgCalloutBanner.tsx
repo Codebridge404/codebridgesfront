@@ -49,9 +49,16 @@ export function CreateOrgCalloutBanner({
   }, []);
 
   // Only display if user is logged in, has NO organization, and is NOT super_admin
+  const hasTenant = Boolean(
+    currentUser?.tenant_id ||
+    currentUser?.tenant_name ||
+    currentUser?.company_name ||
+    currentUser?.tenant?.name
+  );
+
   const shouldDisplay =
     currentUser &&
-    !currentUser.tenant_id &&
+    !hasTenant &&
     currentUser.role !== 'super_admin';
 
   if (!shouldDisplay) {

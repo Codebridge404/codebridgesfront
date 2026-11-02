@@ -1,7 +1,6 @@
 // CodeBridges POS Offline-First Service Worker
-const CACHE_NAME = 'codebridge-pos-v1';
+const CACHE_NAME = 'codebridge-pos-v2';
 const STATIC_ASSETS = [
-  '/',
   '/pos/pos-terminal',
   '/pos/customer-display',
   '/pos/kitchen-display',
@@ -39,7 +38,17 @@ self.addEventListener('fetch', (event) => {
   // Do not intercept non-GET or cross-origin API requests (handled by IndexedDB offlineSync engine)
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/api/')) return;
+
+  // Never intercept local development requests, Next.js build chunks, API endpoints, or root redirect
+  if (
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1' ||
+    url.pathname === '/' ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/_next/')
+  ) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

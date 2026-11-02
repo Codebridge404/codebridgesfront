@@ -103,18 +103,18 @@ export function OrgModuleFleetCard({
   };
 
   return (
-    <div className="bg-transparent border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 sm:p-7 space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-white/10 pb-4">
+    <div className="bg-white border border-slate-200/80 rounded-3xl p-4 sm:p-5 shadow-xs hover:border-slate-300/80 transition-all space-y-4 select-none">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+            <h3 className="text-base font-black text-slate-900 tracking-tight">
               Subscribed Modules Hub
             </h3>
             <span className={badgeStyles.brand}>
               {enabledModules.length} Subscribed
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Subscribe or unsubscribe to individual services dynamically for {orgName}
           </p>
         </div>
@@ -128,12 +128,12 @@ export function OrgModuleFleetCard({
       </div>
 
       {loading ? (
-        <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400 bg-white/40 dark:bg-slate-900/20 backdrop-blur-md rounded-2xl border border-slate-200/60 dark:border-white/10">
+        <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400 bg-white/40 backdrop-blur-md rounded-2xl border border-slate-200/60">
           <RefreshCw className="w-6 h-6 animate-spin text-brand" />
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Loading ecosystem modules from cloud database...</span>
+          <span className="text-xs font-bold text-slate-600">Loading ecosystem modules from cloud database...</span>
         </div>
       ) : modules.length === 0 ? (
-        <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-white/10 p-8 text-center shadow-2xs space-y-2">
+        <div className="bg-white/40 backdrop-blur-md rounded-2xl border border-slate-200/80 p-8 text-center shadow-2xs space-y-2">
           <p className="text-xs text-slate-500 font-medium">
             No integrated platform services currently available in your catalog.
           </p>
@@ -190,7 +190,7 @@ export function OrgModuleFleetCard({
                             onClick={() => handleToggleModule(module)}
                             disabled={isBusy}
                             title="Deactivate Module"
-                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 transition-colors cursor-pointer disabled:opacity-50"
                           >
                             {isBusy ? (
                               <RefreshCw className="w-3.5 h-3.5 animate-spin" />

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, UserPlus, Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Building2, UserPlus, Sparkles, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
 import { getAuthUser, getOutletsApi, getUsersApi, getRoleDisplayName } from '@/lib/api';
 import { getEnabledModulesForOrg, fetchAndSyncModulesForOrg } from '@/lib/modules';
 import { AppIcons } from '@/components/ui/icons';
@@ -84,40 +84,55 @@ export function OrganizationDashboard() {
   }, []);
 
   const roleTitle = getRoleDisplayName(user || 'organization', orgName);
+  const planName =
+    user?.subscription?.plan?.name ||
+    user?.plan_tier ||
+    user?.plan ||
+    (user?.role === 'super_admin' ? 'Platform Core Hub' : 'Enterprise Workspace');
 
   return (
-    <div className="space-y-4 w-full font-sans pb-10 text-slate-900">
+    <div className="space-y-3 w-full font-sans pb-6 text-slate-900">
       {/* 1. Transparent Glassmorphic Organization Identity Hero Card */}
-      <div className="backdrop-blur-2xl bg-white/60 dark:bg-slate-900/40 border border-white/60 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-        {/* Ambient subtle lighting */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-xs hover:border-slate-300/80 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden select-none">
+        {/* Soft Ambient Blur Glows */}
         <div className="pointer-events-none absolute -top-12 -right-12 w-64 h-64 bg-brand/10 rounded-full blur-3xl" />
         <div className="pointer-events-none absolute -bottom-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-white/80 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs backdrop-blur-md">
-            <AppIcons.Organization className="w-7 h-7 text-brand" />
+        <div className="flex items-center gap-3.5 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-brand-subtle text-brand border border-brand-border/60 flex items-center justify-center shrink-0 shadow-2xs">
+            <AppIcons.Organization className="w-6 h-6" />
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Executive Dashboard
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brand-subtle text-brand border border-brand/20 backdrop-blur-md inline-flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brand-subtle text-brand border border-brand/20 inline-flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-brand" />
                 {orgName} &bull; {roleTitle}
               </span>
-              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50/90 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1.5 backdrop-blur-md">
+              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Workspace
+                Live Tenancy
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
               Centralized workspace operations hub. Manage store branches, staff roles, and independent business modules.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 relative z-10">
+          <button
+            type="button"
+            onClick={() => loadOrgData()}
+            disabled={loading}
+            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] disabled:opacity-60"
+            title="Refresh live workspace data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-brand ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
           <button
             type="button"
             onClick={() => setIsStaffModalOpen(true)}
@@ -128,7 +143,7 @@ export function OrganizationDashboard() {
           </button>
           <Link
             href="/organization/outlets"
-            className="px-4 py-2.5 rounded-xl bg-white/80 hover:bg-white border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs backdrop-blur-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
             <Building2 className="w-4 h-4 text-slate-500" />
             <span>Store Outlets</span>
@@ -136,11 +151,12 @@ export function OrganizationDashboard() {
         </div>
       </div>
 
-      {/* 2. Workspace KPI Cards (OONE Ambient Design) */}
+      {/* 2. Workspace KPI Cards (Transparent Super-Admin Glass Design) */}
       <OrgKpiSummary
         outletsCount={outlets.length}
         staffCount={staff.length}
         activeModulesCount={enabledModules.length}
+        planName={planName}
         loading={loading}
       />
 
@@ -152,7 +168,7 @@ export function OrganizationDashboard() {
         onOpenManageStaff={() => setIsStaffModalOpen(true)}
       />
 
-      {/* 4. Independent Business Suites Fleet (Pastel Monogram Badges) */}
+      {/* 4. Independent Business Suites Fleet (Subscribed Modules Hub - Kept Unchanged) */}
       <div id="business-suites">
         <OrgModuleFleetCard
           orgName={orgName}
@@ -161,7 +177,7 @@ export function OrganizationDashboard() {
         />
       </div>
 
-      {/* 4. Split Overview: Store Outlets & Staff Roster */}
+      {/* 5. Split Overview: Store Outlets & Staff Roster */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <OrgOutletsPreview outlets={outlets} loading={loading} />
         <OrgStaffPreview

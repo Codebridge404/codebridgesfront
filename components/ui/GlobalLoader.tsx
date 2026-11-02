@@ -114,7 +114,7 @@ export function GlobalLoader({
     <div
       aria-live="polite"
       role="status"
-      className={`fixed inset-0 z-[9998] flex flex-col items-center justify-center p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl select-none transition-all ${className}`}
+      className={`fixed inset-0 z-[9998] flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-xl select-none transition-all ${className}`}
     >
       {/* Top Progress Beam */}
       <div className="absolute top-0 left-0 right-0 h-1 overflow-hidden bg-brand-subtle/50">
@@ -142,7 +142,7 @@ export function GlobalLoader({
         initial={{ opacity: 0, scale: 0.94, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col items-center max-w-sm w-full mx-auto p-7 rounded-3xl bg-white/85 dark:bg-slate-900/85 border border-slate-200/90 dark:border-slate-800 shadow-xl shadow-blue-900/5 text-center"
+        className="relative z-10 flex flex-col items-center max-w-sm w-full mx-auto p-7 rounded-3xl bg-white/85 border border-slate-200/90 shadow-xl shadow-blue-900/5 text-center"
       >
         {/* Animated Brand Core with Orbiting Halo */}
         <div className="relative w-24 h-24 mb-5 flex items-center justify-center">
@@ -164,7 +164,7 @@ export function GlobalLoader({
           />
 
           {/* Glass Island Core */}
-          <div className="relative z-10 w-14 h-14 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-center p-2.5">
+          <div className="relative z-10 w-14 h-14 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-center p-2.5">
             <Image
               src="/logo/Codebridge.svg"
               alt="CodeBridges Logo"
@@ -182,12 +182,12 @@ export function GlobalLoader({
           CodeBridge@ Cloud Suite
         </div>
 
-        <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white tracking-tight">
+        <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
           {text}
         </h3>
 
         {subtitle && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 leading-relaxed">
+          <p className="text-xs text-slate-500 font-medium mt-1.5 leading-relaxed">
             {subtitle}
           </p>
         )}

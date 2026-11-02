@@ -108,7 +108,11 @@ function onRefreshed(token: string | null) {
   refreshSubscribers = [];
 }
 
+let isRedirectingToLogin = false;
+
 function handleSessionExpired() {
+  if (isRedirectingToLogin) return;
+  isRedirectingToLogin = true;
   if (typeof window !== 'undefined') {
     removeAuthToken();
     if (!window.location.pathname.startsWith('/login')) {

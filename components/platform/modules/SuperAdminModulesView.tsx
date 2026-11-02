@@ -6,6 +6,7 @@ import {
   Lock, Loader2, Search, AlertCircle
 } from 'lucide-react';
 import { ModuleCard } from '@/components/ui';
+import { useToast } from '@/components/common';
 import { apiFetch } from '@/lib/api/client';
 import {
   PlatformModuleRecord, getSuperAdminModulesApi, deletePlatformModuleApi
@@ -13,6 +14,7 @@ import {
 import { PlatformModuleModal, ICON_MAP } from './PlatformModuleModal';
 
 export function SuperAdminModulesView() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<'catalog' | 'licensing'>('catalog');
   const [modules, setModules] = useState<PlatformModuleRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,12 +31,6 @@ export function SuperAdminModulesView() {
   const [tenantModules, setTenantModules] = useState<string[]>([]);
   const [loadingTenants, setLoadingTenants] = useState(false);
   const [syncingLicense, setSyncingLicense] = useState(false);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const loadModules = useCallback(async () => {
     try {
@@ -42,11 +38,11 @@ export function SuperAdminModulesView() {
       const data = await getSuperAdminModulesApi({ search });
       setModules(data);
     } catch {
-      showToast('Failed to load platform modules catalog.', 'error');
+      toast.error('Failed to load platform modules catalog.', 'Catalog Error');
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, toast]);
 
   const loadTenants = useCallback(async () => {
     try {
@@ -58,11 +54,11 @@ export function SuperAdminModulesView() {
         setSelectedTenantId(list[0].id);
       }
     } catch {
-      showToast('Failed to load tenants list.', 'error');
+      toast.error('Failed to load tenants list.', 'Tenant Error');
     } finally {
       setLoadingTenants(false);
     }
-  }, [selectedTenantId]);
+  }, [selectedTenantId, toast]);
 
   const loadTenantLicenses = useCallback(async (tenantId: string) => {
     if (!tenantId) return;
@@ -85,21 +81,21 @@ export function SuperAdminModulesView() {
 
   const handleDelete = async (mod: PlatformModuleRecord) => {
     if (mod.is_core) {
-      showToast(`Core module "${mod.name}" cannot be deleted.`, 'error');
+      toast.warning(`Core system module "${mod.name}" is protected and cannot be deleted.`, 'Protected Module');
       return;
     }
-    if (!window.confirm(`Are you sure you want to delete module "${mod.name}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete module "${mod.name}"? This action cannot be undone.`)) return;
 
     try {
       const res = await deletePlatformModuleApi(mod.id);
       if (res?.success) {
-        showToast(`Module "${mod.name}" deleted successfully.`);
+        toast.success(`Module "${mod.name}" was permanently removed from the catalog.`, 'Module Deleted');
         loadModules();
       } else {
-        showToast(res?.message || 'Failed to delete module.', 'error');
+        toast.error(res?.message || 'Failed to delete module.', 'Delete Failed');
       }
     } catch (err: any) {
-      showToast(err?.message || 'Error deleting module.', 'error');
+      toast.error(err?.message || 'Error deleting module.', 'Error');
     }
   };
 
@@ -116,15 +112,18 @@ export function SuperAdminModulesView() {
         body: JSON.stringify({ tenant_id: selectedTenantId, modules: next }),
       });
       if (res?.success) {
-        showToast(`License ${isCurrentlyActive ? 'revoked' : 'granted'}: ${modId}`);
+        toast.success(
+          `Module "${modId}" license ${isCurrentlyActive ? 'revoked from' : 'granted to'} tenant.`,
+          isCurrentlyActive ? 'License Revoked' : 'License Granted'
+        );
         loadModules();
       } else {
         setTenantModules(tenantModules);
-        showToast(res?.message || 'Failed to update license.', 'error');
+        toast.error(res?.message || 'Failed to update license.', 'License Error');
       }
     } catch (err: any) {
       setTenantModules(tenantModules);
-      showToast(err?.message || 'Network error updating license.', 'error');
+      toast.error(err?.message || 'Network error updating license.', 'Network Error');
     } finally {
       setSyncingLicense(false);
     }
@@ -138,33 +137,25 @@ export function SuperAdminModulesView() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans">
-      {/* Toast Notification */}
-      {notification && (
-        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 text-white text-xs font-bold rounded-2xl shadow-xl flex items-center gap-2 border animate-in fade-in ${notification.type === 'error' ? 'bg-rose-900 border-rose-700' : 'bg-slate-900 border-slate-700'}`}>
-          {notification.type === 'error' ? <AlertCircle className="w-4 h-4 text-rose-400" /> : <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-          <span>{notification.message}</span>
-        </div>
-      )}
-
+    <div className="space-y-4 max-w-7xl mx-auto font-sans pb-6">
       {/* Header Bar */}
-      <div className="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-subtle text-brand text-[11px] font-extrabold uppercase tracking-wider mb-2">
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:border-slate-300/80 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+        <div className="space-y-1 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-subtle text-brand text-[11px] font-extrabold uppercase tracking-wider mb-1">
             <Layers className="w-3.5 h-3.5" />
             <span>Platform Ecosystem Management</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
             Platform Modules Studio
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Create, customize, and license dynamic modules across tenant workspaces.</p>
+          <p className="text-xs text-slate-500 font-medium">Create, edit, delete, and license dynamic modules across tenant workspaces.</p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 relative z-10">
           <button
             type="button"
             onClick={() => { setSelectedModule(null); setModalOpen(true); }}
-            className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-black shadow-md shadow-brand/20 flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-98 text-white text-xs font-black shadow-md shadow-brand/20 flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Register New Module</span>
@@ -174,21 +165,21 @@ export function SuperAdminModulesView() {
 
       {/* Tabs & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex p-1 bg-slate-100 rounded-2xl text-xs font-bold gap-1 border border-slate-200/60 shadow-2xs self-start">
+        <div className="flex p-1 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold gap-1 shadow-2xs self-start">
           <button
             type="button"
             onClick={() => setActiveTab('catalog')}
-            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'catalog' ? 'bg-white text-slate-900 shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'catalog' ? 'bg-brand text-white shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-900'}`}
           >
-            <Layers className="w-3.5 h-3.5 text-brand" />
+            <Layers className={`w-3.5 h-3.5 ${activeTab === 'catalog' ? 'text-white' : 'text-brand'}`} />
             <span>Ecosystem Catalog ({modules.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('licensing')}
-            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'licensing' ? 'bg-white text-slate-900 shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-900'}`}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'licensing' ? 'bg-brand text-white shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-900'}`}
           >
-            <Sliders className="w-3.5 h-3.5 text-brand" />
+            <Sliders className={`w-3.5 h-3.5 ${activeTab === 'licensing' ? 'text-white' : 'text-brand'}`} />
             <span>Tenant Licensing</span>
           </button>
         </div>
@@ -202,24 +193,24 @@ export function SuperAdminModulesView() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search modules..."
-                className="pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden"
+                className="pl-8 pr-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden shadow-2xs"
               />
             </div>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden cursor-pointer"
+              className="px-3 py-1.5 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden cursor-pointer shadow-2xs"
             >
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
             <Building2 className="w-4 h-4 text-slate-400" />
             <select
               value={selectedTenantId}
               onChange={(e) => setSelectedTenantId(e.target.value)}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden cursor-pointer max-w-[260px] truncate"
+              className="bg-transparent text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand outline-hidden cursor-pointer max-w-[260px] truncate"
             >
               {tenants.map((t) => (
                 <option key={t.id} value={t.id}>{t.name} ({t.client_tier?.replace('_', ' ') || 'standard'})</option>
@@ -254,15 +245,15 @@ export function SuperAdminModulesView() {
                 size={activeTab === 'catalog' ? 'standard' : 'compact'}
                 statusDot={mod.is_active}
                 isSelected={activeTab === 'licensing' && isLicensed}
-                onClick={activeTab === 'licensing' ? () => handleToggleLicense(mod.id) : undefined}
+                onClick={activeTab === 'licensing' ? () => handleToggleLicense(mod.id) : () => { setSelectedModule(mod); setModalOpen(true); }}
                 actionSlot={
                   activeTab === 'catalog' ? (
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setSelectedModule(mod); setModalOpen(true); }}
-                        title="Edit Card"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-brand hover:bg-slate-100 transition-colors cursor-pointer"
+                        title="Edit Module Details"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-brand hover:bg-white/80 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
@@ -271,7 +262,7 @@ export function SuperAdminModulesView() {
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handleDelete(mod); }}
                           title="Delete Module"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50/80 transition-colors cursor-pointer border border-transparent hover:border-rose-200"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

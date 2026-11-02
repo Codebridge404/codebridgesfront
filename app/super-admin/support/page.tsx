@@ -1,5 +1,5 @@
-import { SuperAdminSupportView } from '@/components/support';
+import { redirect } from 'next/navigation';
 
 export default function SuperAdminSupportPage() {
-  return <SuperAdminSupportView />;
+  redirect('/super-admin/dashboard');
 }
