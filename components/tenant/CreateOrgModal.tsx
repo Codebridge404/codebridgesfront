@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
-import { apiFetch, getAuthUser } from '@/lib/api';
+import { apiFetch, getAuthUser, setAuthToken, setRefreshToken } from '@/lib/api';
 import { modalContent, scrimFade, appleSpring } from '@/lib/animations';
 import {
   CreateOrgModalHeader,
@@ -89,6 +89,14 @@ export function CreateOrgModal({
           client_tier: workspaceType === 'personal' ? 'free_personal' : 'business_runner',
         }),
       });
+
+      const newToken = res?.token || res?.access_token;
+      if (newToken) {
+        setAuthToken(newToken);
+        if (res?.refresh_token) {
+          setRefreshToken(res.refresh_token);
+        }
+      }
 
       const createdOrgData: CreatedTenantRecord = res?.data || res;
 

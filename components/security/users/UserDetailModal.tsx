@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -35,18 +36,30 @@ export function UserDetailModal({
   onToggleStatus,
   tenantName,
 }: UserDetailModalProps) {
-  if (!user) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!user || !mounted) return null;
 
   const isActive = user.is_active === 1 || user.is_active === true;
   const orgTitle = tenantName || user.tenant_name || (user.tenant_id ? `Organization #${user.tenant_id}` : 'CodeBridges Platform (Root)');
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto transition-all"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="w-full max-w-xl rounded-3xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden font-sans"
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="w-full max-w-xl rounded-3xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden font-sans my-8 relative z-10"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-brand-hover p-6 text-white relative">
@@ -212,7 +225,7 @@ export function UserDetailModal({
           </div>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }
-

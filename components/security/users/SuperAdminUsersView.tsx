@@ -51,6 +51,9 @@ export function SuperAdminUsersView() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedTenant, setSelectedTenant] = useState('all');
 
+  // Multi-select state
+  const [selectedUserIds, setSelectedUserIds] = useState<Array<number | string>>([]);
+
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
@@ -104,96 +107,203 @@ export function SuperAdminUsersView() {
     fetchData();
   }, [fetchData]);
 
-  // Tenant Map lookup
+  // Tenant Map lookup for display
   const tenantMap = useMemo(() => {
     const map = new Map<string, string>();
     tenants.forEach((t) => {
-      if (t && t.id) {
-        map.set(String(t.id), t.name || t.company_name || `Tenant #${t.id}`);
+      const name = t.name || t.company_name;
+      if (t.id && name) {
+        map.set(String(t.id), name);
       }
     });
     return map;
   }, [tenants]);
 
-  // Filtered users calculation
+  // Filtered Users Pipeline
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
-      // Search
-      const searchLower = search.trim().toLowerCase();
-      const matchesSearch =
-        !searchLower ||
-        u.name?.toLowerCase().includes(searchLower) ||
-        u.email?.toLowerCase().includes(searchLower) ||
-        u.phone?.toLowerCase().includes(searchLower);
-
-      // Role
-      const matchesRole =
-        selectedRole === 'all' ||
-        !selectedRole ||
-        u.role === selectedRole ||
-        u.role_slug === selectedRole;
-
-      // Status
-      const isActive = u.is_active === 1 || u.is_active === true;
-      let matchesStatus = true;
-      if (selectedStatus === 'active') matchesStatus = isActive;
-      if (selectedStatus === 'inactive') matchesStatus = !isActive;
-
-      // Tenant
-      let matchesTenant = true;
-      if (selectedTenant === 'root') {
-        matchesTenant = !u.tenant_id;
-      } else if (selectedTenant !== 'all') {
-        matchesTenant = String(u.tenant_id) === String(selectedTenant);
+      // Search by name, email, phone
+      if (search.trim()) {
+        const term = search.toLowerCase();
+        const nameMatch = (u.name || '').toLowerCase().includes(term);
+        const emailMatch = (u.email || '').toLowerCase().includes(term);
+        const phoneMatch = (u.phone || '').toLowerCase().includes(term);
+        if (!nameMatch && !emailMatch && !phoneMatch) return false;
       }
 
-      return matchesSearch && matchesRole && matchesStatus && matchesTenant;
+      // Filter by Role
+      if (selectedRole !== 'all') {
+        const userRole = u.role || 'employee';
+        if (userRole !== selectedRole && u.role_name !== selectedRole && u.role_slug !== selectedRole) {
+          return false;
+        }
+      }
+
+      // Filter by Status (active vs suspended)
+      if (selectedStatus !== 'all') {
+        const isActive = u.is_active === 1 || u.is_active === true;
+        if (selectedStatus === 'active' && !isActive) return false;
+        if (selectedStatus === 'suspended' && isActive) return false;
+      }
+
+      // Filter by Organization / Tenant
+      if (selectedTenant !== 'all') {
+        if (selectedTenant === 'platform') {
+          if (u.tenant_id) return false;
+        } else {
+          if (String(u.tenant_id) !== String(selectedTenant)) return false;
+        }
+      }
+
+      return true;
     });
   }, [users, search, selectedRole, selectedStatus, selectedTenant]);
 
+  // Calculated Stats Header Counts
   const totalUsers = users.length;
-  const activeUsersCount = users.filter((u) => u.is_active === 1 || u.is_active === true).length;
-  const superAdminsCount = users.filter((u) => u.role === 'super_admin' || u.role_slug === 'super_admin').length;
+  const activeUsersCount = useMemo(
+    () => users.filter((u) => u.is_active === 1 || u.is_active === true).length,
+    [users]
+  );
+  const superAdminsCount = useMemo(
+    () => users.filter((u) => u.role === 'super_admin' || u.role_slug === 'super_admin').length,
+    [users]
+  );
 
-  // View User Details
-  const handleViewUser = (u: any) => {
-    setViewingUser(u);
+  // Multi-select handlers
+  const handleToggleSelectUser = (id: number | string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (filteredUsers.length > 0 && selectedUserIds.length === filteredUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map((u) => u.id));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedUserIds([]);
+  };
+
+  // Bulk Activate
+  const handleBulkActivate = async () => {
+    if (selectedUserIds.length === 0) return;
+    const confirmed = await confirm({
+      title: 'Bulk Activate Users',
+      description: `Are you sure you want to activate ${selectedUserIds.length} selected user accounts? They will immediately regain platform sign-in access.`,
+      confirmText: 'Activate Selected',
+      variant: 'success',
+    });
+    if (!confirmed) return;
+
+    try {
+      const results = await Promise.allSettled(
+        selectedUserIds.map((id) => updateUserApi(id, { is_active: true }))
+      );
+      const successful = results.filter((r) => r.status === 'fulfilled').length;
+      toast.success(`Successfully activated ${successful} user accounts`);
+      fetchData(true);
+      setSelectedUserIds([]);
+    } catch {
+      toast.error('Failed to complete bulk activation');
+    }
+  };
+
+  // Bulk Deactivate / Suspend
+  const handleBulkDeactivate = async () => {
+    if (selectedUserIds.length === 0) return;
+    const confirmed = await confirm({
+      title: 'Bulk Suspend Users',
+      description: `Are you sure you want to suspend ${selectedUserIds.length} selected user accounts? Their active sessions and sign-in abilities will be revoked.`,
+      confirmText: 'Suspend Selected',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
+
+    try {
+      const results = await Promise.allSettled(
+        selectedUserIds.map((id) => updateUserApi(id, { is_active: false }))
+      );
+      const successful = results.filter((r) => r.status === 'fulfilled').length;
+      toast.success(`Successfully suspended ${successful} user accounts`);
+      fetchData(true);
+      setSelectedUserIds([]);
+    } catch {
+      toast.error('Failed to complete bulk suspension');
+    }
+  };
+
+  // Bulk Delete
+  const handleBulkDelete = async () => {
+    if (selectedUserIds.length === 0) return;
+    const confirmed = await confirm({
+      title: 'Bulk Delete Users',
+      description: `Are you sure you want to permanently delete/deactivate ${selectedUserIds.length} selected user accounts? This cannot be undone.`,
+      confirmText: 'Delete Selected',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      const results = await Promise.allSettled(
+        selectedUserIds.map((id) => deleteUserApi(id))
+      );
+      const successful = results.filter((r) => r.status === 'fulfilled').length;
+      toast.success(`Successfully removed ${successful} user accounts`);
+      fetchData(true);
+      setSelectedUserIds([]);
+    } catch {
+      toast.error('Failed to complete bulk deletion');
+    }
   };
 
   // Open Edit User Modal
-  const handleEditUser = (u: any) => {
-    setEditingUser(u);
+  const handleEditUser = (user: any) => {
+    setEditingUser(user);
     setFormData({
-      name: u.name || '',
-      email: u.email || '',
-      phone: u.phone || '',
-      role: u.role || u.role_slug || 'admin',
-      tenant_id: u.tenant_id ? String(u.tenant_id) : '',
-      outlet_id: u.outlet_id ? String(u.outlet_id) : (u.outlet_uuid || ''),
-      pin_code: u.pin_code || '',
-      is_active: u.is_active === 1 || u.is_active === true,
+      name: user.name || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      password: '',
+      role: user.role_slug || user.role || 'employee',
+      tenant_id: user.tenant_id ? Number(user.tenant_id) : undefined,
+      outlet_id: user.outlet_id ? String(user.outlet_id) : '',
+      pin_code: user.pin_code || '',
+      is_active: user.is_active === 1 || user.is_active === true,
     });
   };
 
-  // Save User (Create or Update)
+  // Open View User Detail Modal
+  const handleViewUser = (user: any) => {
+    setViewingUser(user);
+  };
+
+  // Submit User Create or Update
   const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim()) {
+      toast.error('Name and Email are required.');
+      return;
+    }
+
     try {
       setSaving(true);
       const payload: any = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || null,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
         role: formData.role,
-        tenant_id: formData.tenant_id ? Number(formData.tenant_id) : null,
-        outlet_id: formData.outlet_id || null,
-        pin_code: formData.pin_code || null,
-        is_active: formData.is_active ?? true,
+        is_active: formData.is_active !== false,
       };
 
-      if (formData.password) {
-        payload.password = formData.password;
-      }
+      if (formData.phone) payload.phone = formData.phone.trim();
+      if (formData.tenant_id) payload.tenant_id = formData.tenant_id;
+      if (formData.outlet_id) payload.outlet_id = formData.outlet_id;
+      if (formData.pin_code) payload.pin_code = formData.pin_code;
+      if (formData.password) payload.password = formData.password;
 
       if (editingUser) {
         await updateUserApi(editingUser.id, payload);
@@ -324,10 +434,17 @@ export function SuperAdminUsersView() {
         isRefreshing={isRefreshing}
       />
 
-      {/* Data Table with Pinned Columns and Horizontal Scroll */}
+      {/* Data Table with Checkbox Multi-Select and Horizontal Scroll */}
       <UserTable
         users={filteredUsers}
         loading={loading}
+        selectedUserIds={selectedUserIds}
+        onToggleSelectUser={handleToggleSelectUser}
+        onSelectAll={handleSelectAll}
+        onClearSelection={handleClearSelection}
+        onBulkActivate={handleBulkActivate}
+        onBulkDeactivate={handleBulkDeactivate}
+        onBulkDelete={handleBulkDelete}
         onViewUser={handleViewUser}
         onEditUser={handleEditUser}
         onResetPassword={(u) => {
@@ -353,6 +470,7 @@ export function SuperAdminUsersView() {
         saving={saving}
         dynamicRoles={roles}
         tenants={tenants}
+        existingUsers={users}
       />
 
       {/* User Detail Modal */}

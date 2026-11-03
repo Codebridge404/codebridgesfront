@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion, Variants } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import {
   Users,
   Shield,
@@ -21,11 +21,19 @@ import {
   CheckCircle2,
   Ban,
   Trash2,
+  X,
 } from 'lucide-react';
 
 interface UserTableProps {
   users: any[];
   loading: boolean;
+  selectedUserIds: Array<number | string>;
+  onToggleSelectUser: (id: number | string) => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
+  onBulkActivate: () => void;
+  onBulkDeactivate: () => void;
+  onBulkDelete: () => void;
   onViewUser: (user: any) => void;
   onResetPassword: (user: any) => void;
   onEditUser: (user: any) => void;
@@ -37,6 +45,13 @@ interface UserTableProps {
 export function UserTable({
   users,
   loading,
+  selectedUserIds,
+  onToggleSelectUser,
+  onSelectAll,
+  onClearSelection,
+  onBulkActivate,
+  onBulkDeactivate,
+  onBulkDelete,
   onViewUser,
   onResetPassword,
   onEditUser,
@@ -45,6 +60,16 @@ export function UserTable({
   tenantMap,
 }: UserTableProps) {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const headerCheckboxRef = useRef<HTMLInputElement>(null);
+
+  const isAllSelected = users.length > 0 && selectedUserIds.length === users.length;
+  const isPartiallySelected = selectedUserIds.length > 0 && selectedUserIds.length < users.length;
+
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isPartiallySelected;
+    }
+  }, [isPartiallySelected]);
 
   const handleCopyEmail = (email: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,7 +116,7 @@ export function UserTable({
   };
 
   return (
-    <div className="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden flex flex-col font-sans">
+    <div className="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden flex flex-col font-sans relative">
       {/* Scroll Helper / Controls Subheader */}
       <div className="px-5 py-2.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
         <div className="flex items-center gap-2">
@@ -99,8 +124,16 @@ export function UserTable({
           <span className="text-slate-300">|</span>
           <span className="hidden sm:inline-flex items-center gap-1 text-slate-400">
             <span className="w-1.5 h-1.5 rounded-full bg-brand" />
-            User Name, Email &amp; Master Actions are pinned
+            Checkboxes, Identity &amp; Master Actions are pinned
           </span>
+          {selectedUserIds.length > 0 && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="inline-flex items-center gap-1 font-bold text-brand bg-brand-subtle px-2 py-0.5 rounded-full text-[10px]">
+                {selectedUserIds.length} selected
+              </span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-1.5 text-brand font-bold">
           <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -125,13 +158,28 @@ export function UserTable({
       ) : (
         /* Horizontal Scroll Viewport */
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
-          <table className="w-full text-left text-xs border-collapse min-w-[1360px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[1420px]">
             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-200/90 select-none">
               <tr>
+                {/* 0. PINNED COLUMN 0: Selection Checkbox */}
+                <th
+                  scope="col"
+                  className="sticky left-0 z-30 bg-slate-50 w-[48px] min-w-[48px] max-w-[48px] px-3.5 py-3.5 text-center border-r border-slate-200/80"
+                >
+                  <input
+                    ref={headerCheckboxRef}
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={onSelectAll}
+                    className="w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand cursor-pointer transition-all"
+                    title={isAllSelected ? 'Deselect all users' : 'Select all users'}
+                  />
+                </th>
+
                 {/* 1. PINNED COLUMN 1: User Name */}
                 <th
                   scope="col"
-                  className="sticky left-0 z-30 bg-slate-50 w-[200px] min-w-[200px] max-w-[200px] px-4 py-3.5 border-r border-slate-200/80 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"
+                  className="sticky left-[48px] z-30 bg-slate-50 w-[200px] min-w-[200px] max-w-[200px] px-4 py-3.5 border-r border-slate-200/80 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"
                 >
                   User Account &amp; Identity
                 </th>
@@ -139,15 +187,15 @@ export function UserTable({
                 {/* 2. PINNED COLUMN 2: Email Address */}
                 <th
                   scope="col"
-                  className="sticky left-[200px] z-30 bg-slate-50 w-[220px] min-w-[220px] max-w-[220px] px-4 py-3.5 border-r border-slate-200/80"
+                  className="sticky left-[248px] z-30 bg-slate-50 w-[220px] min-w-[220px] max-w-[220px] px-4 py-3.5 border-r border-slate-200/80"
                 >
                   Email Address
                 </th>
 
-                {/* 3. PINNED COLUMN 3: Master Actions (stay right after email) */}
+                {/* 3. PINNED COLUMN 3: Master Actions */}
                 <th
                   scope="col"
-                  className="sticky left-[420px] z-30 bg-slate-50 w-[160px] min-w-[160px] max-w-[160px] px-3.5 py-3.5 text-center border-r border-slate-200 shadow-[4px_0_10px_-3px_rgba(0,0,0,0.08)]"
+                  className="sticky left-[468px] z-30 bg-slate-50 w-[160px] min-w-[160px] max-w-[160px] px-3.5 py-3.5 text-center border-r border-slate-200 shadow-[4px_0_10px_-3px_rgba(0,0,0,0.08)]"
                 >
                   Master Actions
                 </th>
@@ -192,6 +240,7 @@ export function UserTable({
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
               {users.map((user, idx) => {
                 const isActive = user.is_active === 1 || user.is_active === true;
+                const isSelected = selectedUserIds.includes(user.id);
                 const orgName =
                   user.tenant_name ||
                   (tenantMap && user.tenant_id ? tenantMap.get(String(user.tenant_id)) : null) ||
@@ -204,11 +253,32 @@ export function UserTable({
                     initial="hidden"
                     animate="visible"
                     variants={cardVariants}
-                    className="hover:bg-slate-50/90 transition-colors group cursor-pointer"
+                    className={`transition-colors group cursor-pointer ${
+                      isSelected ? 'bg-brand-subtle/30 hover:bg-brand-subtle/40' : 'hover:bg-slate-50/90'
+                    }`}
                     onClick={() => onViewUser(user)}
                   >
+                    {/* 0. PINNED COLUMN 0: Selection Checkbox */}
+                    <td
+                      className={`sticky left-0 z-20 w-[48px] min-w-[48px] max-w-[48px] px-3.5 py-3.5 text-center border-r border-slate-200/80 transition-colors ${
+                        isSelected ? 'bg-brand-subtle/30 group-hover:bg-brand-subtle/40' : 'bg-white group-hover:bg-slate-50'
+                      }`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggleSelectUser(user.id)}
+                        className="w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand cursor-pointer transition-all"
+                      />
+                    </td>
+
                     {/* 1. PINNED COLUMN 1: User Name */}
-                    <td className="sticky left-0 z-20 bg-white group-hover:bg-slate-50 w-[200px] min-w-[200px] max-w-[200px] px-4 py-3.5 border-r border-slate-200/80 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors">
+                    <td
+                      className={`sticky left-[48px] z-20 w-[200px] min-w-[200px] max-w-[200px] px-4 py-3.5 border-r border-slate-200/80 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors ${
+                        isSelected ? 'bg-brand-subtle/30 group-hover:bg-brand-subtle/40' : 'bg-white group-hover:bg-slate-50'
+                      }`}
+                    >
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs uppercase">
                           {user.name ? user.name.substring(0, 2) : 'US'}
@@ -225,7 +295,11 @@ export function UserTable({
                     </td>
 
                     {/* 2. PINNED COLUMN 2: Email Address */}
-                    <td className="sticky left-[200px] z-20 bg-white group-hover:bg-slate-50 w-[220px] min-w-[220px] max-w-[220px] px-4 py-3.5 border-r border-slate-200/80 transition-colors">
+                    <td
+                      className={`sticky left-[248px] z-20 w-[220px] min-w-[220px] max-w-[220px] px-4 py-3.5 border-r border-slate-200/80 transition-colors ${
+                        isSelected ? 'bg-brand-subtle/30 group-hover:bg-brand-subtle/40' : 'bg-white group-hover:bg-slate-50'
+                      }`}
+                    >
                       <div className="flex items-center justify-between gap-1.5">
                         <span className="font-mono text-[11px] text-slate-600 truncate">
                           {user.email || '—'}
@@ -247,9 +321,11 @@ export function UserTable({
                       </div>
                     </td>
 
-                    {/* 3. PINNED COLUMN 3: Master Actions (stay right after email) */}
+                    {/* 3. PINNED COLUMN 3: Master Actions */}
                     <td
-                      className="sticky left-[420px] z-20 bg-white group-hover:bg-slate-50 w-[160px] min-w-[160px] max-w-[160px] px-3.5 py-3.5 text-center border-r border-slate-200 shadow-[4px_0_10px_-3px_rgba(0,0,0,0.08)] transition-colors"
+                      className={`sticky left-[468px] z-20 w-[160px] min-w-[160px] max-w-[160px] px-3.5 py-3.5 text-center border-r border-slate-200 shadow-[4px_0_10px_-3px_rgba(0,0,0,0.08)] transition-colors ${
+                        isSelected ? 'bg-brand-subtle/30 group-hover:bg-brand-subtle/40' : 'bg-white group-hover:bg-slate-50'
+                      }`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -341,7 +417,7 @@ export function UserTable({
                     <td className="px-5 py-3.5 min-w-[130px]">
                       {user.pin_code ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] font-mono">
-                          <Lock className="w-3 h-3 text-brand" />
+                          <Lock className="w-3.5 h-3.5 text-brand" />
                           <span>PIN Set</span>
                         </span>
                       ) : (
@@ -395,6 +471,67 @@ export function UserTable({
           </table>
         </div>
       )}
+
+      {/* Floating Bulk Actions Dock */}
+      <AnimatePresence>
+        {selectedUserIds.length > 0 && (
+          <div className="fixed bottom-6 inset-x-0 mx-auto max-w-2xl z-40 px-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, y: 25, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 25, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 text-white p-3 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-3 pointer-events-auto"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
+                <span className="font-extrabold text-xs text-white">
+                  {selectedUserIds.length} {selectedUserIds.length === 1 ? 'user' : 'users'} selected
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={onBulkActivate}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Activate</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onBulkDeactivate}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Ban className="w-3.5 h-3.5" />
+                  <span>Suspend</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onBulkDelete}
+                  className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClearSelection}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
+                  title="Clear all selection"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

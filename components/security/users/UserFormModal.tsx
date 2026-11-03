@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   KeyRound,
@@ -13,6 +14,7 @@ import {
   Lock,
   Store,
   CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { OutletSelector } from '@/components/inventory-suite';
 
@@ -38,6 +40,7 @@ interface UserFormModalProps {
   saving: boolean;
   dynamicRoles: Array<{ id: string; name: string; slug: string; is_system?: boolean }>;
   tenants?: Array<{ id: string | number; name?: string; company_name?: string }>;
+  existingUsers?: any[];
 }
 
 export function UserFormModal({
@@ -50,21 +53,42 @@ export function UserFormModal({
   saving,
   dynamicRoles,
   tenants = [],
+  existingUsers = [],
 }: UserFormModalProps) {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  // Check for duplicate email in real time
+  const trimmedEmail = formData.email?.trim().toLowerCase();
+  const duplicateUser = trimmedEmail
+    ? existingUsers.find(
+        (u) => u.email?.trim().toLowerCase() === trimmedEmail && String(u.id) !== String(editingUser?.id)
+      )
+    : null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto transition-all"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="w-full max-w-xl rounded-3xl bg-white p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200/90 font-sans my-8"
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="w-full max-w-xl rounded-3xl bg-white p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200/90 font-sans my-8 relative z-10"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-bold shadow-2xs">
               <User className="w-5 h-5" />
             </div>
             <div>
@@ -112,16 +136,26 @@ export function UserFormModal({
                 Email Address <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Mail className={`w-4 h-4 absolute left-3 top-3 ${duplicateUser ? 'text-rose-500' : 'text-slate-400'}`} />
                 <input
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="vibol@codebridge.com"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white transition-all font-mono"
+                  className={`w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border text-slate-900 focus:outline-none focus:ring-2 transition-all font-mono ${
+                    duplicateUser
+                      ? 'border-rose-400 bg-rose-50/40 focus:ring-rose-200 focus:border-rose-500'
+                      : 'border-slate-200/90 focus:ring-brand/30 focus:border-brand focus:bg-white'
+                  }`}
                 />
               </div>
+              {duplicateUser && (
+                <p className="text-[11px] text-rose-600 font-bold flex items-center gap-1 mt-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  Email already belongs to {duplicateUser.name} ({duplicateUser.role || 'user'}). Duplicates are not allowed.
+                </p>
+              )}
             </div>
           </div>
 
@@ -290,14 +324,15 @@ export function UserFormModal({
             </button>
             <button
               type="submit"
-              disabled={saving}
-              className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:bg-brand-active text-white font-extrabold text-xs shadow-md shadow-brand/20 cursor-pointer transition-all disabled:opacity-60"
+              disabled={saving || Boolean(duplicateUser)}
+              className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:bg-brand-active text-white font-extrabold text-xs shadow-md shadow-brand/20 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Processing...' : editingUser ? 'Update Account' : 'Create User Account'}
             </button>
           </div>
         </form>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }
