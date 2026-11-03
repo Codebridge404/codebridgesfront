@@ -206,7 +206,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({ refresh_token: refreshToken }),
           });
