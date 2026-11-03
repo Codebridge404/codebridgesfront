@@ -26,6 +26,8 @@ interface ShopCartDrawerProps {
   subtotal: number;
   deliveryFee: number;
   taxAmount: number;
+  taxLabel?: string;
+  isTaxEnabled?: boolean;
   grandTotal: number;
   isSubmitting: boolean;
   onSubmitCheckout: (e: React.FormEvent) => void;
@@ -47,6 +49,8 @@ export const ShopCartDrawer: React.FC<ShopCartDrawerProps> = ({
   subtotal,
   deliveryFee,
   taxAmount,
+  taxLabel = "Tax",
+  isTaxEnabled = true,
   grandTotal,
   isSubmitting,
   onSubmitCheckout,
@@ -203,10 +207,12 @@ export const ShopCartDrawer: React.FC<ShopCartDrawerProps> = ({
                       <span>Subtotal:</span>
                       <span>${subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Tax (10% VAT):</span>
-                      <span>${taxAmount.toFixed(2)}</span>
-                    </div>
+                    {isTaxEnabled && (
+                      <div className="flex justify-between text-slate-400">
+                        <span>{taxLabel}:</span>
+                        <span>${taxAmount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-slate-400">
                       <span>Delivery Fee:</span>
                       <span>${deliveryFee.toFixed(2)}</span>

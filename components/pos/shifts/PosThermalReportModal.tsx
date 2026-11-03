@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Printer } from 'lucide-react';
-import { getShiftXReportApi } from '@/lib/api';
+import { getShiftXReportApi, getCartTaxSettings } from '@/lib/api';
 import { Modal, Button, Badge } from '@/components/ui';
 
 interface PosThermalReportModalProps {
@@ -63,7 +63,14 @@ export function PosThermalReportModal({
   const safeDrops = Number(reportData?.safe_drops ?? shift.safe_drops ?? 0);
 
   const grossSales = Number(reportData?.gross_sales ?? (cashSales + khqrSales + cardSales));
-  const taxCollected = grossSales * 0.10;
+  const taxSettings = getCartTaxSettings();
+  const taxRate = taxSettings.taxEnabled ? Number(taxSettings.taxRate || 0) : 0;
+  const taxLabel = taxSettings.taxLabel || 'Tax';
+  const taxCollected = taxSettings.taxEnabled
+    ? (taxSettings.taxCalculationMode === 'inclusive'
+        ? (grossSales - (grossSales / (1 + (taxRate / 100))))
+        : (grossSales * (taxRate / 100)))
+    : 0;
   const netSales = grossSales - taxCollected;
   const expectedCash = Number(
     reportData?.expected_cash ?? (openingFloat + cashSales + payIns - payOuts - safeDrops)
@@ -171,10 +178,17 @@ export function PosThermalReportModal({
               <span>GROSS SALES:</span>
               <span className="text-brand">${grossSales.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-[10px] text-slate-500">
-              <span>VAT Tax (10%):</span>
-              <span>${taxCollected.toFixed(2)}</span>
-            </div>
+            {taxSettings.taxEnabled ? (
+              <div className="flex justify-between text-[10px] text-slate-500">
+                <span>{taxLabel} ({taxRate}%):</span>
+                <span>${taxCollected.toFixed(2)}</span>
+              </div>
+            ) : (
+              <div className="flex justify-between text-[10px] text-slate-500">
+                <span>Tax Status:</span>
+                <span className="italic text-slate-400">Exempt ($0.00)</span>
+              </div>
+            )}
             <div className="flex justify-between text-[10px] text-slate-500">
               <span>NET REVENUE:</span>
               <span>${netSales.toFixed(2)}</span>

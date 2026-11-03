@@ -17,6 +17,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { sendDigitalReceiptApi, getReceiptHtmlUrl } from '@/lib/api/sales';
+import { getPosReceiptSettings } from '@/lib/posReceiptUtils';
 
 interface PosDigitalReceiptModalProps {
   isOpen: boolean;
@@ -190,7 +191,7 @@ export function PosDigitalReceiptModal({
                     className="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    Also Print Thermal Paper (80mm)
+                    Also Print Thermal Paper (${getPosReceiptSettings().paperWidth || '80mm'})
                   </button>
                 )}
               </div>

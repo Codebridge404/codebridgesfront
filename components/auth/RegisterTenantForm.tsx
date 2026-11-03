@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getAuthUser, apiFetch, logoutApi } from '@/lib/api';
+import { getAuthUser, apiFetch, logoutApi, setAuthToken, setRefreshToken } from '@/lib/api';
 import { AppHeader } from '@/components/header/AppHeader';
 import {
   TenantRegistrationForm,
@@ -90,6 +90,14 @@ export function RegisterTenantForm() {
           registeredData = res.data;
         } else if (res?.name) {
           registeredData = res;
+        }
+
+        const newToken = res?.token || res?.access_token;
+        if (newToken) {
+          setAuthToken(newToken);
+          if (res?.refresh_token) {
+            setRefreshToken(res.refresh_token);
+          }
         }
       } catch (networkErr: any) {
         console.warn('[RegisterTenant] Backend API call failed, creating local workspace:', networkErr);

@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Printer, X, CheckCircle2, Mail } from 'lucide-react';
 import { ThermalReceiptPaper } from './ThermalReceiptPaper';
+import { getPosReceiptSettings, mergeReceiptOutlet } from '@/lib/posReceiptUtils';
 import { PosDigitalReceiptModal } from '@/components/pos/terminal/PosDigitalReceiptModal';
 
 interface ThermalReceiptModalProps {
@@ -52,7 +53,9 @@ export function ThermalReceiptModal({
     print_badge: saleData?.print_badge,
   };
 
-  const { sale, lines, outlet, cashier, register, payments, is_reprint, print_count, print_badge } = data;
+  const { sale, lines, outlet: rawOutlet, cashier, register, payments, is_reprint, print_count, print_badge } = data;
+  const outlet = mergeReceiptOutlet(rawOutlet);
+  const paperWidth = outlet.paper_width || '80mm';
   const [showDigitalModal, setShowDigitalModal] = React.useState(false);
 
   const handlePrint = () => {
@@ -95,7 +98,7 @@ export function ThermalReceiptModal({
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
-            width: 80mm !important;
+            width: ${paperWidth === "58mm" ? "58mm" : "80mm"} !important;
             margin: 0 !important;
             padding: 10px !important;
             box-shadow: none !important;
@@ -135,7 +138,7 @@ export function ThermalReceiptModal({
             <CheckCircle2 className="w-5 h-5 text-brand shrink-0" />
             <div>
               <p className="text-xs font-bold text-slate-900">Transaction Finalized</p>
-              <p className="text-[11px] text-brand/80">Receipt ready for 80mm thermal printing</p>
+              <p className="text-[11px] text-brand/80">Receipt ready for ${paperWidth} thermal printing</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">

@@ -59,6 +59,10 @@ function GlobalOrganizationSettingsContent() {
     address: '',
     country: 'KH',
     logo_url: '',
+    tax_enabled: false,
+    tax_rate: 10,
+    tax_calculation_mode: 'exclusive' as 'exclusive' | 'inclusive',
+    tax_label: 'VAT',
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -105,6 +109,19 @@ function GlobalOrganizationSettingsContent() {
           const localTz = localStorage.getItem('cb_org_timezone') || '';
           if (localTax) setFormData((prev) => ({ ...prev, tax_id: localTax }));
           if (localTz) setFormData((prev) => ({ ...prev, timezone: localTz }));
+          const localTaxSettings = localStorage.getItem('cb_tenant_tax_settings');
+          if (localTaxSettings) {
+            try {
+              const parsedTax = JSON.parse(localTaxSettings);
+              setFormData((prev) => ({
+                ...prev,
+                tax_enabled: parsedTax.taxEnabled !== undefined ? Boolean(parsedTax.taxEnabled) : prev.tax_enabled,
+                tax_rate: parsedTax.taxRate !== undefined ? Number(parsedTax.taxRate) : prev.tax_rate,
+                tax_calculation_mode: parsedTax.taxCalculationMode || prev.tax_calculation_mode,
+                tax_label: parsedTax.taxLabel || prev.tax_label,
+              }));
+            } catch {}
+          }
         }
 
         // Fetch live workspace details from backend
@@ -143,6 +160,15 @@ function GlobalOrganizationSettingsContent() {
               if (pay.tax_id) {
                 setFormData((prev) => ({ ...prev, tax_id: pay.tax_id }));
                 if (typeof window !== 'undefined') localStorage.setItem('cb_org_tax_id', pay.tax_id);
+              }
+              if (pay.tax_enabled !== undefined) {
+                setFormData((prev) => ({
+                  ...prev,
+                  tax_enabled: Boolean(pay.tax_enabled),
+                  tax_rate: pay.tax_rate !== undefined ? Number(pay.tax_rate) : prev.tax_rate,
+                  tax_calculation_mode: pay.tax_calculation_mode || prev.tax_calculation_mode,
+                  tax_label: pay.tax_label || prev.tax_label,
+                }));
               }
               if (pay.timezone) {
                 setFormData((prev) => ({ ...prev, timezone: pay.timezone }));
@@ -241,6 +267,10 @@ function GlobalOrganizationSettingsContent() {
       const paymentPayload = {
         tax_id: formData.tax_id,
         timezone: formData.timezone,
+        tax_enabled: formData.tax_enabled,
+        tax_rate: formData.tax_rate,
+        tax_calculation_mode: formData.tax_calculation_mode,
+        tax_label: formData.tax_label,
       };
 
       await updateTenantProfileApi({
@@ -252,6 +282,20 @@ function GlobalOrganizationSettingsContent() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('cb_org_tax_id', formData.tax_id);
         localStorage.setItem('cb_org_timezone', formData.timezone);
+
+        const taxSettingsObj = {
+          taxEnabled: formData.tax_enabled,
+          taxRate: formData.tax_rate,
+          taxCalculationMode: formData.tax_calculation_mode,
+          taxLabel: formData.tax_label,
+        };
+        localStorage.setItem('cb_tenant_tax_settings', JSON.stringify(taxSettingsObj));
+
+        const currentTermRaw = localStorage.getItem('cb_pos_terminal_settings');
+        const termObj = currentTermRaw ? JSON.parse(currentTermRaw) : {};
+        const updatedTermObj = { ...termObj, ...taxSettingsObj };
+        localStorage.setItem('cb_pos_terminal_settings', JSON.stringify(updatedTermObj));
+        window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: updatedTermObj }));
       }
 
       setSaved(true);

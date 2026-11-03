@@ -103,7 +103,7 @@ export function PosSupervisorPinModal({
             {[0, 1, 2, 3].map((idx) => (
               <motion.div
                 key={idx}
-                animate={idx < pin.length ? { scale: [1, 1.25, 1.1] } : { scale: 1 }}
+                animate={{ scale: idx < pin.length ? 1.15 : 1 }}
                 transition={appleSpring}
                 className={`w-4 h-4 rounded-full border-2 transition-colors ${
                   idx < pin.length

@@ -35,7 +35,7 @@ export function UserStatsHeader({
             <div className="w-9 h-9 rounded-xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            Users & Staff Management (RBAC)
+            User Management
           </h1>
           <p className="text-xs font-medium text-slate-500 mt-1">
             Manage operational staff accounts, access credentials, and role permission boundaries

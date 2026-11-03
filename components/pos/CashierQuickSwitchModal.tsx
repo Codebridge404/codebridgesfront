@@ -120,7 +120,7 @@ export function CashierQuickSwitchModal({
                   <motion.div
                     key={idx}
                     animate={{
-                      scale: pin.length === idx ? [1, 1.15, 1] : 1,
+                      scale: pin.length === idx ? 1.15 : (idx < pin.length ? 1.05 : 1),
                       backgroundColor: idx < pin.length ? 'var(--color-brand)' : 'var(--color-surface-subtle)',
                       borderColor: idx < pin.length ? 'var(--color-brand-hover)' : 'var(--color-card-border)',
                     }}

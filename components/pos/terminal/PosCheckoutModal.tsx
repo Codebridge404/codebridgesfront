@@ -12,6 +12,8 @@ import {
   Wallet,
 } from 'lucide-react';
 import { CartItem } from '../types';
+import { calculateCartTax, getPosTaxSettings, PosTaxSettings } from '@/lib/posTaxUtils';
+import { getPosReceiptSettings } from '@/lib/posReceiptUtils';
 import { PosCheckoutTenderSelector, PosTenderType } from './PosCheckoutTenderSelector';
 import { PosCustomer } from './usePosCustomerAndTable';
 
@@ -43,7 +45,7 @@ export function PosCheckoutModal({
 }: PosCheckoutModalProps) {
   const [tenderType, setTenderType] = useState<PosTenderType>(defaultTender);
   const [cashTendered, setCashTendered] = useState<string>('');
-  const [printReceipt, setPrintReceipt] = useState<boolean>(true);
+  const [printReceipt, setPrintReceipt] = useState<boolean>(() => getPosReceiptSettings().autoPrintReceipt ?? true);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -52,9 +54,20 @@ export function PosCheckoutModal({
       ? (subtotal * appliedCoupon.value) / 100
       : appliedCoupon.value
     : 0;
-  const taxableSubtotal = Math.max(0, subtotal - discountAmount);
-  const tax = taxableSubtotal * 0.1; // 10% VAT
-  const grandTotal = taxableSubtotal + tax;
+  const [taxSettings, setTaxSettings] = useState<PosTaxSettings>(getPosTaxSettings);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTaxSettings(getPosTaxSettings());
+      setPrintReceipt(getPosReceiptSettings().autoPrintReceipt ?? true);
+    }
+  }, [isOpen]);
+
+  const { taxAmount: tax, grandTotal, taxLabel, isEnabled: isTaxEnabled } = calculateCartTax(
+    subtotal,
+    discountAmount,
+    taxSettings
+  );
   const customerCredit = Number(customer?.store_credit || 0);
 
   useEffect(() => {
@@ -150,7 +163,7 @@ export function PosCheckoutModal({
               </div>
               <div className="text-right text-[11px] text-brand-subtle font-medium">
                 <p>{cart.length} item{cart.length === 1 ? '' : 's'}</p>
-                <p>Includes 10% VAT</p>
+                <p>{isTaxEnabled ? (taxLabel || 'Includes VAT') : 'No VAT (Tax Exempt)'}</p>
               </div>
             </div>
 
@@ -261,7 +274,7 @@ export function PosCheckoutModal({
                   <span>Print customer receipt</span>
                 </div>
                 <p className="text-[10px] text-slate-500 truncate">
-                  {printReceipt ? 'Receipt for 80mm thermal printer' : 'Skip paper receipt and proceed'}
+                  {printReceipt ? `Receipt for ${getPosReceiptSettings().paperWidth || '80mm'} thermal printer` : 'Skip paper receipt and proceed'}
                 </p>
               </div>
               <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md shrink-0 ${

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Globe, Save, Check, Loader2, DollarSign, Clock, ShieldCheck } from 'lucide-react';
+import { Globe, Save, Check, Loader2, DollarSign, Clock, ShieldCheck, Percent, Receipt } from 'lucide-react';
 import { buttonStyles } from '@/lib/theme';
 
 interface RegionalSettingsTabProps {
@@ -10,6 +10,10 @@ interface RegionalSettingsTabProps {
     timezone: string;
     tax_id: string;
     country: string;
+    tax_enabled?: boolean;
+    tax_rate?: number;
+    tax_calculation_mode?: 'exclusive' | 'inclusive';
+    tax_label?: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<any>>;
   saving: boolean;
@@ -107,6 +111,82 @@ export function RegionalSettingsTab({
               <option value="US" className="text-slate-900 bg-white">United States</option>
             </select>
           </div>
+
+        {/* VAT & Sales Tax Governance */}
+        <div className="pt-4 border-t border-slate-200/70 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <Percent className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-slate-900">Value-Added Tax (VAT) &amp; Sales Tax Policy</h3>
+                <p className="text-[11px] text-slate-500 font-medium">Configure whether sales transactions automatically calculate VAT for this organization</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={Boolean(formData.tax_enabled)}
+                onChange={(e) => setFormData({ ...formData, tax_enabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
+              <span className="ml-2.5 text-xs font-bold text-slate-800">
+                {formData.tax_enabled ? "VAT Enabled" : "VAT Disabled (Tax Exempt)"}
+              </span>
+            </label>
+          </div>
+
+          {formData.tax_enabled ? (
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Calculation Method</label>
+                  <select
+                    value={formData.tax_calculation_mode || "exclusive"}
+                    onChange={(e) => setFormData({ ...formData, tax_calculation_mode: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-300/80 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand cursor-pointer"
+                  >
+                    <option value="exclusive">Tax Exclusive (Added at checkout)</option>
+                    <option value="inclusive">Tax Inclusive (Included in product price)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tax / VAT Rate (%)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={formData.tax_rate ?? 10}
+                      onChange={(e) => setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })}
+                      className="w-full pl-4 pr-8 py-2.5 rounded-2xl bg-white border border-slate-300/80 text-xs font-mono font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    />
+                    <span className="absolute right-3.5 top-2.5 text-xs font-bold text-slate-400 pointer-events-none">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tax Label on Receipts</label>
+                  <input
+                    type="text"
+                    value={formData.tax_label || "VAT"}
+                    onChange={(e) => setFormData({ ...formData, tax_label: e.target.value })}
+                    placeholder="e.g. VAT, Sales Tax"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-white border border-slate-300/80 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Small business &amp; solopreneur mode: POS terminals will not add or calculate VAT. Prices will be charged at exact face value ($0 tax).</span>
+            </div>
+          )}
+        </div>
+
         </div>
 
         <div className="flex justify-end pt-3">

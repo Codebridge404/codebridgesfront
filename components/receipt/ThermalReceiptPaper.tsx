@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { mergeReceiptOutlet } from '@/lib/posReceiptUtils';
 
 interface ThermalReceiptPaperProps {
   sale: any;
@@ -18,7 +19,7 @@ interface ThermalReceiptPaperProps {
 export function ThermalReceiptPaper({
   sale,
   lines,
-  outlet,
+  outlet: rawOutlet,
   cashier,
   register,
   payments,
@@ -27,12 +28,14 @@ export function ThermalReceiptPaper({
   print_badge,
   formattedDate,
 }: ThermalReceiptPaperProps) {
+  const outlet = mergeReceiptOutlet(rawOutlet);
   const primaryPayment = payments && payments.length > 0 ? payments[0] : null;
+  const is58mm = outlet.paper_width === "58mm";
 
   return (
     <div
       id="printable-thermal-receipt"
-      className="w-[300px] bg-white p-5 border border-slate-200 shadow-sm rounded-xl font-mono text-[11px] leading-tight text-slate-900 select-text"
+      className={`${is58mm ? "w-[230px]" : "w-[300px]"} bg-white p-4 sm:p-5 border border-slate-200 shadow-sm rounded-xl font-mono text-[11px] leading-tight text-slate-900 select-text`}
     >
       {/* Original / Reprint Badge */}
       <div className="text-center mb-3">
@@ -49,22 +52,23 @@ export function ThermalReceiptPaper({
 
       {/* Store / Outlet Branding Header */}
       <div className="text-center space-y-1 pb-3 border-b border-dashed border-slate-300">
-        {(outlet?.logo_url || (typeof window !== 'undefined' && localStorage.getItem('cb_active_org_logo'))) && (
-          <div className="flex justify-center mb-1">
+        {outlet?.logo_url && (
+          <div className="flex justify-center mb-1.5">
             <img
-              src={outlet?.logo_url || (typeof window !== 'undefined' ? localStorage.getItem('cb_active_org_logo') || '' : '')}
+              src={outlet.logo_url}
               alt="Logo"
               className="max-h-12 max-w-[150px] object-contain grayscale contrast-125"
             />
           </div>
         )}
         <h2 className="font-extrabold text-sm uppercase tracking-tight text-slate-900">
-          {outlet?.name || 'Freshmart POS'}
+          {outlet?.name || 'CodeBridges POS'}
         </h2>
         {outlet?.address && <p className="text-[10px] text-slate-600 leading-snug">{outlet.address}</p>}
         {outlet?.phone && <p className="text-[10px] text-slate-600">Tel: {outlet.phone}</p>}
+        {outlet?.vat_tin && <p className="text-[10px] text-slate-600 font-mono">VAT TIN: {outlet.vat_tin}</p>}
         {outlet?.receipt_header && (
-          <p className="text-[10px] italic text-slate-500 pt-1 border-t border-slate-100 mt-1">
+          <p className="text-[10px] italic text-slate-500 pt-1 border-t border-slate-100 mt-1 whitespace-pre-line">
             {outlet.receipt_header}
           </p>
         )}
@@ -157,7 +161,7 @@ export function ThermalReceiptPaper({
 
         {Number(sale?.tax_total) > 0 && (
           <div className="flex justify-between text-slate-600">
-            <span>Tax (VAT):</span>
+            <span>{outlet?.tax_label ? `Tax (${outlet.tax_label}):` : "Tax (VAT):"}</span>
             <span>${Number(sale.tax_total).toFixed(2)}</span>
           </div>
         )}
@@ -197,14 +201,14 @@ export function ThermalReceiptPaper({
       {/* Receipt Footer */}
       <div className="pt-3 text-center space-y-2">
         {outlet?.receipt_footer ? (
-          <p className="text-[10px] text-slate-600 italic leading-snug">{outlet.receipt_footer}</p>
+          <p className="text-[10px] text-slate-600 italic leading-snug whitespace-pre-line">{outlet.receipt_footer}</p>
         ) : (
           <p className="text-[10px] text-slate-500 italic">Thank you for your visit! Please come again.</p>
         )}
 
         {/* Pseudo Barcode Representation */}
         <div className="pt-2 flex flex-col items-center justify-center gap-1">
-          <div className="w-48 h-8 bg-slate-900 flex items-center justify-between px-2 text-white font-mono text-[9px] tracking-widest rounded-xs">
+          <div className={`${is58mm ? "w-36" : "w-48"} h-8 bg-slate-900 flex items-center justify-between px-2 text-white font-mono text-[9px] tracking-widest rounded-xs`}>
             <span>||||||||||||||||||||||||||||||||||||||||||||</span>
           </div>
           <span className="text-[9px] text-slate-400 font-mono">{sale?.receipt_number}</span>

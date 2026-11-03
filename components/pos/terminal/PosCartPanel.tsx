@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { calculateCartTax, getPosTaxSettings, PosTaxSettings } from '@/lib/posTaxUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { appleSpring, pressSpring } from '@/lib/animations';
 import {
@@ -76,9 +77,30 @@ export function PosCartPanel({
       ? (subtotal * appliedCoupon.value) / 100
       : appliedCoupon.value
     : 0;
-  const taxableSubtotal = Math.max(0, subtotal - discountAmount);
-  const tax = taxableSubtotal * 0.1; // 10% VAT
-  const grandTotal = taxableSubtotal + tax;
+  const [taxSettings, setTaxSettings] = useState<PosTaxSettings>(getPosTaxSettings);
+
+  useEffect(() => {
+    const handleSettingsUpdated = () => {
+      setTaxSettings(getPosTaxSettings());
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (!e.key || e.key === 'cb_pos_terminal_settings' || e.key === 'cb_tenant_tax_settings') {
+        setTaxSettings(getPosTaxSettings());
+      }
+    };
+    window.addEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('cb_terminal_settings_updated', handleSettingsUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
+  const { taxAmount: tax, grandTotal, taxLabel, isEnabled: isTaxEnabled } = calculateCartTax(
+    subtotal,
+    discountAmount,
+    taxSettings
+  );
 
   const totalItemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
@@ -271,10 +293,12 @@ export function PosCartPanel({
                 <span className="font-mono">-${discountAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-slate-500">
-              <span>VAT Tax (10%)</span>
-              <span className="font-mono">${tax.toFixed(2)}</span>
-            </div>
+            {isTaxEnabled && (
+              <div className="flex justify-between text-slate-500">
+                <span>{taxLabel}</span>
+                <span className="font-mono">${tax.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-base font-black text-slate-900 pt-1.5 border-t border-slate-200">
               <span>Grand Total</span>
               <span className="text-brand font-mono">

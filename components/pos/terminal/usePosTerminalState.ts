@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { calculateCartTax } from '@/lib/posTaxUtils';
 import {
   getProductsApi,
   createSaleApi,
@@ -231,8 +232,7 @@ export function usePosTerminalState() {
         ? (subtotal * cartState.appliedCoupon.value) / 100
         : cartState.appliedCoupon.value
       : 0;
-    const tax = Math.max(0, subtotal - discount) * 0.1;
-    const grandTotal = Math.max(0, subtotal - discount) + tax;
+    const { taxAmount: tax, grandTotal } = calculateCartTax(subtotal, discount);
 
     const salePayload = {
       outlet_id: activeOutletId || user?.outlet_id || '0d612401-62c2-4e9e-9857-69e40f24c86d',

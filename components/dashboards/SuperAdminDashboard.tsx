@@ -178,23 +178,19 @@ function SuperAdminDashboardContent() {
           <PlatformKpiCards stats={stats} isLoading={isLoading} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+            {/* Left 2-Column Stack: Charts & Telemetry with tight, natural spacing */}
+            <div className="lg:col-span-2 space-y-6">
               <PlatformGrowthChart growthData={growthData} isLoading={isLoading} />
-            </div>
-            <div className="lg:col-span-1">
-              <ModuleAdoptionCard moduleStats={moduleStats} isLoading={isLoading} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
               <MicroserviceHealthMatrix
                 telemetry={healthTelemetry}
                 onRefresh={refetch}
                 isLoading={isLoading}
               />
             </div>
-            <div className="lg:col-span-1">
+
+            {/* Right 1-Column Stack: Module Adoption & Activity Feed */}
+            <div className="lg:col-span-1 space-y-6">
+              <ModuleAdoptionCard moduleStats={moduleStats} isLoading={isLoading} />
               <TenantActivityFeed auditLogs={auditLogs} isLoading={isLoading} />
             </div>
           </div>

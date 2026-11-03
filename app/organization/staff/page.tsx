@@ -13,7 +13,7 @@ import {
   Building2,
   X,
 } from 'lucide-react';
-import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermissionsApi } from '@/lib/api';
+import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermissionsApi, getAuthUser } from '@/lib/api';
 import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/components/security/users';
 import { useConfirm, useToast } from '@/components/common';
 import { WorkspaceStaffDirectory } from '@/components/launchpad/staff/WorkspaceStaffDirectory';
@@ -93,6 +93,11 @@ export default function OrganizationStaffPage() {
   );
 
   const handleToggleStatus = async (user: any) => {
+    const current = getAuthUser();
+    if (current && (current.id === user.id || (current.email && user.email && current.email.toLowerCase() === user.email.toLowerCase()))) {
+      toast.warning('You cannot disable your own active account.');
+      return;
+    }
     try {
       const newStatus = !user.is_active;
       await updateUserApi(user.id, { is_active: newStatus });
@@ -104,6 +109,11 @@ export default function OrganizationStaffPage() {
   };
 
   const handleDeleteStaff = async (id: number | string, name: string) => {
+    const current = getAuthUser();
+    if (current && String(current.id) === String(id)) {
+      toast.warning('You cannot remove your own account from the workspace.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Remove Staff Member',
       description: `Are you sure you want to remove "${name}" from your workspace? They will immediately lose access to all store registers and assigned business modules.`,
@@ -197,7 +207,12 @@ export default function OrganizationStaffPage() {
         onClose={() => setEditingStaff(null)}
         onSubmit={handleSaveEdit}
         saving={savingEdit}
-        dynamicRoles={[]}
+        dynamicRoles={AVAILABLE_ROLES.map((r) => ({
+          id: r.value,
+          name: r.label,
+          slug: r.value,
+          is_system: true,
+        }))}
       />
 
       {/* Add Staff Popup Screen (Modal with 2 Options) */}

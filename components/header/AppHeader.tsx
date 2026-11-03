@@ -1,17 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { appleSpring, pressSpring } from '@/lib/animations';
 import {
-  Menu, Building2, Users, Settings, Shield, FileText, User,
-  ShieldCheck, LogOut, LogIn, Plus,
+  Menu,
+  Building2,
+  Users,
+  Settings,
+  Shield,
+  FileText,
+  User,
+  ShieldCheck,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { getAuthUser, logoutApi, getRoleDisplayName } from '@/lib/api';
+import { getMeetingNotificationsApi } from '@/lib/api/meetings';
+import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotificationsDrawer';
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
 
@@ -30,13 +38,31 @@ export function AppHeader({
 }: AppHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
+
   const [user, setUser] = useState<any>(initialUser !== undefined ? initialUser : null);
   const [orgName, setOrgName] = useState<string>('CodeBridges');
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [impersonating, setImpersonating] = useState<any>(null);
+
+  // Live Notification Drawer state matching ModuleSuiteHeader
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const loadNotificationsCount = async () => {
+    try {
+      const res = await getMeetingNotificationsApi();
+      if (res?.data && Array.isArray(res.data)) {
+        const unread = res.data.filter((n: any) => n.status === 'unread').length;
+        setUnreadNotifCount(unread);
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   const syncState = () => {
     const authUser = initialUser !== undefined ? initialUser : getAuthUser();
@@ -45,7 +71,9 @@ export function AppHeader({
       try {
         const rawImp = localStorage.getItem('cb_impersonation');
         setImpersonating(rawImp ? JSON.parse(rawImp) : null);
-      } catch { setImpersonating(null); }
+      } catch {
+        setImpersonating(null);
+      }
 
       if (authUser) {
         const active =
@@ -93,16 +121,20 @@ export function AppHeader({
       }
     };
 
-    ['cb_org_changed', 'cb_impersonation_changed', 'storage'].forEach(ev =>
+    ['cb_org_changed', 'cb_impersonation_changed', 'storage'].forEach((ev) =>
       window.addEventListener(ev, handleSync as EventListener)
     );
     window.addEventListener('cb_user_updated', handleUserSync as EventListener);
 
+    loadNotificationsCount();
+    const notifInterval = setInterval(loadNotificationsCount, 20000);
+
     return () => {
-      ['cb_org_changed', 'cb_impersonation_changed', 'storage'].forEach(ev =>
+      ['cb_org_changed', 'cb_impersonation_changed', 'storage'].forEach((ev) =>
         window.removeEventListener(ev, handleSync as EventListener)
       );
       window.removeEventListener('cb_user_updated', handleUserSync as EventListener);
+      clearInterval(notifInterval);
     };
   }, [initialUser]);
 
@@ -144,6 +176,7 @@ export function AppHeader({
     : hasOrganization
     ? '/organization/dashboard'
     : '/launchpad';
+
   const userInitials = user?.name
     ? user.name
         .split(' ')
@@ -153,169 +186,200 @@ export function AppHeader({
         .toUpperCase()
     : 'U';
 
+  const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
+
+  // Context Pill Badge matching ModuleSuiteHeader
+  const contextBadge = useMemo(() => {
+    if (!pathname) return null;
+    if (pathname.startsWith('/super-admin')) {
+      return { icon: Shield, title: 'Super Admin Console' };
+    }
+    if (pathname.startsWith('/organization')) {
+      return { icon: Building2, title: 'Workspace Hub' };
+    }
+    if (pathname.startsWith('/profile')) {
+      return { icon: User, title: 'Profile & Account' };
+    }
+    if (pathname.startsWith('/cashier')) {
+      return { icon: AppIcons.POS, title: 'Cashier Terminal' };
+    }
+    if (pathname.startsWith('/launchpad')) {
+      return { icon: AppIcons.Compass, title: 'Launchpad Directory' };
+    }
+    return null;
+  }, [pathname]);
+
+  const subTitle = useMemo(() => {
+    if (!user) return 'Ecosystem Platform';
+    if (isSuperAdmin && !impersonating) return 'Platform Super Admin';
+    if (isOrg) return 'Workspace Operations';
+    if (isEmp) return 'Staff Workspace Portal';
+    return 'Workspace Member';
+  }, [user, isSuperAdmin, impersonating, isOrg, isEmp]);
+
   return (
-    <header className="h-16 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 select-none bg-white/75 backdrop-blur-2xl backdrop-saturate-190 border-b border-white/60 shadow-2xs transition-all">
-      {/* Left Header Elements */}
-      <div className="flex items-center gap-3 sm:gap-4">
-        {setSidebarOpen && user && (
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 active:scale-[0.94] transition-all cursor-pointer"
-            title="Toggle Navigation Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* Dynamic Brand Logo & Identity */}
-        <Link href={homeUrl} className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-            {orgLogo && user && (!isSuperAdmin || impersonating) ? (
-              <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
-            ) : (
-              <img src="/logo/Codebridge.png" alt="CodeBridges Logo" className="w-full h-full object-contain" />
-            )}
-          </div>
-          <div className="hidden sm:block leading-tight">
-            <span className="font-extrabold text-base tracking-tight text-slate-900 block truncate max-w-[180px] lg:max-w-[240px]">
-              {!user || (isSuperAdmin && !impersonating) || (!hasOrganization && !isEmp) ? (
-                <>Code<span className="text-brand">Bridges</span></>
-              ) : (
-                orgName
-              )}
-            </span>
-            <span className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider block">
-              {!user
-                ? 'Ecosystem Platform'
-                : isSuperAdmin && !impersonating
-                ? 'Platform Super Admin'
-                : isOrg
-                ? 'Workspace Operations Hub'
-                : isEmp
-                ? 'Staff Workspace Portal'
-                : 'Workspace Member'}
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      {/* Right Header Actions */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
-        {!user ? (
-          /* ================= GUEST / SIGNED OUT STATE ================= */
-          <>
-            {pathname !== '/launchpad' && (
-              <Link
-                href="/launchpad"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-[0.96] text-slate-700 text-xs font-bold transition-all border border-slate-200/60"
-                title="App Directory Launchpad"
-              >
-                <AppIcons.Compass className="w-3.5 h-3.5 text-brand" />
-                <span>Launchpad</span>
-              </Link>
-            )}
-
-            <Link
-              href="/register"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-[0.96] text-slate-700 text-xs font-bold transition-all border border-slate-200/60"
-            >
-              <span>Register</span>
-            </Link>
-
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-brand hover:bg-brand-hover active:scale-[0.96] text-white text-xs font-bold transition-all shadow-xs"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </Link>
-          </>
-        ) : (
-          /* ================= AUTHENTICATED USER STATE ================= */
-          <>
-            {/* Quick 1-Click Launchpad <-> Dashboard Switcher */}
-            {pathname !== '/launchpad' ? (
-              <Link
-                href="/launchpad"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-[0.96] text-slate-700 text-xs font-bold transition-all border border-slate-200/60"
-                title="App Directory Launchpad"
-              >
-                <AppIcons.Compass className="w-3.5 h-3.5 text-brand" />
-                <span className="hidden sm:inline">Launchpad</span>
-              </Link>
-            ) : isSuperAdmin ? (
-              <Link
-                href="/super-admin/dashboard"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 active:scale-[0.96] text-brand text-xs font-bold transition-all border border-brand/20"
-                title="Platform Super Admin Console"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Admin Panel</span>
-              </Link>
-            ) : hasOrganization ? (
-              <Link
-                href="/organization/dashboard"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-brand/10 hover:bg-brand/20 active:scale-[0.96] text-brand text-xs font-bold transition-all border border-brand/20"
-                title="Return to Workspace Dashboard"
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Link>
-            ) : null}
-
-            {/* Dynamic Notifications Bell */}
+    <>
+      <header className="h-16 px-4 sm:px-6 flex items-center justify-between relative z-30 select-none bg-canvas shrink-0">
+        {/* Left: Sidebar Toggle + Brand Identity + Context Pill */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          {setSidebarOpen && user && (
             <button
               type="button"
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 active:scale-[0.92] transition-all relative cursor-pointer"
-              title="System Notifications"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Toggle Navigation Menu"
             >
-              <AppIcons.Bell className="w-5 h-5" />
-              <span className="w-2 h-2 rounded-full bg-brand absolute top-2 right-2 border-2 border-white animate-pulse" />
+              <Menu className="w-5 h-5" />
             </button>
+          )}
 
-            {/* Interactive User Profile Dropdown */}
-            <div className="relative pl-2 sm:pl-3 border-l border-slate-200" ref={dropdownRef}>
+          {/* Dynamic Brand Logo & Identity matching ModuleSuiteHeader */}
+          <Link href={homeUrl} className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+              {orgLogo && user && (!isSuperAdmin || impersonating) ? (
+                <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
+              ) : (
+                <img src="/logo/Codebridge.png" alt="CodeBridges Logo" className="w-full h-full object-contain" />
+              )}
+            </div>
+            <div className="hidden sm:block leading-tight">
+              <span className="font-extrabold text-base tracking-tight text-slate-900 block truncate max-w-[160px] lg:max-w-[200px]">
+                {!user || (isSuperAdmin && !impersonating) || (!hasOrganization && !isEmp) ? (
+                  <>Code<span className="text-brand">Bridges</span></>
+                ) : (
+                  orgName
+                )}
+              </span>
+              <span className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider block">
+                {subTitle}
+              </span>
+            </div>
+          </Link>
+
+          {/* Context Pill Badge matching ModuleSuiteHeader */}
+          {contextBadge && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand/10 border border-brand/20 shadow-2xs">
+              <contextBadge.icon className="w-3.5 h-3.5 text-brand" />
+              <span className="font-extrabold text-xs text-brand tracking-tight">{contextBadge.title}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Switcher + Notifications Bell + User Profile Dropdown */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {!user ? (
+            /* ================= GUEST / SIGNED OUT STATE ================= */
+            <>
+              {pathname !== '/launchpad' && (
+                <Link
+                  href="/launchpad"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
+                  title="App Directory Launchpad"
+                >
+                  <AppIcons.Compass className="w-3.5 h-3.5 text-brand" />
+                  <span>Launchpad</span>
+                </Link>
+              )}
+
+              <Link
+                href="/register"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
+              >
+                <span>Register</span>
+              </Link>
+
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-xs"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
+            </>
+          ) : (
+            /* ================= AUTHENTICATED USER STATE ================= */
+            <>
+              {/* Quick 1-Click Launchpad <-> Dashboard Switcher matching ModuleSuiteHeader */}
+              {pathname !== '/launchpad' ? (
+                <Link
+                  href="/launchpad"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
+                  title="App Directory Launchpad"
+                >
+                  <AppIcons.Compass className="w-3.5 h-3.5 text-brand" />
+                  <span className="hidden sm:inline">Launchpad</span>
+                </Link>
+              ) : isSuperAdmin ? (
+                <Link
+                  href="/super-admin/dashboard"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
+                  title="Platform Super Admin Console"
+                >
+                  <Shield className="w-3.5 h-3.5 text-brand" />
+                  <span className="hidden sm:inline">Admin Panel</span>
+                </Link>
+              ) : hasOrganization ? (
+                <Link
+                  href="/organization/dashboard"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-colors border border-slate-200/60"
+                  title="Return to Workspace Dashboard"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-brand" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </Link>
+              ) : null}
+
+              {/* Dynamic Notifications Bell matching ModuleSuiteHeader */}
               <button
                 type="button"
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100/80 active:scale-[0.96] transition-all cursor-pointer text-left"
+                onClick={() => setNotificationsOpen(true)}
+                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors relative cursor-pointer"
+                title="System Notifications"
               >
-                {user.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover shadow-xs border border-slate-200"
-                  />
+                <AppIcons.Bell className="w-5 h-5" />
+                {unreadNotifCount > 0 ? (
+                  <span className="absolute top-1.5 right-1.5 px-1 min-w-[15px] h-3.5 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse shadow-2xs">
+                    {unreadNotifCount}
+                  </span>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shadow-xs">
-                    {userInitials}
-                  </div>
+                  <span className="w-2 h-2 rounded-full bg-brand absolute top-2 right-2 border-2 border-white animate-pulse" />
                 )}
-                <div className="hidden md:block">
-                  <p className="text-xs font-bold leading-tight text-slate-900 flex items-center gap-1">
-                    {user.name}
-                    <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
-                  </p>
-                  <p className="text-[10px] text-brand font-bold capitalize truncate max-w-[120px]">{roleTitle}</p>
-                </div>
               </button>
 
-              <AnimatePresence>
+              {/* Interactive User Profile Dropdown matching ModuleSuiteHeader */}
+              <div className="relative pl-2 sm:pl-3 border-l border-slate-200" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer text-left"
+                >
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={user.name || 'User'}
+                      className="w-8 h-8 rounded-full object-cover shadow-xs border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shadow-xs">
+                      {userInitials}
+                    </div>
+                  )}
+                  <div className="hidden md:block">
+                    <p className="text-xs font-bold leading-tight text-slate-900 flex items-center gap-1">
+                      {user.name || 'User'}
+                      <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                    </p>
+                    <p className="text-[10px] text-brand font-bold capitalize truncate max-w-[120px]">{roleTitle}</p>
+                  </div>
+                </button>
+
                 {showProfileDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -6 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -6 }}
-                    transition={appleSpring}
-                    style={{ transformOrigin: 'top right' }}
-                    className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 font-sans text-slate-800"
-                  >
-                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-start gap-3 rounded-t-xl">
-                      {user.avatar_url ? (
+                  <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 font-sans text-slate-800 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-4 py-3 bg-slate-50/70 flex items-start gap-3">
+                      {avatarUrl ? (
                         <img
-                          src={user.avatar_url}
-                          alt={user.name}
+                          src={avatarUrl}
+                          alt={user.name || 'User'}
                           className="w-10 h-10 rounded-xl object-cover shadow-2xs border border-slate-200 shrink-0"
                         />
                       ) : (
@@ -324,10 +388,9 @@ export function AppHeader({
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+                        <p className="text-xs font-bold text-slate-900 truncate">{user.name || 'User'}</p>
                         <p className="text-[11px] text-slate-500 truncate">{user.email || ''}</p>
                         <span className={`inline-block mt-1 ${badgeStyles.brand}`}>
-                          <ShieldCheck className="w-3 h-3 text-brand" />
                           {roleTitle}
                         </span>
                       </div>
@@ -342,50 +405,50 @@ export function AppHeader({
                         <User className="w-4 h-4 text-slate-400" /> My Profile
                       </Link>
 
-                      {isSuperAdmin && !impersonating ? (
+                      {['organization', 'admin', 'super_admin', 'owner', 'organization_owner', 'manager', 'accountant', 'staff'].includes(user?.role) && (
                         <>
-                          <Link href="/super-admin/security/settings" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                            <Settings className="w-4 h-4 text-slate-400" /> Setting
-                          </Link>
-                          <Link href="/super-admin/security/roles" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                            <Shield className="w-4 h-4 text-slate-400" /> Dynamic Roles &amp; RBAC
-                          </Link>
-                          <Link href="/super-admin/security/audit-logs" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                            <FileText className="w-4 h-4 text-slate-400" /> Security Audit Logs
-                          </Link>
-                        </>
-                      ) : isOrg ? (
-                        <>
-                          <Link href="/organization/dashboard" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
+                          <Link
+                            href="/organization/dashboard"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
+                          >
                             <Building2 className="w-4 h-4 text-slate-400" /> Workspace Dashboard
                           </Link>
-                          <Link href="/organization/outlets" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                            <Building2 className="w-4 h-4 text-slate-400" /> Store Outlets &amp; Hubs
-                          </Link>
-                          <Link href="/organization/staff" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
-                            <Users className="w-4 h-4 text-slate-400" /> Staff &amp; Team Roster
-                          </Link>
-                          <Link href="/organization/settings" onClick={() => setShowProfileDropdown(false)} className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors">
+                          <Link
+                            href="/organization/settings"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
+                          >
                             <Settings className="w-4 h-4 text-slate-400" /> Setting
                           </Link>
                         </>
-                      ) : null}
+                      )}
+
+                      {isSuperAdmin && (
+                        <Link
+                          href="/super-admin/dashboard"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
+                        >
+                          <Shield className="w-4 h-4 text-brand" /> Super Admin Console
+                        </Link>
+                      )}
 
                       {/* Bidirectional Switcher: Launchpad <-> Dashboard */}
                       {pathname !== '/launchpad' ? (
                         <Link
                           href="/launchpad"
                           onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors border-t border-slate-100"
+                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
                         >
-                          <AppIcons.Compass className="w-4 h-4 text-slate-400" />
-                          <span>{isEmp ? 'Workspace Launchpad' : 'App Directory Launchpad'}</span>
+                          <AppIcons.Compass className="w-4 h-4 text-brand" />
+                          <span>App Directory Launchpad</span>
                         </Link>
                       ) : isSuperAdmin ? (
                         <Link
                           href="/super-admin/dashboard"
                           onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
+                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
                         >
                           <Shield className="w-4 h-4 text-brand" />
                           <span>Platform Super Admin</span>
@@ -394,7 +457,7 @@ export function AppHeader({
                         <Link
                           href="/organization/dashboard"
                           onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
+                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
                         >
                           <Building2 className="w-4 h-4 text-brand" />
                           <span>Organization Dashboard</span>
@@ -406,30 +469,40 @@ export function AppHeader({
                       <button
                         type="button"
                         onClick={onLogout}
-                        className="w-full px-4 py-2.5 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        className="w-full px-4 py-2 text-left hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-2.5 cursor-pointer transition-colors"
                       >
-                        <LogOut className="w-4 h-4" /> Sign Out
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </div>
-          </>
-        )}
-      </div>
+              </div>
+            </>
+          )}
+        </div>
 
-      {/* 1-Click Create Organization Modal */}
-      {showCreateOrgModal && (
-        <CreateOrgModal
-          isOpen={showCreateOrgModal}
-          onClose={() => setShowCreateOrgModal(false)}
-          onOrgCreated={() => {
-            setShowCreateOrgModal(false);
-            router.push('/organization/dashboard');
-          }}
-        />
-      )}
-    </header>
+        {/* 1-Click Create Organization Modal */}
+        {showCreateOrgModal && (
+          <CreateOrgModal
+            isOpen={showCreateOrgModal}
+            onClose={() => setShowCreateOrgModal(false)}
+            onOrgCreated={() => {
+              setShowCreateOrgModal(false);
+              router.push('/organization/dashboard');
+            }}
+          />
+        )}
+      </header>
+
+      {/* Global Notifications Center Drawer */}
+      <MeetingNotificationsDrawer
+        isOpen={notificationsOpen}
+        onClose={() => {
+          setNotificationsOpen(false);
+          loadNotificationsCount();
+        }}
+      />
+    </>
   );
 }

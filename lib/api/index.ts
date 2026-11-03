@@ -14,3 +14,5 @@ export * from './support';
 export * from './modules';
 export * from '../modules';
 export * from '../rbac';
+export * from "../posTaxUtils";
+export * from "../posReceiptUtils";

@@ -42,6 +42,10 @@ const DEFAULT_SETTINGS = {
   secondaryCurrency: 'KHR',
   exchangeRate: 4100,
   khrRounding: '100',
+  taxEnabled: false,
+  taxRate: 10,
+  taxCalculationMode: 'exclusive',
+  taxLabel: 'VAT',
   printerType: 'network',
   printerIp: '192.168.1.200',
   printerPort: '9100',
@@ -197,6 +201,7 @@ function PosTerminalSettingsContent() {
           is_kds_enabled: settings.kdsEnabled !== false,
           is_cfd_enabled: settings.cfdEnabled !== false,
           terminal_settings: {
+            ...settings,
             businessType: settings.businessType,
             printerType: settings.printerType,
             printerIp: settings.printerIp,
@@ -206,6 +211,9 @@ function PosTerminalSettingsContent() {
             printKitchenTicket: settings.printKitchenTicket,
             drawerKickOnCash: settings.drawerKickOnCash,
             cfdAutoKhqr: settings.cfdAutoKhqr,
+            receiptHeader: settings.receiptHeader,
+            receiptFooter: settings.receiptFooter,
+            receiptLogoUrl: settings.receiptLogoUrl,
           },
         });
 
@@ -224,6 +232,9 @@ function PosTerminalSettingsContent() {
       localStorage.setItem('cb_pos_terminal_settings', JSON.stringify(settings));
       localStorage.setItem('cb_pos_receipt_header', settings.receiptHeader || '');
       localStorage.setItem('cb_pos_receipt_footer', settings.receiptFooter || '');
+      if (settings.receiptLogoUrl) {
+        localStorage.setItem('cb_active_org_logo', settings.receiptLogoUrl);
+      }
 
       window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: settings }));
     }

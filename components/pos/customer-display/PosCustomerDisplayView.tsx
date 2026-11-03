@@ -14,6 +14,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { getPersistentCart } from '@/lib/offlineStore';
+import { calculateCartTax } from '@/lib/posTaxUtils';
 import { CfdItemsList } from './CfdItemsList';
 import { CfdPaymentCard } from './CfdPaymentCard';
 
@@ -21,6 +22,7 @@ export function PosCustomerDisplayView() {
   const [cart, setCart] = useState<any[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [, setSettingsTick] = useState(0);
   const [cfdEnabled, setCfdEnabled] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -37,7 +39,7 @@ export function PosCustomerDisplayView() {
   useEffect(() => {
     const handleSettingsUpdated = (e: any) => {
       if (e?.detail?.cfdEnabled !== undefined) {
-        setCfdEnabled(Boolean(e.detail.cfdEnabled));
+        setCfdEnabled(Boolean(e.detail.cfdEnabled)); setSettingsTick((t) => t + 1);
       }
     };
     const handleStorage = (e: StorageEvent) => {
@@ -45,7 +47,7 @@ export function PosCustomerDisplayView() {
         try {
           const parsed = JSON.parse(e.newValue);
           if (parsed.cfdEnabled !== undefined) {
-            setCfdEnabled(Boolean(parsed.cfdEnabled));
+            setCfdEnabled(Boolean(parsed.cfdEnabled)); setSettingsTick((t) => t + 1);
           }
         } catch {}
       }
@@ -116,8 +118,9 @@ export function PosCustomerDisplayView() {
       ? (subtotal * appliedCoupon.value) / 100
       : appliedCoupon.value
     : 0;
-  const tax = Math.max(0, subtotal - discount) * 0.1;
-  const grandTotal = Math.max(0, subtotal - discount) + tax;
+  const taxCalc = calculateCartTax(subtotal, discount);
+  const tax = taxCalc.taxAmount;
+  const grandTotal = taxCalc.grandTotal;
 
   if (!cfdEnabled) {
     return (
@@ -225,7 +228,7 @@ export function PosCustomerDisplayView() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-auto py-6">
           <CfdItemsList cart={formattedItems} />
-          <CfdPaymentCard subtotal={subtotal} tax={tax} grandTotal={grandTotal} />
+          <CfdPaymentCard subtotal={subtotal} tax={tax} grandTotal={grandTotal} taxLabel={taxCalc.taxLabel} isTaxEnabled={taxCalc.isTaxEnabled} />
         </div>
       )}
 

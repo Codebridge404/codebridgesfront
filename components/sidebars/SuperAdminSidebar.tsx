@@ -8,7 +8,7 @@ import { appleSpring } from '@/lib/animations';
 import {
   LayoutDashboard, Building2, Layers, CreditCard, Users, BarChart3, LifeBuoy,
   ShieldCheck, Sliders, DollarSign, Key, Lock, Server, Receipt, UserCheck, Shield,
-  ChevronDown, ChevronRight, ExternalLink, Search, X, Sparkles, LucideIcon, Settings,
+  ChevronDown, ChevronRight, ExternalLink, Sparkles, LucideIcon, Settings,
 } from 'lucide-react';
 import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
@@ -68,6 +68,7 @@ export const platformNavGroups: NavGroup[] = [
     id: 'security-governance',
     title: 'Security & Governance',
     items: [
+      { name: 'User Management', href: '/super-admin/users', icon: Users, badge: 'Admin' },
       { name: 'Platform Settings', href: '/super-admin/settings', icon: Settings },
       { name: 'Dynamic Roles & RBAC', href: '/super-admin/security/roles', icon: Shield },
       { name: 'Immutable Audit Trail', href: '/super-admin/security/audit-logs', icon: Lock },
@@ -79,7 +80,6 @@ export const platformNavGroups: NavGroup[] = [
 export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userRole?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [navSearch, setNavSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({
     'platform-overview': true,
     'multi-tenant': true,
@@ -111,16 +111,7 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
     return false;
   };
 
-  const filteredNavGroups = useMemo(() => {
-    if (!navSearch.trim()) return platformNavGroups;
-    const query = navSearch.toLowerCase().trim();
-    return platformNavGroups
-      .map((g) => ({
-        ...g,
-        items: g.items.filter((item) => item.name.toLowerCase().includes(query)),
-      }))
-      .filter((g) => g.items.length > 0);
-  }, [navSearch]);
+
 
   return (
     <aside
@@ -152,36 +143,13 @@ export function SuperAdminSidebar({ sidebarOpen }: { sidebarOpen: boolean; userR
         )}
       </div>
 
-      {/* Quick Nav Search */}
-      {sidebarOpen && (
-        <div className="px-3 py-1.5">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Quick find module..."
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-slate-100/70 border border-slate-200/60 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
-            />
-            {navSearch && (
-              <button
-                type="button"
-                onClick={() => setNavSearch('')}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+
 
       {/* Scrollable Navigation List */}
       <nav className="flex-1 px-2.5 py-2 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
-        {filteredNavGroups.map((group) => {
+        {platformNavGroups.map((group) => {
           const isCollapsible = group.collapsible !== false;
-          const isExpanded = !isCollapsible || navSearch ? true : (expandedGroups[group.id] ?? true);
+          const isExpanded = !isCollapsible ? true : (expandedGroups[group.id] ?? true);
 
           return (
             <div key={group.id} className="space-y-1">

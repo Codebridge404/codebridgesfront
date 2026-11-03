@@ -7,9 +7,11 @@ interface CfdPaymentCardProps {
   subtotal: number;
   tax: number;
   grandTotal: number;
+  taxLabel?: string;
+  isTaxEnabled?: boolean;
 }
 
-export function CfdPaymentCard({ subtotal, tax, grandTotal }: CfdPaymentCardProps) {
+export function CfdPaymentCard({ subtotal, tax, grandTotal, taxLabel = 'VAT', isTaxEnabled = true }: CfdPaymentCardProps) {
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-6 flex flex-col justify-between text-center">
       <div className="space-y-3">
@@ -29,10 +31,12 @@ export function CfdPaymentCard({ subtotal, tax, grandTotal }: CfdPaymentCardProp
           <span>Subtotal:</span>
           <span className="font-bold font-mono">${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-slate-600">
-          <span>VAT Tax (10%):</span>
-          <span className="font-bold font-mono">${tax.toFixed(2)}</span>
-        </div>
+        {isTaxEnabled && (
+          <div className="flex justify-between text-slate-600">
+            <span>{taxLabel}:</span>
+            <span className="font-bold font-mono">${tax.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-xl font-black text-brand border-t border-slate-200 pt-3">
           <span>Total Due:</span>
           <span className="font-mono">${grandTotal.toFixed(2)}</span>

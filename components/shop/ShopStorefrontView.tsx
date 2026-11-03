@@ -6,6 +6,7 @@ import { getProductsApi, createOnlineOrderApi } from '@/lib/api';
 import { BakongKhqrModal } from '@/components/payments/BakongKhqrModal';
 import { ShopProduct, ShopProductGrid } from './ShopProductGrid';
 import { CartItem, ShopCartDrawer } from './ShopCartDrawer';
+import { calculateCartTax } from '@/lib/posTaxUtils';
 
 export const ShopStorefrontView: React.FC = () => {
   const [products, setProducts] = useState<ShopProduct[]>([]);
@@ -82,8 +83,9 @@ export const ShopStorefrontView: React.FC = () => {
   // Calculations
   const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const deliveryFee = deliveryType === 'delivery' ? 1.5 : 0.0;
-  const taxAmount = roundTwo(subtotal * 0.1);
-  const grandTotal = roundTwo(subtotal + taxAmount + deliveryFee);
+  const taxCalc = calculateCartTax(subtotal, 0);
+  const taxAmount = taxCalc.taxAmount;
+  const grandTotal = roundTwo(taxCalc.grandTotal + deliveryFee);
 
   function roundTwo(val: number) {
     return Math.round(val * 100) / 100;
@@ -218,6 +220,8 @@ export const ShopStorefrontView: React.FC = () => {
         subtotal={subtotal}
         deliveryFee={deliveryFee}
         taxAmount={taxAmount}
+        taxLabel={taxCalc.taxLabel}
+        isTaxEnabled={taxCalc.isTaxEnabled}
         grandTotal={grandTotal}
         isSubmitting={isSubmitting}
         onSubmitCheckout={handleStartKhqrCheckout}
