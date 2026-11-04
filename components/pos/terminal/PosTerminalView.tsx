@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Cross-Outlet Stock Lookup in POS Terminal (BD-0132)
+ */
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
@@ -25,6 +30,8 @@ import { PosCustomerSelectorModal } from './PosCustomerSelectorModal';
 import { PosTableSelectorModal } from './PosTableSelectorModal';
 import { PosSupervisorPinModal } from './PosSupervisorPinModal';
 import { PosCrossOutletStockModal } from './PosCrossOutletStockModal';
+import { VoucherRedeemModal } from '@/components/crm/customers/VoucherRedeemModal';
+import { Gift } from 'lucide-react';
 import {
   getPosBusinessType,
   POS_BUSINESS_PROFILES,
@@ -37,6 +44,7 @@ function PosTerminalContent() {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
   const [showStockLookupModal, setShowStockLookupModal] = useState(false);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [pendingSupervisorAction, setPendingSupervisorAction] = useState<{
     actionName: string;
     onExecute: () => void;
@@ -127,17 +135,15 @@ function PosTerminalContent() {
                 onSearchChange={t.setSearchQuery}
               />
             </div>
-            {t.outletsCount > 1 && (
-              <button
-                type="button"
-                onClick={() => setShowStockLookupModal(true)}
-                className="px-3 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
-                title="Lookup inventory across chain branches"
-              >
-                <Building2 className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="hidden xl:inline">Branch Stock</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowStockLookupModal(true)}
+              className="px-3 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+              title="Lookup inventory across chain branches"
+            >
+              <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="hidden xl:inline">Branch Stock</span>
+            </button>
           </div>
 
           <div className="shrink-0">

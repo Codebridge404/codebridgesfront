@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: NBC Currency Sync & Cash Variance Alerts (BD-0133)
+ */
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { DollarSign, Building2, ShieldCheck, ArrowRight, Percent, Receipt } from 'lucide-react';
+import { DollarSign, Building2, ShieldCheck, ArrowRight, Percent, Receipt, RefreshCw, Loader2, ShieldAlert, Send, CheckCircle2 } from 'lucide-react';
+import { syncNbcExchangeRateApi } from '@/lib/api/payments';
+import { testVarianceAlertApi } from '@/lib/api/shifts';
 
 interface PosPolicySettingsTabProps {
   settings: any;

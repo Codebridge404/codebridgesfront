@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Customer Store Credit & Tax Invoice Invoicing (BD-0137)
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,6 +14,7 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  Gift,
 } from 'lucide-react';
 import {
   getCustomersApi,
@@ -19,6 +25,8 @@ import {
 import { CustomerModal } from './CustomerModal';
 import { CustomerMetricsCards } from './CustomerMetricsCards';
 import { CustomerCardGrid } from './CustomerCardGrid';
+import { CustomerCreditTopupModal } from './CustomerCreditTopupModal';
+import { VoucherRedeemModal } from './VoucherRedeemModal';
 
 export const SuperAdminCustomersView: React.FC = () => {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -28,6 +36,10 @@ export const SuperAdminCustomersView: React.FC = () => {
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [topupCustomer, setTopupCustomer] = useState<any | null>(null);
+  const [voucherCustomer, setVoucherCustomer] = useState<any | null>(null);
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -98,90 +110,100 @@ export const SuperAdminCustomersView: React.FC = () => {
         loyalty_points: parseInt(formData.loyalty_points, 10) || 0,
       };
 
-      let res;
       if (editingCustomer) {
-        res = await updateCustomerApi(editingCustomer.id, payload);
-      } else {
-        res = await createCustomerApi(payload);
-      }
-
-      if (res.success) {
+        await updateCustomerApi(editingCustomer.id, payload);
         setNotification({
           type: 'success',
-          message: editingCustomer ? 'Customer profile updated' : 'Customer successfully registered',
+          message: `Customer "${formData.name}" updated successfully.`,
         });
-        setIsModalOpen(false);
-        loadCustomers();
       } else {
+        await createCustomerApi(payload);
         setNotification({
-          type: 'error',
-          message: res.message || 'Operation failed',
+          type: 'success',
+          message: `Customer "${formData.name}" registered successfully.`,
         });
       }
+      setIsModalOpen(false);
+      loadCustomers();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        message: err.message || 'Failed to submit customer details',
+        message: err.message || 'Failed to save customer.',
       });
     } finally {
       setSaving(false);
-      setTimeout(() => setNotification(null), 4000);
     }
   };
 
   const handleDeleteCustomer = async (customer: any) => {
-    if (!window.confirm(`Are you sure you want to delete "${customer.name}"?`)) {
+    if (!window.confirm(`Are you sure you want to remove customer "${customer.name}"?`)) {
       return;
     }
     try {
-      const res = await deleteCustomerApi(customer.id);
-      if (res.success) {
-        setNotification({ type: 'success', message: 'Customer record removed' });
-        loadCustomers();
-      } else {
-        setNotification({ type: 'error', message: res.message || 'Could not delete customer' });
-      }
+      await deleteCustomerApi(customer.id);
+      setNotification({
+        type: 'success',
+        message: `Customer "${customer.name}" removed.`,
+      });
+      loadCustomers();
     } catch (err: any) {
-      setNotification({ type: 'error', message: err.message || 'Deletion error' });
-    } finally {
-      setTimeout(() => setNotification(null), 4000);
+      setNotification({
+        type: 'error',
+        message: err.message || 'Failed to delete customer.',
+      });
     }
   };
 
+  // Metrics
   const totalCustomers = customers.length;
   const totalPointsBalance = customers.reduce(
-    (acc, curr) => acc + (parseInt(curr.loyalty_points, 10) || 0),
+    (sum, c) => sum + (c.loyalty_points || 0),
     0
   );
-  const pointsLiabilityUSD = totalPointsBalance * 0.01;
+  const pointsLiabilityUSD = Number((totalPointsBalance / 100).toFixed(2));
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header Bar */}
+    <div className="space-y-6">
+      {/* Title Header */}
       <motion.div
-        initial={{ opacity: 0, x: -15 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-brand" />
-            Customer Relationship &amp; Loyalty Ledger
+        <div className="space-y-1">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-brand" />
+            Customer Relationship Management
           </h1>
           <p className="text-xs text-slate-500">
-            Manage customer directories, track purchase points, and maintain buyer engagement
+            Manage customer directories, store credit pre-payment invoices, gift vouchers, and loyalty points
           </p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handleOpenCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:bg-brand-active text-white font-bold text-xs shadow-md shadow-brand/20 transition-all flex items-center gap-2 self-start sm:self-auto"
-        >
-          <UserPlus className="w-4 h-4" />
-          Register Customer
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setVoucherCustomer(null);
+              setIsVoucherModalOpen(true);
+            }}
+            className="px-3.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            title="Redeem digital gift voucher"
+          >
+            <Gift className="w-4 h-4 text-amber-600" />
+            <span>Redeem Voucher</span>
+          </button>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handleOpenCreateModal}
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover active:bg-brand-active text-white font-bold text-xs shadow-md shadow-brand/20 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            Register Customer
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Metrics Cards */}
@@ -234,8 +256,11 @@ export const SuperAdminCustomersView: React.FC = () => {
         loading={loading}
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteCustomer}
+        onTopupCredit={(cust) => setTopupCustomer(cust)}
+        onRedeemVoucher={(cust) => setVoucherCustomer(cust)}
       />
 
+      {/* Customer Create/Edit Modal */}
       <CustomerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -244,6 +269,29 @@ export const SuperAdminCustomersView: React.FC = () => {
         setFormData={setFormData}
         onSave={handleSaveCustomer}
         saving={saving}
+      />
+
+      {/* Customer Store Credit Prepayment Tax Invoice Modal */}
+      {topupCustomer && (
+        <CustomerCreditTopupModal
+          isOpen={Boolean(topupCustomer)}
+          onClose={() => setTopupCustomer(null)}
+          customer={topupCustomer}
+          onSuccess={loadCustomers}
+        />
+      )}
+
+      {/* Digital Voucher Redemption Modal */}
+      <VoucherRedeemModal
+        isOpen={isVoucherModalOpen || Boolean(voucherCustomer)}
+        onClose={() => {
+          setIsVoucherModalOpen(false);
+          setVoucherCustomer(null);
+        }}
+        customerId={voucherCustomer?.id}
+        customerName={voucherCustomer?.name}
+        customers={customers}
+        onRedeemSuccess={loadCustomers}
       />
     </div>
   );

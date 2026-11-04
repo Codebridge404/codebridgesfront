@@ -1,7 +1,13 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: End-of-Day (EOD) Z-Report & Nightly Dispatch (BD-0132)
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Send } from 'lucide-react';
 import {
   getAuthUser,
   getActiveShiftApi,
@@ -20,6 +26,7 @@ import {
   DualCurrencyDenominationModal,
   PosThermalReportModal,
   PosSafeDropModal,
+  PosEodDispatchModal,
 } from './index';
 
 export function PosShiftsManagementView() {
@@ -39,6 +46,7 @@ export function PosShiftsManagementView() {
   const [thermalReportType, setThermalReportType] = useState<'X-REPORT' | 'Z-REPORT'>('X-REPORT');
   const [selectedThermalShift, setSelectedThermalShift] = useState<any>(null);
   const [showSafeDropModal, setShowSafeDropModal] = useState(false);
+  const [showEodDispatchModal, setShowEodDispatchModal] = useState(false);
 
   useEffect(() => {
     const currentUser = getAuthUser();
@@ -137,7 +145,7 @@ export function PosShiftsManagementView() {
             Cash drawer opening float, paid-in/out movements, mid-shift safe drops, and Z-report end-of-day reconciliation
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {activeShift ? (
             <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
               ● Shift Active (#{String(activeShift.id).slice(0, 6)})
@@ -147,6 +155,16 @@ export function PosShiftsManagementView() {
               No Active Shift
             </span>
           )}
+
+          <button
+            type="button"
+            onClick={() => setShowEodDispatchModal(true)}
+            className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20"
+            title="Perform End-of-Day reconciliation & dispatch nightly summary"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>End-of-Day Z-Report</span>
+          </button>
         </div>
       </div>
 
@@ -230,6 +248,26 @@ export function PosShiftsManagementView() {
         onClose={() => setShowSafeDropModal(false)}
         onConfirm={handleSafeDrop}
         currentCashInDrawer={currentExpectedCash}
+      />
+
+      {/* Modal: End-of-Day (EOD) Z-Report & Dispatch */}
+      <PosEodDispatchModal
+        isOpen={showEodDispatchModal}
+        onClose={() => setShowEodDispatchModal(false)}
+        user={user}
+        onSuccess={loadShiftsData}
+        onPrintThermal={(zData) => {
+          setSelectedThermalShift({
+            ...zData,
+            id: zData.z_report_code,
+            status: 'closed',
+            cash_sales: zData.payment_breakdown?.cash,
+            gross_sales: zData.gross_sales,
+            net_sales: zData.net_sales,
+          });
+          setThermalReportType('Z-REPORT');
+          setShowThermalReportModal(true);
+        }}
       />
     </div>
   );

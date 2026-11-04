@@ -77,3 +77,41 @@ export interface TelemetryData {
 export async function getInfrastructureTelemetryApi(): Promise<{ success: boolean; data: TelemetryData }> {
   return await apiFetch('/super-admin/infrastructure/telemetry');
 }
+
+
+export interface StorageConfigData {
+  provider: "minio" | "s3";
+  endpoint: string;
+  region: string;
+  use_path_style: boolean;
+  default_bucket: string;
+  public_bucket: string;
+  secure_bucket: string;
+  status: "healthy" | "degraded" | "offline";
+  latency: number;
+  total_capacity_gb: number;
+  used_capacity_gb: number;
+  files_count: number;
+  access_key_masked: string;
+}
+
+export async function getStorageConfigApi(): Promise<{ success: boolean; data: StorageConfigData }> {
+  return await apiFetch("/super-admin/infrastructure/storage");
+}
+
+export async function testStorageConnectionApi(data?: { endpoint?: string }): Promise<{
+  success: boolean;
+  message: string;
+  data: {
+    status: string;
+    latency_ms: number;
+    read_write_test: string;
+    bucket_accessible: boolean;
+    tested_at: string;
+  };
+}> {
+  return await apiFetch("/super-admin/infrastructure/storage/test", {
+    method: "POST",
+    body: JSON.stringify(data || {}),
+  });
+}

@@ -332,3 +332,38 @@ export async function deleteEmployeeApi(id: number | string) {
     method: 'DELETE',
   });
 }
+
+
+export interface TopUpStoreCreditPayload {
+  amount_paid: number;
+  bonus_credit?: number;
+  payment_method: "cash" | "card" | "khqr" | "bank_transfer";
+  payment_reference?: string;
+  validity_days?: number;
+  notes?: string;
+  outlet_id?: number | string;
+}
+
+export async function topupCustomerCreditInvoiceApi(
+  customerId: number | string,
+  payload: TopUpStoreCreditPayload
+) {
+  return await apiFetch(`/customers/${customerId}/credit/topup-invoice`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getCustomerCreditInvoicesApi(customerId: number | string) {
+  return await apiFetch(`/customers/${customerId}/credit/invoices`);
+}
+
+export async function redeemDigitalVoucherApi(payload: {
+  voucher_code: string;
+  customer_id: number | string;
+}) {
+  return await apiFetch("/vouchers/redeem", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

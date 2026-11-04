@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: NBC Currency Sync & Vouchers (BD-0133)
+ */
 import { apiFetch } from './client';
 
 // ABA Bakong KHQR
@@ -142,5 +147,31 @@ export async function createGiftCardApi(payload: any) {
   return await apiFetch('/gift-cards', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+// -------------------------------------------------------------
+// Multi-Currency & NBC Exchange Rates
+// -------------------------------------------------------------
+
+export async function getActiveExchangeRateApi() {
+  return await apiFetch('/currencies/exchange-rate/active');
+}
+
+export async function syncNbcExchangeRateApi(rate?: number) {
+  return await apiFetch('/currencies/exchange-rate/sync-nbc', {
+    method: 'POST',
+    body: JSON.stringify(rate ? { rate } : {}),
+  });
+}
+
+// -------------------------------------------------------------
+// Vouchers & Gift Redemption
+// -------------------------------------------------------------
+
+export async function redeemVoucherApi(code: string, amount?: number) {
+  return await apiFetch('/vouchers/redeem', {
+    method: 'POST',
+    body: JSON.stringify({ code, amount }),
   });
 }

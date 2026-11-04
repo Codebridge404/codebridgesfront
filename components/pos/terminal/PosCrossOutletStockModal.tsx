@@ -1,6 +1,12 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Cross-Outlet Stock Lookup in POS Terminal (BD-0132)
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Building2,
   X,
@@ -11,7 +17,6 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
 } from 'lucide-react';
 import { getCrossOutletStockApi } from '@/lib/api';
 
@@ -24,10 +29,15 @@ export function PosCrossOutletStockModal({
   initialSearch = '',
   onClose,
 }: PosCrossOutletStockModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState(initialSearch);
   const [loading, setLoading] = useState(false);
   const [stockData, setStockData] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchStock = async (queryText: string) => {
     if (!queryText.trim()) return;
@@ -60,9 +70,11 @@ export function PosCrossOutletStockModal({
     fetchStock(search);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
-      <div className="bg-white w-full max-w-2xl rounded-3xl p-6 shadow-2xl border border-slate-200/90 space-y-5">
+  if (!mounted || typeof window === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
+      <div className="bg-white w-full max-w-2xl rounded-3xl p-6 shadow-2xl border border-slate-200/90 space-y-5 animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-3">
@@ -225,6 +237,7 @@ export function PosCrossOutletStockModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: End-of-Day (EOD) Z-Report & Nightly Dispatch (BD-0132)
+ */
 import { apiFetch } from './client';
 
 export async function getActiveShiftApi() {
@@ -72,4 +77,49 @@ export async function getShiftHistoryApi() {
 
 export async function getShiftXReportApi(shiftId: string = 'active') {
   return await apiFetch(`/shifts/${shiftId}/x-report`);
+}
+
+export interface ZReportParams {
+  outlet_id?: number | string;
+  date?: string;
+  close_open_registers?: boolean;
+}
+
+export async function getZReportApi(params?: ZReportParams) {
+  const query = new URLSearchParams();
+  if (params?.outlet_id) query.append('outlet_id', String(params.outlet_id));
+  if (params?.date) query.append('date', params.date);
+  if (params?.close_open_registers !== undefined) {
+    query.append('close_open_registers', params.close_open_registers ? '1' : '0');
+  }
+  const queryString = query.toString() ? `?${query.toString()}` : '';
+  return await apiFetch(`/pos/reports/z-report${queryString}`);
+}
+
+export interface EodDispatchParams {
+  outlet_id?: number | string;
+  date?: string;
+  recipient_email?: string;
+}
+
+export async function dispatchEodZReportApi(data?: EodDispatchParams) {
+  return await apiFetch('/pos/shifts/eod-dispatch', {
+    method: 'POST',
+    body: JSON.stringify(data || {}),
+  });
+}
+
+export async function getVarianceConfigApi() {
+  return await apiFetch('/shifts/variance-config');
+}
+
+export async function getVarianceAlertsApi() {
+  return await apiFetch('/shifts/variance-alerts');
+}
+
+export async function testVarianceAlertApi(data?: { variance_amount?: number; outlet_name?: string; note?: string }) {
+  return await apiFetch('/shifts/test-variance-alert', {
+    method: 'POST',
+    body: JSON.stringify(data || {}),
+  });
 }

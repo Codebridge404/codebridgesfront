@@ -8,6 +8,8 @@ import { EditProductModal } from './EditProductModal';
 import { ProductImportModal } from './ProductImportModal';
 import { ProductStockAdjustModal } from './ProductStockAdjustModal';
 import { ProductMovementsModal } from './ProductMovementsModal';
+import { InternalSuppliesExpenseModal } from '../InternalSuppliesExpenseModal';
+import { ProductBatchLotDrawer } from '../ProductBatchLotDrawer';
 import { getProductsApi, getCategoriesApi, getBrandsApi, deleteProductApi } from '@/lib/api';
 import { useToast, useConfirm } from '@/components/common';
 
@@ -26,6 +28,8 @@ export function ProductsCatalogView() {
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [adjustingProduct, setAdjustingProduct] = useState<any | null>(null);
   const [viewingMovementsProduct, setViewingMovementsProduct] = useState<any | null>(null);
+  const [isSuppliesModalOpen, setIsSuppliesModalOpen] = useState(false);
+  const [isBatchesDrawerOpen, setIsBatchesDrawerOpen] = useState(false);
 
   async function loadProductsData() {
     try {
@@ -180,6 +184,22 @@ export function ProductsCatalogView() {
           toast.success(`Stock adjusted for "${name}" (New balance: ${newQty} units).`);
           loadProductsData();
         }}
+      />
+
+      {/* 7. Internal Packaging & Supplies Expense Modal */}
+      <InternalSuppliesExpenseModal
+        isOpen={isSuppliesModalOpen}
+        onClose={() => setIsSuppliesModalOpen(false)}
+        onSuccess={() => {
+          toast.success("Packaging consumption recorded and stock updated.");
+          loadProductsData();
+        }}
+      />
+
+      {/* 8. FEFO Expiration Batches & Quarantine Drawer */}
+      <ProductBatchLotDrawer
+        isOpen={isBatchesDrawerOpen}
+        onClose={() => setIsBatchesDrawerOpen(false)}
       />
 
       {/* 6. In-Page Dynamic Product Movement Audit Ledger Modal */}

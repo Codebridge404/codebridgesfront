@@ -1,11 +1,17 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Meeting iCalendar (.ics) Export & RSVP (BD-0132)
+ */
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Download, ExternalLink, ChevronDown } from 'lucide-react';
+import { Calendar, Download, ExternalLink, ChevronDown, Loader2 } from 'lucide-react';
 import {
   MeetingItem,
   generateGoogleCalendarUrl,
   generateOutlookCalendarUrl,
+  downloadMeetingIcsApi,
   getMeetingIcsUrl,
 } from '@/lib/api/meetings';
 
@@ -15,6 +21,7 @@ interface CalendarSyncDropdownProps {
 
 export function CalendarSyncDropdown({ meeting }: CalendarSyncDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [downloadingIcs, setDownloadingIcs] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,7 +36,21 @@ export function CalendarSyncDropdown({ meeting }: CalendarSyncDropdownProps) {
 
   const googleUrl = generateGoogleCalendarUrl(meeting);
   const outlookUrl = generateOutlookCalendarUrl(meeting);
-  const icsUrl = meeting.id ? getMeetingIcsUrl(meeting.id) : '#';
+
+  const handleDownloadIcs = async () => {
+    if (!meeting.id) return;
+    try {
+      setDownloadingIcs(true);
+      await downloadMeetingIcsApi(meeting.id, `meeting-${meeting.id}.ics`);
+      setIsOpen(false);
+    } catch {
+      // Fallback to opening direct URL
+      window.open(getMeetingIcsUrl(meeting.id), '_blank');
+      setIsOpen(false);
+    } finally {
+      setDownloadingIcs(false);
+    }
+  };
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
@@ -75,17 +96,21 @@ export function CalendarSyncDropdown({ meeting }: CalendarSyncDropdownProps) {
             </span>
             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
           </a>
-          <a
-            href={icsUrl}
-            download
-            onClick={() => setIsOpen(false)}
-            className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition-colors border-t border-slate-100 mt-1"
+          <button
+            type="button"
+            onClick={handleDownloadIcs}
+            disabled={downloadingIcs}
+            className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition-colors border-t border-slate-100 mt-1 cursor-pointer disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
-              <Download className="w-3.5 h-3.5 text-indigo-500" />
+              {downloadingIcs ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-500" />
+              ) : (
+                <Download className="w-3.5 h-3.5 text-indigo-500" />
+              )}
               Apple / iCal (.ics)
             </span>
-          </a>
+          </button>
         </div>
       )}
     </div>

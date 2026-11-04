@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Interactive Floor Plan Room Locator & Heatmap (BD-0135)
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +17,8 @@ import {
   Pencil,
   Trash2,
   Tablet,
+  LayoutGrid,
+  Map,
 } from 'lucide-react';
 import {
   getMeetingRoomsApi,
@@ -20,6 +27,7 @@ import {
 } from '@/lib/api';
 import { MeetingBookingModal } from './MeetingBookingModal';
 import { RoomFormModal } from './RoomFormModal';
+import { MeetingFloorPlanView } from './MeetingFloorPlanView';
 import { cardStyles } from '@/lib/theme';
 import { useToast } from '@/components/common';
 
@@ -27,6 +35,7 @@ export function MeetingRoomsView() {
   const toast = useToast();
   const [rooms, setRooms] = useState<MeetingRoomItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'floorplan'>('grid');
   const [roomModalOpen, setRoomModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<MeetingRoomItem | null>(null);
   const [selectedRoomIdForBooking, setSelectedRoomIdForBooking] = useState<number | undefined>(undefined);
@@ -85,22 +94,58 @@ export function MeetingRoomsView() {
             Conference Room Fleet
           </h1>
           <p className="text-xs text-slate-500 font-medium">
-            Inspect real-time room availability, capacity limits, and tablet door signage.
+            Inspect real-time room availability, spatial architectural blueprints, and tablet door signage.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
-        >
-          <PlusCircle className="w-4 h-4" />
-          <span>Add Conference Room</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Dual View Toggle: Grid vs Floor Plan */}
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'grid'
+                  ? 'bg-white text-indigo-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Fleet Grid</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('floorplan')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'floorplan'
+                  ? 'bg-white text-indigo-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Map className="w-3.5 h-3.5" />
+              <span>Floor Plan Locator</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Add Conference Room</span>
+          </button>
+        </div>
       </div>
 
-      {/* Room Cards Grid */}
-      {loading ? (
+      {/* Main View Area */}
+      {viewMode === 'floorplan' ? (
+        <MeetingFloorPlanView
+          rooms={rooms}
+          onBookRoom={handleBookRoom}
+          onOpenEdit={handleOpenEdit}
+        />
+      ) : loading ? (
         <div className="py-16 text-center text-slate-400 text-xs font-semibold">Loading conference rooms...</div>
       ) : rooms.length === 0 ? (
         <div className={`${cardStyles.base} p-12 text-center space-y-3`}>

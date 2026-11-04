@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Meeting iCalendar (.ics) Export & RSVP (BD-0132)
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +22,7 @@ import {
   StopCircle,
   ShieldAlert,
   ShieldCheck,
+  HelpCircle,
   Check,
   X,
   Filter,
@@ -107,7 +113,7 @@ export function MeetingDashboardView() {
     }
   };
 
-  const handleRsvp = async (id: number, status: 'accepted' | 'declined') => {
+  const handleRsvp = async (id: number, status: 'accepted' | 'declined' | 'tentative') => {
     try {
       await rsvpMeetingApi(id, status);
       toast.success(`RSVP response saved: ${status}.`);
@@ -326,6 +332,49 @@ export function MeetingDashboardView() {
 
                   {/* Calendar Sync Dropdown */}
                   <CalendarSyncDropdown meeting={m} />
+
+                  {/* Live RSVP Response Actions */}
+                  {m.status === 'scheduled' && (
+                    <div className="flex items-center gap-1 bg-slate-100/90 p-0.5 rounded-xl border border-slate-200 text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => handleRsvp(m.id, 'accepted')}
+                        className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                          m.my_rsvp === 'accepted'
+                            ? 'bg-emerald-600 text-white shadow-2xs font-extrabold'
+                            : 'text-slate-600 hover:text-emerald-700 hover:bg-emerald-50'
+                        }`}
+                        title="Accept Invitation"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Accept</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRsvp(m.id, 'tentative')}
+                        className={`px-1.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                          m.my_rsvp === 'tentative'
+                            ? 'bg-amber-500 text-white shadow-2xs font-extrabold'
+                            : 'text-slate-600 hover:text-amber-700 hover:bg-amber-50'
+                        }`}
+                        title="Tentative"
+                      >
+                        <HelpCircle className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRsvp(m.id, 'declined')}
+                        className={`px-1.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                          m.my_rsvp === 'declined'
+                            ? 'bg-rose-600 text-white shadow-2xs font-extrabold'
+                            : 'text-slate-600 hover:text-rose-700 hover:bg-rose-50'
+                        }`}
+                        title="Decline Invitation"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
 
                   {/* Check-In */}
                   {m.status === 'scheduled' && (

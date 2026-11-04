@@ -1,11 +1,17 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: MinIO S3 Object Storage Platform & Health Probes (BD-0136)
+ */
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Server, RefreshCw, Database, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Server, RefreshCw, Database, Sparkles, CheckCircle2, HardDrive } from 'lucide-react';
 import { INITIAL_SERVICES, ServiceStatus } from './types';
 import { InfrastructureKpiCards } from './InfrastructureKpiCards';
 import { InfrastructureServicesTable } from './InfrastructureServicesTable';
 import { DatabaseTelemetryView } from './DatabaseTelemetryView';
+import { MinioStorageGovernanceView } from './MinioStorageGovernanceView';
 import { getInfrastructureTelemetryApi, TelemetryData } from '@/lib/api';
 import { useToast } from '@/components/common';
 
@@ -15,7 +21,7 @@ export function SuperAdminInfrastructureView() {
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'microservices' | 'databases'>('microservices');
+  const [activeTab, setActiveTab] = useState<'microservices' | 'databases' | 'storage'>('microservices');
 
   const fetchTelemetry = useCallback(async (isManual = false) => {
     try {
@@ -81,7 +87,7 @@ export function SuperAdminInfrastructureView() {
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Real-time socket heartbeats, container memory allocations, MySQL database connection pools, and API latency benchmarks.
+              Real-time socket heartbeats, container memory allocations, MySQL database connection pools, MinIO S3 storage, and API latency benchmarks.
             </p>
           </div>
         </div>
@@ -112,7 +118,7 @@ export function SuperAdminInfrastructureView() {
 
       {/* 3. Tab Filter Selector Bar */}
       <div className="bg-white/50 backdrop-blur-2xl backdrop-saturate-180 p-2 rounded-2xl border border-white/80 shadow-[0_4px_20px_rgba(31,38,135,0.04)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
             onClick={() => setActiveTab('microservices')}
@@ -143,13 +149,33 @@ export function SuperAdminInfrastructureView() {
             }`}
           >
             <Database className="w-3.5 h-3.5" />
-            <span>Dual Databases &amp; Storage</span>
+            <span>Dual Databases</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
                 activeTab === 'databases' ? 'bg-white/20 text-white' : 'bg-slate-200/60 text-slate-700'
               }`}
             >
               Auth &amp; Operations
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('storage')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === 'storage'
+                ? 'bg-brand text-white shadow-xs'
+                : 'bg-white/60 hover:bg-white/80 text-slate-700 border border-white/80 backdrop-blur-md'
+            }`}
+          >
+            <HardDrive className="w-3.5 h-3.5" />
+            <span>MinIO / S3 Object Storage</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                activeTab === 'storage' ? 'bg-white/20 text-white' : 'bg-slate-200/60 text-slate-700'
+              }`}
+            >
+              Cluster
             </span>
           </button>
         </div>
@@ -160,15 +186,17 @@ export function SuperAdminInfrastructureView() {
         </div>
       </div>
 
-      {/* 4. Tab Content: Microservices or Database Schema */}
+      {/* 4. Tab Content: Microservices, Dual Databases, or MinIO S3 Object Storage */}
       {activeTab === 'microservices' ? (
         <InfrastructureServicesTable services={services} />
-      ) : (
+      ) : activeTab === 'databases' ? (
         <DatabaseTelemetryView
           telemetry={telemetry}
           refreshing={refreshing}
           onRefresh={() => fetchTelemetry(true)}
         />
+      ) : (
+        <MinioStorageGovernanceView />
       )}
     </div>
   );

@@ -1,3 +1,14 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Internal Packaging Expense & FEFO Batch Drawer (BD-0134)
+ */
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Missing UI Implementation (BD-0132)
+ */
+
 import { apiFetch } from './client';
 
 export async function getInventoryBalancesApi(outletId: string | number = 1, status?: string, search?: string) {
@@ -152,8 +163,44 @@ export async function autoReorderPurchaseOrdersApi(data?: { suppliers?: string[]
 export async function getCrossOutletStockApi(params: { product_id?: string | number; search?: string }) {
   const queryParams: string[] = [];
   if (params.product_id) queryParams.push(`product_id=${params.product_id}`);
-  if (params.search) queryParams.push(`q=${encodeURIComponent(params.search)}`);
-  const url = `/inventory/nearby-outlets?${queryParams.join('&')}`;
+  if (params.search) {
+    queryParams.push(`search=${encodeURIComponent(params.search)}`);
+    queryParams.push(`q=${encodeURIComponent(params.search)}`);
+  }
+  const url = `/inventory/cross-outlet-stock?${queryParams.join("&")}`;
   return await apiFetch(url);
 }
 
+// -------------------------------------------------------------
+// Internal Supplies Consumption & FEFO Batch Tracking
+// -------------------------------------------------------------
+
+export async function recordInternalConsumptionApi(data: {
+  outlet_id: string | number;
+  product_id: string | number;
+  quantity: number;
+  category?: string;
+  reason?: string;
+  notes?: string;
+}) {
+  return await apiFetch('/inventory/internal-consumption', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getInventoryBatchesApi(params?: {
+  outlet_id?: string | number;
+  status?: string;
+  search?: string;
+}) {
+  const query = new URLSearchParams();
+  if (params?.outlet_id) query.append('outlet_id', String(params.outlet_id));
+  if (params?.status && params.status !== 'all') query.append('status', params.status);
+  if (params?.search) {
+    query.append('search', params.search);
+    query.append('q', params.search);
+  }
+  const queryString = query.toString() ? `?${query.toString()}` : '';
+  return await apiFetch(`/inventory/batches${queryString}`);
+}

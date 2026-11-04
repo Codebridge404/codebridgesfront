@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: 2FA Recovery Codes & Email OTP UI (BD-0133)
+ */
 import { apiFetch, getAuthToken, setAuthToken, setRefreshToken, setAuthUser, removeAuthToken } from './client';
 
 export async function loginApi(email: string, password: string) {
@@ -367,3 +372,41 @@ export function getRoleDisplayName(userOrRole?: any, activeOrgName?: string): st
   return roleSlug.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Employee';
 }
 
+// -------------------------------------------------------------
+// Two-Factor Authentication (2FA) & Recovery Codes
+// -------------------------------------------------------------
+
+export async function getTwoFactorRecoveryCodesApi() {
+  return await apiFetch('/auth/2fa/recovery-codes');
+}
+
+export async function regenerateTwoFactorRecoveryCodesApi() {
+  return await apiFetch('/auth/2fa/recovery-codes', {
+    method: 'POST',
+  });
+}
+
+// -------------------------------------------------------------
+// Email Verification & OTP
+// -------------------------------------------------------------
+
+export async function sendEmailVerificationNotificationApi(email?: string) {
+  return await apiFetch('/auth/email/verification-notification', {
+    method: 'POST',
+    body: JSON.stringify(email ? { email } : {}),
+  });
+}
+
+export async function verifyEmailCodeApi(email: string, code: string) {
+  return await apiFetch('/auth/email/verify-code', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
+  });
+}
+
+export async function checkEmailVerificationApi(email?: string) {
+  return await apiFetch('/auth/email/check', {
+    method: 'POST',
+    body: JSON.stringify(email ? { email } : {}),
+  });
+}

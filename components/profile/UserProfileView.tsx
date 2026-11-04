@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: 2FA Recovery Codes & Email OTP UI (BD-0133)
+ */
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -39,6 +44,8 @@ import {
 import { toggle2faApi } from '@/lib/api/auth';
 import { badgeStyles, buttonStyles } from '@/lib/theme';
 import { ProfileSubSidebar, ProfileTab } from './ProfileSubSidebar';
+import { TwoFactorRecoveryCodesModal } from './TwoFactorRecoveryCodesModal';
+import { EmailVerificationOtpModal } from './EmailVerificationOtpModal';
 
 interface UserProfileViewProps {
   user: any;
@@ -67,6 +74,9 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
   const [twoFactorSecret, setTwoFactorSecret] = useState<string | null>(null);
   const [toggling2fa, setToggling2fa] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const [showRecoveryCodesModal, setShowRecoveryCodesModal] = useState(false);
+  const [showEmailOtpModal, setShowEmailOtpModal] = useState(false);
+  const [newRecoveryCodes, setNewRecoveryCodes] = useState<string[]>([]);
 
   // Status & Feedback States
   const [savingProfile, setSavingProfile] = useState(false);
@@ -244,6 +254,10 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
       if (res.status === 'success') {
         setTwoFactorEnabled(res.two_factor_enabled);
         setTwoFactorSecret(res.secret || null);
+        if (res.recovery_codes && Array.isArray(res.recovery_codes)) {
+          setNewRecoveryCodes(res.recovery_codes);
+          setShowRecoveryCodesModal(true);
+        }
       }
     } catch (err: any) {
       alert(err.message || 'Failed to toggle 2FA.');

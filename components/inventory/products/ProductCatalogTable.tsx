@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, Plus, Loader2, RotateCcw, FileSpreadsheet, Download } from 'lucide-react';
+import { Package, Plus, Loader2, RotateCcw, FileSpreadsheet, Download, Coffee, Layers } from 'lucide-react';
 import { ProductCatalogStats } from './ProductCatalogStats';
 import { ProductCatalogToolbar } from './ProductCatalogToolbar';
 import { ProductCatalogFilterChips } from './ProductCatalogFilterChips';

@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-04
+ * Task: Meeting iCalendar (.ics) Export & RSVP (BD-0132)
+ */
 import { apiFetch } from './client';
 
 export interface MeetingItem {
@@ -617,4 +622,32 @@ export function generateOutlookCalendarUrl(meeting: Partial<MeetingItem>): strin
   const location = encodeURIComponent(meeting.room_name || '');
 
   return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&body=${body}&location=${location}&startdt=${startUtc}&enddt=${endUtc}`;
+}
+
+export async function downloadMeetingIcsApi(id: number | string, filename?: string) {
+  const token = typeof window !== 'undefined'
+    ? localStorage.getItem('token') || localStorage.getItem('access_token') || sessionStorage.getItem('token')
+    : null;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
+  const url = `${baseUrl}/meetings/${id}/ics`;
+
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    throw new Error(`Failed to export calendar file (${response.status})`);
+  }
+
+  const blob = await response.blob();
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = filename || `meeting-${id}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(downloadUrl);
 }
