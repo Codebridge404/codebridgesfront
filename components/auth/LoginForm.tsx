@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -36,14 +42,9 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const res = await loginApi(identifier, password);
-      const user = res?.user;
-
-      if (redirectUrl && redirectUrl !== '/login') {
-        router.push(redirectUrl);
-      } else {
-        router.push('/launchpad');
-      }
+      await loginApi(identifier, password);
+      // Deterministically route to launchpad on login success per task requirement
+      router.push('/launchpad');
     } catch (err: any) {
       console.error('Login Error:', err);
       if (err?.message === 'Failed to fetch' || err?.name === 'TypeError') {
@@ -66,18 +67,18 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden"
+      className="w-full max-w-md bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden ring-1 ring-white/30"
     >
       {/* Top Back Link */}
       <div className="flex items-center justify-between">
         <Link
           href="/launchpad"
-          className="text-xs font-bold text-slate-500 hover:text-brand flex items-center gap-1.5 transition-colors"
+          className="text-xs font-bold text-slate-600 hover:text-brand flex items-center gap-1.5 transition-colors bg-white/40 px-2.5 py-1 rounded-full border border-white/60 backdrop-blur-sm"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Launchpad
         </Link>
-        <span className="text-[10px] font-extrabold text-brand bg-brand-subtle px-2 py-0.5 rounded-full border border-brand/20 uppercase tracking-widest">
+        <span className="text-[10px] font-extrabold text-brand bg-white/50 backdrop-blur-sm px-2.5 py-1 rounded-full border border-brand/20 uppercase tracking-widest">
           SSO Auth
         </span>
       </div>
@@ -88,7 +89,7 @@ export function LoginForm() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.15, type: 'spring', stiffness: 200 }}
-          className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white p-1.5 shadow-md shadow-brand/20 mb-1 border border-slate-200/80 overflow-hidden"
+          className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/60 backdrop-blur-md p-1.5 shadow-md shadow-brand/20 mb-1 border border-white/80 overflow-hidden"
         >
           <img src="/logo/Codebridge.png" alt="CodeBridges Logo" className="w-full h-full object-contain" />
         </motion.div>
@@ -99,7 +100,7 @@ export function LoginForm() {
       </div>
 
       {/* Redirect Target Banner */}
-      {redirectUrl && (
+      {redirectUrl && redirectUrl !== '/launchpad' && redirectUrl !== '/' && redirectUrl !== '/login' && (
         <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
           <span>Sign in to access: <strong className="font-extrabold">{redirectUrl}</strong></span>
@@ -124,12 +125,12 @@ export function LoginForm() {
       {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email / Phone Mode Switcher Tabs */}
-        <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200">
+        <div className="flex bg-slate-900/5 backdrop-blur-md p-1 rounded-xl text-xs font-bold border border-white/50">
           <button
             type="button"
             onClick={() => setLoginMethod('email')}
             className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              loginMethod === 'email' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+              loginMethod === 'email' ? 'bg-white/80 text-brand shadow-xs font-extrabold backdrop-blur-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Mail className="w-3.5 h-3.5" /> Email
@@ -138,7 +139,7 @@ export function LoginForm() {
             type="button"
             onClick={() => setLoginMethod('phone')}
             className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              loginMethod === 'phone' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+              loginMethod === 'phone' ? 'bg-white/80 text-brand shadow-xs font-extrabold backdrop-blur-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Phone className="w-3.5 h-3.5" /> Phone
@@ -156,7 +157,7 @@ export function LoginForm() {
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             placeholder={loginMethod === 'email' ? 'user@codebridges.com' : '+855 12 345 678'}
-            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all text-xs font-medium"
+            className="w-full px-4 py-3 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all text-xs font-medium"
           />
         </div>
 
@@ -177,7 +178,7 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all text-xs font-medium"
+              className="w-full px-4 py-3 pr-11 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all text-xs font-medium"
             />
             <button
               type="button"
@@ -227,7 +228,7 @@ export function LoginForm() {
       <QuickFillSection onQuickFill={handleQuickFill} />
 
       {/* Registration Links Footer */}
-      <div className="pt-3 border-t border-slate-100 space-y-1.5 text-center text-xs">
+      <div className="pt-3 border-t border-slate-200/50 space-y-1.5 text-center text-xs">
         <p className="text-slate-500 font-medium">
           Don't have a staff account?{' '}
           <Link href="/register" className="font-extrabold text-brand hover:underline">

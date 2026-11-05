@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,6 +24,24 @@ export default function ProfilePage() {
       router.push('/login?redirect=/profile');
       return;
     }
+
+    if (currentUser.role === 'super_admin') {
+      router.replace('/super-admin/security/profile');
+      return;
+    }
+
+    const hasOrg = Boolean(
+      currentUser.tenant_id ||
+      currentUser.tenant_name ||
+      currentUser.company_name ||
+      (typeof window !== 'undefined' && localStorage.getItem('active_org'))
+    );
+
+    if (hasOrg) {
+      router.replace('/organization/profile');
+      return;
+    }
+
     setUser(currentUser);
     setLoading(false);
 

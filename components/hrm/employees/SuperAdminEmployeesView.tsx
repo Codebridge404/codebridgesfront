@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -22,6 +28,7 @@ import {
 import { EmployeeModal } from './EmployeeModal';
 import { EmployeeMetricsCards } from './EmployeeMetricsCards';
 import { EmployeeCardGrid } from './EmployeeCardGrid';
+import { UserDetailModal } from '@/components/security/users/UserDetailModal';
 
 export const SuperAdminEmployeesView: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -34,6 +41,7 @@ export const SuperAdminEmployeesView: React.FC = () => {
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -275,7 +283,20 @@ export const SuperAdminEmployeesView: React.FC = () => {
         loading={loading}
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteEmployee}
+        onView={(emp) => setViewingEmployee(emp)}
       />
+
+      {/* Employee Profile Preview Modal */}
+      {viewingEmployee && (
+        <UserDetailModal
+          user={viewingEmployee}
+          onClose={() => setViewingEmployee(null)}
+          onEdit={(emp) => {
+            setViewingEmployee(null);
+            handleOpenEditModal(emp);
+          }}
+        />
+      )}
 
       <EmployeeModal
         isOpen={isModalOpen}

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 export interface CrossTenantUser {
   id: string | number;
   name: string;
@@ -10,6 +16,9 @@ export interface CrossTenantUser {
   is_active: boolean | number;
   last_login?: string;
   created_at: string;
+  avatar_url?: string;
+  avatar?: string;
+  photo_url?: string;
 }
 
 export const getRoleBadge = (role: string) => {

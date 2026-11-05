@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UserCheck, Search, Filter, Phone, Mail, Building2, Loader2, Store } from 'lucide-react';
+import { UserCheck, Search, Filter, Phone, Mail, Building2, Loader2, Store, Eye } from 'lucide-react';
 import { getEmployeesApi, getAuthToken } from '@/lib/api';
+import { UserDetailModal } from '@/components/security/users/UserDetailModal';
 
 interface Employee {
   id: string | number;
@@ -13,12 +20,15 @@ interface Employee {
   outlet?: string;
   status: 'Active' | 'On Leave' | 'Probation';
   salary?: string;
+  avatar_url?: string;
+  raw?: any;
 }
 
 export function StaffRosterTable() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewingProfile, setViewingProfile] = useState<any | null>(null);
 
   useEffect(() => {
     async function loadStaff() {
@@ -47,6 +57,8 @@ export function StaffRosterTable() {
               outlet: e.outlet_name || 'All Outlets',
               status: e.is_active ? 'Active' : 'Probation',
               salary: e.salary && parseFloat(e.salary) > 0 ? `$${parseFloat(e.salary).toFixed(2)}/mo` : 'Unassigned',
+              avatar_url: e.avatar_url || e.avatar || e.photo_url || e.logo_url,
+              raw: e,
             });
           });
         }
@@ -114,14 +126,29 @@ export function StaffRosterTable() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredEmployees.map((emp) => (
-                <tr key={emp.id} className="hover:bg-slate-50/60 transition-colors">
+                <tr
+                  key={emp.id}
+                  onClick={() => setViewingProfile(emp.raw || emp)}
+                  className="hover:bg-slate-50/80 transition-colors cursor-pointer group/roster"
+                  title="Click to view staff profile"
+                >
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-black text-xs">
-                        {emp.name.substring(0, 2).toUpperCase()}
+                      <div className="relative w-8 h-8 rounded-xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-black text-xs shrink-0 overflow-hidden select-none">
+                        <span>{emp.name.substring(0, 2).toUpperCase()}</span>
+                        {emp.avatar_url && (
+                          <img
+                            src={emp.avatar_url}
+                            alt={emp.name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        )}
                       </div>
                       <div>
-                        <p className="font-extrabold text-slate-900 text-xs">{emp.name}</p>
+                        <p className="font-extrabold text-slate-900 text-xs group-hover/roster:text-brand group-hover/roster:underline transition-colors">{emp.name}</p>
                         <p className="text-[10px] text-slate-400 font-mono">{emp.code}</p>
                       </div>
                     </div>
@@ -134,21 +161,43 @@ export function StaffRosterTable() {
                   <td className="py-3 px-4 font-bold text-slate-800 capitalize">{emp.role}</td>
                   <td className="py-3 px-4 font-mono font-bold text-slate-900">{emp.salary}</td>
                   <td className="py-3 px-4 text-right">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                        emp.status === 'Active'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {emp.status}
-                    </span>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          emp.status === 'Active'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {emp.status}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingProfile(emp.raw || emp);
+                        }}
+                        className="p-1 rounded-lg text-slate-400 hover:text-brand hover:bg-brand-subtle transition-colors"
+                        title="Display Profile"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Profile Detail Preview Modal */}
+      {viewingProfile && (
+        <UserDetailModal
+          user={viewingProfile}
+          onClose={() => setViewingProfile(null)}
+          readOnly
+        />
       )}
     </div>
   );

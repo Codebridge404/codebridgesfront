@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -54,6 +60,48 @@
   --radius-3xl: 0.75rem; /* 12px */
   --radius-2xl: 0.625rem; /* 10px */
   --radius-xl: 0.5rem; /* 8px */
+}
+
+html.dark {
+  --background: #090d16;
+  --foreground: #F8FAFC;
+  --color-canvas: #090d16;
+  --color-canvas-end: #0f172a;
+  --color-canvas-gradient:
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+    #090d16;
+  --color-surface: rgba(15, 23, 42, 0.85);
+  --color-surface-subtle: rgba(30, 41, 59, 0.7);
+  --color-card-border: rgba(51, 65, 85, 0.6);
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-sidebar-bg: rgba(15, 23, 42, 0.95);
+  --color-sidebar-active: rgba(37, 99, 235, 0.2);
+  --color-sidebar-active-text: #60A5FA;
+}
+
+html[data-font-size="compact"] {
+  font-size: 14px;
+}
+html[data-font-size="standard"] {
+  font-size: 16px;
+}
+html[data-font-size="large"] {
+  font-size: 18px;
+}
+
+html[data-canvas-style="flat"] {
+  --color-canvas-gradient: none;
+}
+html[data-canvas-style="grid"] {
+  --color-canvas-gradient:
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
+    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px, 24px 24px;
 }
 
 @theme inline {

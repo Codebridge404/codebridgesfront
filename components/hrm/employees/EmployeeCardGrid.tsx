@@ -1,14 +1,21 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Briefcase, Building2, Phone, Mail, UserX, Edit3 } from 'lucide-react';
+import { Briefcase, Building2, Phone, Mail, UserX, Edit3, Eye } from 'lucide-react';
 
 interface EmployeeCardGridProps {
   employees: any[];
   loading: boolean;
   onEdit: (emp: any) => void;
   onDelete: (emp: any) => void;
+  onView?: (emp: any) => void;
 }
 
 const cardVariants: Variants = {
@@ -25,6 +32,7 @@ export const EmployeeCardGrid: React.FC<EmployeeCardGridProps> = ({
   loading,
   onEdit,
   onDelete,
+  onView,
 }) => {
   if (loading) {
     return (
@@ -60,13 +68,29 @@ export const EmployeeCardGrid: React.FC<EmployeeCardGridProps> = ({
         >
           <div className="space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-bold text-sm">
-                  {emp.first_name ? emp.first_name[0] : ''}
-                  {emp.last_name ? emp.last_name[0] : ''}
+              <div
+                className={`flex items-center gap-3 ${onView ? 'cursor-pointer group/emp' : ''}`}
+                onClick={() => onView && onView(emp)}
+                title={onView ? 'Click to view full employee profile' : undefined}
+              >
+                <div className="relative w-10 h-10 rounded-2xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-bold text-sm overflow-hidden shrink-0 select-none">
+                  <span>
+                    {emp.first_name ? emp.first_name[0] : ''}
+                    {emp.last_name ? emp.last_name[0] : ''}
+                  </span>
+                  {(emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url) && (
+                    <img
+                      src={emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url}
+                      alt={`${emp.first_name || ''} ${emp.last_name || ''}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">
+                  <h3 className={`font-bold text-slate-900 text-sm ${onView ? 'group-hover/emp:text-brand group-hover/emp:underline' : ''} transition-colors`}>
                     {emp.first_name} {emp.last_name}
                   </h3>
                   <p className="text-[11px] text-brand font-semibold">
@@ -116,6 +140,17 @@ export const EmployeeCardGrid: React.FC<EmployeeCardGridProps> = ({
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            {onView && (
+              <button
+                type="button"
+                onClick={() => onView(emp)}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-brand hover:border-brand/40 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-slate-50 hover:bg-white"
+                title="View Full Profile"
+              >
+                <Eye className="w-3.5 h-3.5 text-brand" />
+                <span>Profile</span>
+              </button>
+            )}
             <button
               onClick={() => onDelete(emp)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"

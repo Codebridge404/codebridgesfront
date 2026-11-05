@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 export function getApiUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
@@ -110,13 +116,19 @@ function onRefreshed(token: string | null) {
 
 let isRedirectingToLogin = false;
 
+const PUBLIC_ROUTES = ['/', '/launchpad', '/login', '/register', '/register-tenant', '/shop'];
+
 function handleSessionExpired() {
   if (isRedirectingToLogin) return;
-  isRedirectingToLogin = true;
   if (typeof window !== 'undefined') {
+    const hadToken = !!getAuthToken() || !!getRefreshToken();
     removeAuthToken();
-    if (!window.location.pathname.startsWith('/login')) {
-      const currentPath = window.location.pathname;
+    if (!hadToken) return;
+
+    const currentPath = window.location.pathname;
+    const isPublic = PUBLIC_ROUTES.some((p) => p === currentPath || (p !== '/' && currentPath.startsWith(p)));
+    if (!isPublic) {
+      isRedirectingToLogin = true;
       window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
     }
   }
@@ -167,6 +179,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
     // Check if 401 Unauthorized can be silently resolved via Refresh Token
     if (
       response.status === 401 &&
+      token &&
       typeof window !== 'undefined' &&
       !endpoint.startsWith('/auth/login') &&
       !endpoint.startsWith('/auth/register') &&

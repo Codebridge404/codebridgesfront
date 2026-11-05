@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -168,7 +174,7 @@ export function RegisterTenantForm() {
             }}
             onEnterAdmin={() => {
               localStorage.setItem('active_org', registeredTenant.name);
-              window.location.href = '/super-admin/dashboard';
+              window.location.href = '/launchpad';
             }}
           />
         )}

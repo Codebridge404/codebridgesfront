@@ -3,6 +3,12 @@
  * Date: 2026-11-04
  * Task: 2FA Recovery Codes & Email OTP UI (BD-0133)
  */
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -131,8 +137,35 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
         .toUpperCase()
     : 'U';
 
-  const roleName = getRoleDisplayName(user, user?.tenant_name || user?.company_name);
+  const hasActiveOrg = Boolean(
+    user?.tenant_id ||
+    user?.tenant_name ||
+    user?.company_name ||
+    (typeof window !== 'undefined' && localStorage.getItem('active_org'))
+  );
+  const effectiveRole =
+    user?.role === 'super_admin'
+      ? 'super_admin'
+      : hasActiveOrg && (!user?.role || user?.role === 'user' || user?.role === 'customer')
+      ? 'organization'
+      : user?.role || 'user';
+
+  const roleName = getRoleDisplayName(
+    { ...user, role: effectiveRole },
+    user?.tenant_name || user?.company_name
+  );
   const orgName = user?.tenant_name || user?.company_name;
+
+  useEffect(() => {
+    if (user && hasActiveOrg && (!user.role || user.role === 'user' || user.role === 'customer')) {
+      const updated = { ...user, role: 'organization' };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pos_user', JSON.stringify(updated));
+        localStorage.setItem('cb_user', JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('cb_user_updated', { detail: { user: updated } }));
+      }
+    }
+  }, [user, hasActiveOrg]);
 
   // Avatar File Handler
   const handleAvatarFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -509,7 +542,7 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
                     <div className="px-4 py-2.5 rounded-2xl bg-white/60 border border-slate-200 text-slate-700 font-bold flex items-center justify-between">
                       <span>{roleName}</span>
                       <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white text-brand border border-slate-200 shadow-2xs">
-                        {user?.role || 'user'}
+                        {effectiveRole}
                       </span>
                     </div>
                   </div>

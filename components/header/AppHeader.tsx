@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -17,11 +23,12 @@ import {
 } from 'lucide-react';
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
-import { getAuthUser, logoutApi, getRoleDisplayName } from '@/lib/api';
+import { getAuthUser, getAuthToken, logoutApi, getRoleDisplayName } from '@/lib/api';
 import { getMeetingNotificationsApi } from '@/lib/api/meetings';
 import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotificationsDrawer';
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
+import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
 
 export interface AppHeaderProps {
   sidebarOpen?: boolean;
@@ -44,6 +51,7 @@ export function AppHeader({
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [impersonating, setImpersonating] = useState<any>(null);
 
   // Live Notification Drawer state matching ModuleSuiteHeader
@@ -53,6 +61,11 @@ export function AppHeader({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const loadNotificationsCount = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setUnreadNotifCount(0);
+      return;
+    }
     try {
       const res = await getMeetingNotificationsApi();
       if (res?.data && Array.isArray(res.data)) {
@@ -126,8 +139,14 @@ export function AppHeader({
     );
     window.addEventListener('cb_user_updated', handleUserSync as EventListener);
 
-    loadNotificationsCount();
-    const notifInterval = setInterval(loadNotificationsCount, 20000);
+    if (getAuthToken()) {
+      loadNotificationsCount();
+    }
+    const notifInterval = setInterval(() => {
+      if (getAuthToken()) {
+        loadNotificationsCount();
+      }
+    }, 20000);
 
     return () => {
       ['cb_org_changed', 'cb_impersonation_changed', 'storage'].forEach((ev) =>
@@ -176,6 +195,12 @@ export function AppHeader({
     : hasOrganization
     ? '/organization/dashboard'
     : '/launchpad';
+
+  const profileRoute = isSuperAdmin
+    ? '/super-admin/security/profile'
+    : hasOrganization
+    ? '/organization/profile'
+    : '/profile';
 
   const userInitials = user?.name
     ? user.name
@@ -398,71 +423,25 @@ export function AppHeader({
 
                     <div className="py-1 text-xs">
                       <Link
-                        href="/profile"
+                        href={profileRoute}
                         onClick={() => setShowProfileDropdown(false)}
                         className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
                       >
-                        <User className="w-4 h-4 text-slate-400" /> My Profile
+                        <User className="w-4 h-4 text-slate-400" />
+                        <span>My Profile</span>
                       </Link>
 
-                      {['organization', 'admin', 'super_admin', 'owner', 'organization_owner', 'manager', 'accountant', 'staff'].includes(user?.role) && (
-                        <>
-                          <Link
-                            href="/organization/dashboard"
-                            onClick={() => setShowProfileDropdown(false)}
-                            className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                          >
-                            <Building2 className="w-4 h-4 text-slate-400" /> Workspace Dashboard
-                          </Link>
-                          <Link
-                            href="/organization/settings"
-                            onClick={() => setShowProfileDropdown(false)}
-                            className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                          >
-                            <Settings className="w-4 h-4 text-slate-400" /> Setting
-                          </Link>
-                        </>
-                      )}
-
-                      {isSuperAdmin && (
-                        <Link
-                          href="/super-admin/dashboard"
-                          onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                        >
-                          <Shield className="w-4 h-4 text-brand" /> Super Admin Console
-                        </Link>
-                      )}
-
-                      {/* Bidirectional Switcher: Launchpad <-> Dashboard */}
-                      {pathname !== '/launchpad' ? (
-                        <Link
-                          href="/launchpad"
-                          onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
-                        >
-                          <AppIcons.Compass className="w-4 h-4 text-brand" />
-                          <span>App Directory Launchpad</span>
-                        </Link>
-                      ) : isSuperAdmin ? (
-                        <Link
-                          href="/super-admin/dashboard"
-                          onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
-                        >
-                          <Shield className="w-4 h-4 text-brand" />
-                          <span>Platform Super Admin</span>
-                        </Link>
-                      ) : hasOrganization ? (
-                        <Link
-                          href="/organization/dashboard"
-                          onClick={() => setShowProfileDropdown(false)}
-                          className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
-                        >
-                          <Building2 className="w-4 h-4 text-brand" />
-                          <span>Organization Dashboard</span>
-                        </Link>
-                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          setShowSettingsModal(true);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors cursor-pointer"
+                      >
+                        <Settings className="w-4 h-4 text-slate-400" />
+                        <span>Setting</span>
+                      </button>
                     </div>
 
                     <div className="pt-1">
@@ -493,6 +472,12 @@ export function AppHeader({
             }}
           />
         )}
+
+        {/* Global User Theme & Display Preferences Modal */}
+        <UserSettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+        />
       </header>
 
       {/* Global Notifications Center Drawer */}

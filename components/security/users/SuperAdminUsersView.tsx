@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -27,6 +32,7 @@ const INITIAL_FORM: UserFormData = {
   name: '',
   email: '',
   phone: '',
+  avatar_url: '',
   password: '',
   role: 'admin',
   tenant_id: '',
@@ -242,7 +248,7 @@ export function SuperAdminUsersView() {
     if (selectedUserIds.length === 0) return;
     const confirmed = await confirm({
       title: 'Bulk Delete Users',
-      description: `Are you sure you want to permanently delete/deactivate ${selectedUserIds.length} selected user accounts? This cannot be undone.`,
+      description: `Are you sure you want to permanently delete ${selectedUserIds.length} selected user accounts? This action cannot be undone.`,
       confirmText: 'Delete Selected',
       variant: 'danger',
     });
@@ -253,9 +259,10 @@ export function SuperAdminUsersView() {
         selectedUserIds.map((id) => deleteUserApi(id))
       );
       const successful = results.filter((r) => r.status === 'fulfilled').length;
-      toast.success(`Successfully removed ${successful} user accounts`);
-      fetchData(true);
+      toast.success(`Successfully deleted ${successful} user accounts`);
+      setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
       setSelectedUserIds([]);
+      fetchData(true);
     } catch {
       toast.error('Failed to complete bulk deletion');
     }
@@ -268,6 +275,7 @@ export function SuperAdminUsersView() {
       name: user.name || '',
       email: user.email || '',
       phone: user.phone || '',
+      avatar_url: user.avatar_url || user.avatar || user.photo_url || '',
       password: '',
       role: user.role_slug || user.role || 'employee',
       tenant_id: user.tenant_id ? Number(user.tenant_id) : undefined,
@@ -300,6 +308,7 @@ export function SuperAdminUsersView() {
       };
 
       if (formData.phone) payload.phone = formData.phone.trim();
+      if (formData.avatar_url) payload.avatar_url = formData.avatar_url.trim();
       if (formData.tenant_id) payload.tenant_id = formData.tenant_id;
       if (formData.outlet_id) payload.outlet_id = formData.outlet_id;
       if (formData.pin_code) payload.pin_code = formData.pin_code;
@@ -366,12 +375,12 @@ export function SuperAdminUsersView() {
     }
   };
 
-  // Deactivate / Soft Delete User with Confirmation
+  // Delete User with Permanent Removal & Confirmation
   const handleDeleteUser = async (id: number | string, name: string) => {
     const confirmed = await confirm({
-      title: 'Deactivate User Account',
-      description: `Are you sure you want to deactivate ${name}? This user will immediately lose access to the platform and linked workspaces.`,
-      confirmText: 'Deactivate Account',
+      title: 'Delete User Account',
+      description: `Are you sure you want to permanently delete "${name}"? This account will be removed from the platform and linked workspaces. This action cannot be undone.`,
+      confirmText: 'Delete Permanently',
       variant: 'danger',
     });
 
@@ -379,13 +388,15 @@ export function SuperAdminUsersView() {
 
     try {
       await deleteUserApi(id);
-      toast.success(`User account for ${name} has been deactivated`);
-      fetchData(true);
+      toast.success(`User account for ${name} has been permanently deleted`);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      setSelectedUserIds((prev) => prev.filter((i) => i !== id));
       if (viewingUser && viewingUser.id === id) {
         setViewingUser(null);
       }
+      fetchData(true);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to deactivate user');
+      toast.error(err.message || 'Failed to delete user');
     }
   };
 

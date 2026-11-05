@@ -1,14 +1,21 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, Menu, Building2, Settings, Shield, LogOut } from 'lucide-react';
-import { getAuthUser, logoutApi, getRoleDisplayName } from '@/lib/api';
+import { getAuthUser, getAuthToken, logoutApi, getRoleDisplayName } from '@/lib/api';
 import { getMeetingNotificationsApi } from '@/lib/api/meetings';
 import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotificationsDrawer';
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
+import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
 
 interface ModuleSuiteHeaderProps {
   currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization' | 'meeting-management' | 'meetings' | string;
@@ -29,12 +36,18 @@ export function ModuleSuiteHeader({
   const [activeOrg, setActiveOrg] = useState<string>('CodeBridges');
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const loadNotificationsCount = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setUnreadNotifCount(0);
+      return;
+    }
     try {
       const res = await getMeetingNotificationsApi();
       if (res?.data && Array.isArray(res.data)) {
@@ -81,8 +94,14 @@ export function ModuleSuiteHeader({
 
     document.addEventListener('mousedown', handleClickOutside);
 
-    loadNotificationsCount();
-    const interval = setInterval(loadNotificationsCount, 20000);
+    if (getAuthToken()) {
+      loadNotificationsCount();
+    }
+    const interval = setInterval(() => {
+      if (getAuthToken()) {
+        loadNotificationsCount();
+      }
+    }, 20000);
 
     return () => {
       window.removeEventListener('cb_org_changed', handleOrgChange);
@@ -102,6 +121,18 @@ export function ModuleSuiteHeader({
   };
 
   const isSuperAdmin = user?.role === 'super_admin';
+  const hasOrganization = Boolean(
+    (activeOrg &&
+      activeOrg !== 'CodeBridges' &&
+      activeOrg !== 'No Organization Yet! Please Create' &&
+      activeOrg !== 'Guest Workspace') ||
+      user?.tenant_id
+  );
+  const profileRoute = isSuperAdmin
+    ? '/super-admin/security/profile'
+    : hasOrganization
+    ? '/organization/profile'
+    : '/profile';
   const roleTitle = user ? getRoleDisplayName(user, activeOrg) : '';
   const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
   const userInitials = user?.name
@@ -237,51 +268,25 @@ export function ModuleSuiteHeader({
 
                 <div className="py-1 text-xs">
                   <Link
-                    href="/profile"
+                    href={profileRoute}
                     onClick={() => setUserMenuOpen(false)}
                     className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
                   >
-                    <User className="w-4 h-4 text-slate-400" /> My Profile
+                    <User className="w-4 h-4 text-slate-400" />
+                    <span>My Profile</span>
                   </Link>
 
-                  {['organization', 'admin', 'super_admin', 'owner', 'organization_owner', 'manager', 'accountant', 'staff'].includes(user?.role) && (
-                    <>
-                      <Link
-                        href="/organization/dashboard"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                      >
-                        <Building2 className="w-4 h-4 text-slate-400" /> Workspace Dashboard
-                      </Link>
-                      <Link
-                        href="/organization/settings"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                      >
-                        <Settings className="w-4 h-4 text-slate-400" /> Setting
-                      </Link>
-                    </>
-                  )}
-
-                  {isSuperAdmin && (
-                    <Link
-                      href="/super-admin/dashboard"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                    >
-                      <Shield className="w-4 h-4 text-brand" /> Super Admin Console
-                    </Link>
-                  )}
-
-                  {/* Return to Launchpad */}
-                  <Link
-                    href="/launchpad"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="px-4 py-2.5 hover:bg-brand/5 flex items-center gap-2.5 font-bold text-brand transition-colors border-t border-slate-100"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      setShowSettingsModal(true);
+                    }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors cursor-pointer"
                   >
-                    <AppIcons.Compass className="w-4 h-4 text-brand" />
-                    <span>App Directory Launchpad</span>
-                  </Link>
+                    <Settings className="w-4 h-4 text-slate-400" />
+                    <span>Setting</span>
+                  </button>
                 </div>
 
                 {/* Sign Out */}
@@ -307,6 +312,12 @@ export function ModuleSuiteHeader({
           setNotificationsOpen(false);
           loadNotificationsCount();
         }}
+      />
+
+      {/* Global User Theme & Display Preferences Modal */}
+      <UserSettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
       />
     </>
   );

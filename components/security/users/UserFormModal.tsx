@@ -15,6 +15,7 @@ import {
   Store,
   CheckCircle2,
   AlertCircle,
+  Camera,
 } from 'lucide-react';
 import { OutletSelector } from '@/components/inventory-suite';
 
@@ -22,6 +23,7 @@ export interface UserFormData {
   name: string;
   email: string;
   phone?: string;
+  avatar_url?: string;
   password?: string;
   role: string;
   tenant_id?: string | number;
@@ -199,6 +201,39 @@ export function UserFormModal({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Row 2.5: Profile Avatar Picture */}
+          <div>
+            <label className="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-slate-400" />
+                Profile Picture URL (Optional)
+              </span>
+              <span className="text-[10px] text-slate-400 font-normal">Direct image link (JPG, PNG, WebP)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs overflow-hidden select-none">
+                <span>{formData.name ? formData.name.substring(0, 2).toUpperCase() : 'US'}</span>
+                {formData.avatar_url && (
+                  <img
+                    src={formData.avatar_url}
+                    alt="Preview"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                )}
+              </div>
+              <input
+                type="url"
+                value={formData.avatar_url || ''}
+                onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
+                placeholder="https://images.unsplash.com/... or uploaded photo link"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white font-mono text-xs transition-all"
+              />
+            </div>
           </div>
 
           {/* Row 3: Assigned Role & 4-Digit PIN */}

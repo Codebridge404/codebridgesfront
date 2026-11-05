@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -279,12 +285,29 @@ export function UserTable({
                         isSelected ? 'bg-brand-subtle/30 group-hover:bg-brand-subtle/40' : 'bg-white group-hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs uppercase">
-                          {user.name ? user.name.substring(0, 2) : 'US'}
+                      <div
+                        className="flex items-center gap-2.5 group/user cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onViewUser(user);
+                        }}
+                        title={`View ${user.name || 'User'}'s full profile`}
+                      >
+                        <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs uppercase overflow-hidden select-none">
+                          <span>{user.name ? user.name.substring(0, 2) : 'US'}</span>
+                          {(user.avatar_url || user.avatar || user.photo_url || user.logo_url) && (
+                            <img
+                              src={user.avatar_url || user.avatar || user.photo_url || user.logo_url}
+                              alt={user.name || 'User avatar'}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-extrabold text-slate-900 text-xs truncate group-hover:text-brand transition-colors">
+                          <p className="font-extrabold text-slate-900 text-xs truncate group-hover/user:text-brand transition-colors">
                             {user.name || 'Unnamed User'}
                           </p>
                           <p className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -364,7 +387,7 @@ export function UserTable({
                           type="button"
                           onClick={() => onDeleteUser(user.id, user.name)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Delete / Deactivate User"
+                          title="Permanently Delete User Account"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -472,7 +495,7 @@ export function UserTable({
         </div>
       )}
 
-      {/* Floating Bulk Actions Dock */}
+      {/* Floating Bulk Actions Dock (Light Apple Glassmorphic Theme - No Black) */}
       <AnimatePresence>
         {selectedUserIds.length > 0 && (
           <div className="fixed bottom-6 inset-x-0 mx-auto max-w-2xl z-40 px-4 pointer-events-none">
@@ -481,11 +504,11 @@ export function UserTable({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 25, scale: 0.95 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 text-white p-3 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-3 pointer-events-auto"
+              className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 text-slate-800 p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] ring-1 ring-slate-900/5 flex items-center justify-between gap-3 pointer-events-auto"
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
-                <span className="font-extrabold text-xs text-white">
+                <span className="px-2.5 py-1 rounded-full bg-brand-subtle text-brand border border-brand/20 font-black text-xs">
                   {selectedUserIds.length} {selectedUserIds.length === 1 ? 'user' : 'users'} selected
                 </span>
               </div>
@@ -494,7 +517,7 @@ export function UserTable({
                 <button
                   type="button"
                   onClick={onBulkActivate}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/90 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Activate</span>
@@ -503,7 +526,7 @@ export function UserTable({
                 <button
                   type="button"
                   onClick={onBulkDeactivate}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/90 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
                 >
                   <Ban className="w-3.5 h-3.5" />
                   <span>Suspend</span>
@@ -512,7 +535,7 @@ export function UserTable({
                 <button
                   type="button"
                   onClick={onBulkDelete}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-400/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/90 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -521,7 +544,7 @@ export function UserTable({
                 <button
                   type="button"
                   onClick={onClearSelection}
-                  className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                   title="Clear all selection"
                 >
                   <X className="w-3.5 h-3.5" />

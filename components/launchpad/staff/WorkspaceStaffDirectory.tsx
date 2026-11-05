@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -19,9 +25,11 @@ import {
   CheckCircle2,
   XCircle,
   Building2,
+  Eye,
 } from 'lucide-react';
 import { getRoleDisplayName, getAuthUser } from '@/lib/api';
 import { buttonStyles } from '@/lib/theme';
+import { UserDetailModal } from '@/components/security/users/UserDetailModal';
 
 export interface WorkspaceStaffDirectoryProps {
   staff: any[];
@@ -92,6 +100,7 @@ export function WorkspaceStaffDirectory({
   const [outletFilter, setOutletFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled'>('all');
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [viewingProfileMember, setViewingProfileMember] = useState<any | null>(null);
 
   const currentAuthUser = useMemo(() => {
     try {
@@ -335,16 +344,30 @@ export function WorkspaceStaffDirectory({
                     <tr key={`staff-dir-row-${member.id ?? idx}-${idx}`} className="hover:bg-slate-50/70 transition-colors">
                       {/* Name & Identity */}
                       <td className="py-3.5 px-5">
-                        <div className="flex items-center gap-3">
+                        <div
+                          className="flex items-center gap-3 cursor-pointer group/staff"
+                          onClick={() => setViewingProfileMember(member)}
+                          title="Click to view staff profile"
+                        >
                           <div
-                            className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 shadow-2xs ${getAvatarBg(
+                            className={`relative w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 shadow-2xs overflow-hidden select-none ${getAvatarBg(
                               member.role
                             )}`}
                           >
-                            {member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}
+                            <span>{member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}</span>
+                            {(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
+                              <img
+                                src={member.avatar_url || member.avatar || member.photo_url || member.logo_url}
+                                alt={member.name}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                              />
+                            )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-extrabold text-slate-900 truncate flex items-center gap-1.5">
+                            <p className="font-extrabold text-slate-900 truncate flex items-center gap-1.5 group-hover/staff:text-brand group-hover/staff:underline transition-colors">
                             <span>{member.name}</span>
                             {isCurrentUser && (
                               <span className="px-1.5 py-0.5 rounded-md bg-brand-subtle text-brand text-[9px] font-black uppercase tracking-wider border border-brand/20">
@@ -441,6 +464,15 @@ export function WorkspaceStaffDirectory({
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
+                            onClick={() => setViewingProfileMember(member)}
+                            className="p-2 text-slate-500 hover:text-brand hover:bg-brand-subtle rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
+                            title="View Staff Profile"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => onEditStaff(member)}
                             className="p-2 text-slate-500 hover:text-brand hover:bg-brand-subtle rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
                             title="Edit Role, Outlet & PIN"
@@ -486,17 +518,31 @@ export function WorkspaceStaffDirectory({
                 <div className="space-y-3">
                   {/* Top Bar with Avatar & Actions */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="flex items-center gap-3 min-w-0 cursor-pointer group/staff"
+                      onClick={() => setViewingProfileMember(member)}
+                      title="Click to view staff profile"
+                    >
                       <div
-                        className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 shadow-2xs ${getAvatarBg(
+                        className={`relative w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 shadow-2xs overflow-hidden select-none ${getAvatarBg(
                           member.role
                         )}`}
                       >
-                        {member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}
+                        <span>{member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}</span>
+                        {(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
+                          <img
+                            src={member.avatar_url || member.avatar || member.photo_url || member.logo_url}
+                            alt={member.name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        )}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                        <h4 className="font-extrabold text-sm text-slate-900 truncate">{member.name}</h4>
+                        <h4 className="font-extrabold text-sm text-slate-900 truncate group-hover/staff:text-brand group-hover/staff:underline transition-colors">{member.name}</h4>
                         {isCurrentUser && (
                           <span className="px-1.5 py-0.5 rounded-md bg-brand-subtle text-brand text-[9px] font-black uppercase tracking-wider border border-brand/20 shrink-0">
                             You
@@ -515,6 +561,14 @@ export function WorkspaceStaffDirectory({
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setViewingProfileMember(member)}
+                        className="p-1.5 text-slate-400 hover:text-brand hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                        title="View Staff Profile"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => onEditStaff(member)}
@@ -594,6 +648,22 @@ export function WorkspaceStaffDirectory({
             );
           })}
         </div>
+      )}
+
+      {/* Staff Profile Modal */}
+      {viewingProfileMember && (
+        <UserDetailModal
+          user={viewingProfileMember}
+          tenantName={activeOrgName}
+          onClose={() => setViewingProfileMember(null)}
+          onEdit={(m) => {
+            setViewingProfileMember(null);
+            onEditStaff(m);
+          }}
+          onToggleStatus={(m) => {
+            onToggleStatus(m);
+          }}
+        />
       )}
     </div>
   );

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -108,9 +114,11 @@ export function CreateOrgModal({
       if (typeof window !== 'undefined') {
         const currentUserStr = localStorage.getItem('pos_user');
         const currentUserObj = currentUserStr ? JSON.parse(currentUserStr) : {};
-        const updatedRole = 'organization';
+        const isSuperAdmin = currentUserObj.role === 'super_admin';
+        const updatedRole = isSuperAdmin ? 'super_admin' : 'organization';
         const updatedUser = {
           ...currentUserObj,
+          ...(res?.user || {}),
           tenant_id: createdOrgData.id || currentUserObj.tenant_id,
           tenant_name: createdOrgData.name,
           company_name: createdOrgData.name,
@@ -118,7 +126,9 @@ export function CreateOrgModal({
           role: updatedRole,
         };
         localStorage.setItem('pos_user', JSON.stringify(updatedUser));
+        localStorage.setItem('cb_user', JSON.stringify(updatedUser));
         localStorage.setItem('active_org', createdOrgData.name);
+        localStorage.setItem('cb_active_org_name', createdOrgData.name);
 
         // Dispatch global sync events to notify all components in real time
         window.dispatchEvent(

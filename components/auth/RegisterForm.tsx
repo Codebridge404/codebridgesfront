@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0140
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -94,13 +100,13 @@ export function RegisterForm() {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full max-w-lg bg-white/90 backdrop-blur-2xl border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden"
+      className="w-full max-w-lg bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 rounded-3xl p-8 shadow-2xl shadow-brand/10 space-y-6 relative overflow-hidden ring-1 ring-white/30"
     >
       {/* Top Back Link */}
       <div className="flex items-center justify-between">
         <Link
           href="/login"
-          className="text-xs font-bold text-slate-500 hover:text-brand flex items-center gap-1.5 transition-colors"
+          className="text-xs font-bold text-slate-600 hover:text-brand flex items-center gap-1.5 transition-colors bg-white/40 px-2.5 py-1 rounded-full border border-white/60 backdrop-blur-sm"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Sign In
@@ -113,7 +119,7 @@ export function RegisterForm() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.15, type: 'spring', stiffness: 200 }}
-          className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-subtle border border-brand/20 shadow-md shadow-brand/10 mb-1"
+          className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/60 backdrop-blur-md border border-white/80 shadow-md shadow-brand/10 mb-1"
         >
           <div className="w-full h-full rounded-[14px] flex items-center justify-center">
             <UserPlus className="w-7 h-7 text-brand" />
@@ -172,18 +178,18 @@ export function RegisterForm() {
               placeholder="e.g. Vibol Sen"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all"
             />
           </div>
         </div>
 
         {/* Email / Phone Mode Switcher Tabs */}
-        <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200">
+        <div className="flex bg-slate-900/5 backdrop-blur-md p-1 rounded-xl text-xs font-bold border border-white/50">
           <button
             type="button"
             onClick={() => setRegMethod('email')}
             className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-              regMethod === 'email' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+              regMethod === 'email' ? 'bg-white/80 text-brand shadow-xs font-extrabold backdrop-blur-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Mail className="w-3.5 h-3.5" /> Register with Email
@@ -192,7 +198,7 @@ export function RegisterForm() {
             type="button"
             onClick={() => setRegMethod('phone')}
             className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-              regMethod === 'phone' ? 'bg-white text-brand shadow-xs font-extrabold' : 'text-slate-500 hover:text-slate-800'
+              regMethod === 'phone' ? 'bg-white/80 text-brand shadow-xs font-extrabold backdrop-blur-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Phone className="w-3.5 h-3.5" /> Register with Phone
@@ -210,7 +216,7 @@ export function RegisterForm() {
                 placeholder="vibol@codebridges.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all"
               />
             </div>
           </div>
@@ -225,7 +231,7 @@ export function RegisterForm() {
                 placeholder="+855 12 345 678"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all"
               />
             </div>
           </div>
@@ -242,7 +248,7 @@ export function RegisterForm() {
                 placeholder="Min 6 characters"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all"
               />
               <button
                 type="button"
@@ -264,7 +270,7 @@ export function RegisterForm() {
                 placeholder="Repeat password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/45 backdrop-blur-md border border-slate-300/60 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand focus:bg-white/70 transition-all"
               />
             </div>
           </div>
@@ -287,7 +293,7 @@ export function RegisterForm() {
       </form>
 
       {/* Footer Link */}
-      <div className="pt-2 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
+      <div className="pt-2 border-t border-slate-200/50 text-center text-xs text-slate-500 font-medium">
         Already registered?{' '}
         <Link href="/login" className="font-bold text-brand hover:underline">
           Sign In to your Account

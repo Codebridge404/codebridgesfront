@@ -1,7 +1,14 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0141
+ */
+
 'use client';
 
-import React from 'react';
-import { Users, Check, AlertCircle, KeyRound, Lock, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Check, AlertCircle, KeyRound, Lock, ShieldCheck, Eye } from 'lucide-react';
+import { UserDetailModal } from '@/components/security/users/UserDetailModal';
 
 interface StaffUser {
   id: string | number;
@@ -10,6 +17,9 @@ interface StaffUser {
   role: string;
   pin_code?: string;
   has_pin?: boolean;
+  avatar_url?: string;
+  avatar?: string;
+  outlet_name?: string;
 }
 
 interface PosAccessStaffTableProps {
@@ -25,6 +35,7 @@ export function PosAccessStaffTable({
   onTogglePermission,
   onOpenPinModal,
 }: PosAccessStaffTableProps) {
+  const [viewingStaff, setViewingStaff] = useState<StaffUser | null>(null);
   return (
     <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] overflow-hidden">
       <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -61,12 +72,26 @@ export function PosAccessStaffTable({
                   <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Name & Role */}
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-brand text-white font-black text-xs flex items-center justify-center shrink-0">
-                          {u.name ? u.name.slice(0, 2).toUpperCase() : 'OP'}
+                      <div
+                        className="flex items-center gap-3 cursor-pointer group/op"
+                        onClick={() => setViewingStaff(u)}
+                        title="Click to view operator profile"
+                      >
+                        <div className="relative w-8 h-8 rounded-xl bg-brand text-white font-black text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-2xs select-none">
+                          <span>{u.name ? u.name.slice(0, 2).toUpperCase() : 'OP'}</span>
+                          {(u.avatar_url || u.avatar) && (
+                            <img
+                              src={u.avatar_url || u.avatar}
+                              alt={u.name}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          )}
                         </div>
                         <div>
-                          <p className="font-extrabold text-slate-900">{u.name}</p>
+                          <p className="font-extrabold text-slate-900 group-hover/op:text-brand group-hover/op:underline transition-colors">{u.name}</p>
                           <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-600">
                             {u.role ? u.role.replace('_', ' ') : 'Staff'}
                           </span>
@@ -128,16 +153,27 @@ export function PosAccessStaffTable({
                       </button>
                     </td>
 
-                    {/* Action: Set / Reset PIN */}
+                    {/* Action: Profile & Set / Reset PIN */}
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => onOpenPinModal(u)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs transition-colors flex items-center gap-1.5 ml-auto cursor-pointer"
-                      >
-                        <KeyRound className="w-3.5 h-3.5 text-brand" />
-                        <span>{perms.hasPin ? 'Change PIN' : 'Set PIN'}</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setViewingStaff(u)}
+                          className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-brand hover:border-brand/40 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-slate-50 hover:bg-white"
+                          title="Display Operator Profile"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-brand" />
+                          <span>Profile</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onOpenPinModal(u)}
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <KeyRound className="w-3.5 h-3.5 text-brand" />
+                          <span>{perms.hasPin ? 'Change PIN' : 'Set PIN'}</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -146,6 +182,15 @@ export function PosAccessStaffTable({
           </tbody>
         </table>
       </div>
+
+      {/* Operator Profile Modal */}
+      {viewingStaff && (
+        <UserDetailModal
+          user={viewingStaff}
+          onClose={() => setViewingStaff(null)}
+          readOnly
+        />
+      )}
     </div>
   );
 }

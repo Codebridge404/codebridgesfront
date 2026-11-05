@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -128,6 +134,11 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
           name: 'Organization Settings',
           href: '/organization/settings',
           icon: Settings,
+        },
+        {
+          name: 'My Profile',
+          href: '/organization/profile',
+          icon: UserCheck,
         },
       ],
     });

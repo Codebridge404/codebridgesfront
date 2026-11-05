@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0138
+ */
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppProviders } from "@/components/common";
@@ -29,6 +35,25 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-canvas text-slate-800 relative selection:bg-brand selection:text-white" suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var raw = localStorage.getItem('cb_user_preferences');
+                if (raw) {
+                  var p = JSON.parse(raw);
+                  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (p.theme === 'dark' || (p.theme === 'system' && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                  if (p.fontSize) document.documentElement.setAttribute('data-font-size', p.fontSize);
+                  if (p.canvasStyle) document.documentElement.setAttribute('data-canvas-style', p.canvasStyle);
+                  if (p.accentColor) document.documentElement.style.setProperty('--color-brand', p.accentColor);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
         <LaunchpadTechBackground />
         <AppProviders>{children}</AppProviders>
         <script

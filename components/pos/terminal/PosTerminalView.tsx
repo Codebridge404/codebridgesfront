@@ -201,6 +201,10 @@ function PosTerminalContent() {
               onRemoveCoupon={() => t.setAppliedCoupon(null)}
               onOpenCheckout={t.handleOpenCheckout}
               isProcessing={t.isProcessing}
+              customer={custTable.selectedCustomer}
+              table={custTable.selectedTable}
+              orderType={custTable.orderType}
+              cashier={t.user}
             />
           </div>
         </div>
