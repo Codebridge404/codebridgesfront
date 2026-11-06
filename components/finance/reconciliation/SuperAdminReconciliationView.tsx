@@ -9,11 +9,13 @@ import {
   RefreshCw,
   Search,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import {
   runReconciliationApi,
   getReconciliationExceptionsApi,
   resolveReconciliationExceptionApi,
+  classifyReconciliationApi,
 } from '@/lib/api';
 import { ReconciliationException, ReconciliationSummary } from './types';
 import { ReconciliationResolveModal } from './ReconciliationResolveModal';
@@ -21,6 +23,7 @@ import { ReconciliationResolveModal } from './ReconciliationResolveModal';
 export function SuperAdminReconciliationView() {
   const [loading, setLoading] = useState(true);
   const [runningBatch, setRunningBatch] = useState(false);
+  const [classifying, setClassifying] = useState(false);
   const [exceptions, setExceptions] = useState<ReconciliationException[]>([]);
   const [summary, setSummary] = useState<ReconciliationSummary>({
     pending_count: 0,
@@ -50,6 +53,19 @@ export function SuperAdminReconciliationView() {
       console.error('Failed to load reconciliation data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRunAutoClassification = async () => {
+    try {
+      setClassifying(true);
+      const res = await classifyReconciliationApi();
+      await loadReconciliationData();
+      alert(res?.message || 'Auto-classification complete: discrepancies categorized into amount, fee, and missing status.');
+    } catch (err: any) {
+      alert(err.message || 'Failed to auto-classify exceptions.');
+    } finally {
+      setClassifying(false);
     }
   };
 
@@ -99,13 +115,21 @@ export function SuperAdminReconciliationView() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <FileCheck2 className="w-7 h-7 text-brand" />
-            Payment Reconciliation &amp; Settlement Audit
+            Payment Gateways &amp; Invoices
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Automated auditing of internal POS transactions against payment gateway settlement statements
           </p>
         </div>
 
+        <button
+          onClick={handleRunAutoClassification}
+          disabled={classifying || runningBatch}
+          className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-600/20 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+        >
+          <Sparkles className={`w-4 h-4 ${classifying ? 'animate-spin' : ''}`} />
+          {classifying ? 'Classifying...' : 'Auto-Classify Exceptions'}
+        </button>
         <button
           onClick={handleRunBatchAudit}
           disabled={runningBatch}

@@ -497,6 +497,7 @@ export function SuperAdminUsersView() {
           setNewPassword('');
         }}
         onToggleStatus={handleToggleStatus}
+        onDelete={(u) => handleDeleteUser(u.id, u.name)}
         tenantName={viewingUser?.tenant_id ? tenantMap.get(String(viewingUser.tenant_id)) : undefined}
       />
 

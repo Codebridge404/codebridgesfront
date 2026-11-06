@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { logoutApi, getRoleDisplayName, getTenantProfileApi, getOutletTerminalSettingsApi } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface PosSuiteHeaderProps {
   user: any;
@@ -201,7 +202,7 @@ export function PosSuiteHeader({
 
   // Cashier initials
   const cashierName = user?.name || 'Cashier';
-  const cashierAvatar = user?.avatar_url || user?.avatar || user?.profile_image_url || null;
+  const cashierAvatar = resolveMediaUrl(user?.avatar_url || user?.avatar || user?.profile_image_url || null);
   const cashierInitials = cashierName
     .split(' ')
     .map((n: string) => n[0])

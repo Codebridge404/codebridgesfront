@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
@@ -18,6 +18,7 @@ import {
   Building2,
   ShieldCheck,
   Ban,
+  Trash2,
   Download,
   CheckSquare,
   Square,
@@ -27,16 +28,20 @@ import {
 import {
   getUsersApi,
   updateUserApi,
+  deleteUserApi,
   getSuperAdminTenantsApi,
   getAuthToken,
   apiFetch,
 } from '@/lib/api';
 import { CrossTenantUser } from './types';
 import { CrossTenantUsersTable, SortField, SortOrder } from './CrossTenantUsersTable';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 import { UserDetailModal } from '@/components/security/users/UserDetailModal';
+import { useConfirm } from '@/components/common';
 import { appleSpring } from '@/lib/animations';
 
 export function SuperAdminPlatformUsersView() {
+  const confirm = useConfirm();
   const [users, setUsers] = useState<CrossTenantUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -115,7 +120,7 @@ export function SuperAdminPlatformUsersView() {
           outlet_name: u.outlet_name,
           is_active: u.is_active === 1 || u.is_active === true,
           created_at: u.created_at ? u.created_at.slice(0, 10) : '2026-08-01',
-          avatar_url: u.avatar_url || u.avatar || u.photo_url || u.logo_url,
+          avatar_url: resolveMediaUrl(u.avatar_url || u.avatar || u.photo_url || u.logo_url) || undefined,
         }));
 
         setUsers(formatted);
@@ -269,6 +274,54 @@ export function SuperAdminPlatformUsersView() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedUserIds.length === 0) return;
+    const confirmed = await confirm({
+      title: 'Bulk Delete Users',
+      description: `Are you sure you want to permanently delete ${selectedUserIds.length} selected user accounts? They will be removed from the database and all organizations. This cannot be undone.`,
+      confirmText: 'Delete Selected',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    setBulkActionLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        selectedUserIds.map((id) => deleteUserApi(id))
+      );
+      const successCount = results.filter((r) => r.status === 'fulfilled').length;
+      setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
+      showToast(`Permanently deleted ${successCount} user accounts.`);
+      setSelectedUserIds([]);
+    } catch {
+      showToast('Bulk deletion encountered an error.');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: string | number, name: string) => {
+    const confirmed = await confirm({
+      title: 'Delete User Account',
+      description: `Are you sure you want to permanently delete "${name}"? This account will be completely removed from the database and all organizations. This action cannot be undone.`,
+      confirmText: 'Delete Permanently',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteUserApi(id);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      setSelectedUserIds((prev) => prev.filter((item) => item !== id));
+      if (viewingUser && viewingUser.id === id) {
+        setViewingUser(null);
+      }
+      showToast(`User account for "${name}" has been permanently deleted.`);
+    } catch (err: any) {
+      showToast(`Failed to delete user: ${err.message || 'API error'}`);
+    }
+  };
+
   const handleBulkExportCSV = () => {
     const targetUsers = users.filter((u) => selectedUserIds.includes(u.id));
     if (targetUsers.length === 0) return;
@@ -329,7 +382,7 @@ export function SuperAdminPlatformUsersView() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                Cross-Tenant Users Directory
+                Cross-Tenant Users
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -535,6 +588,16 @@ export function SuperAdminPlatformUsersView() {
 
               <button
                 type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkActionLoading}
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/90 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95 disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Bulk Delete</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleBulkExportCSV}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95"
               >
@@ -567,6 +630,7 @@ export function SuperAdminPlatformUsersView() {
           onToggleSelectAll={handleToggleSelectAll}
           onResetPassword={handleResetPassword}
           onToggleActive={handleToggleActive}
+          onDeleteUser={handleDeleteUser}
           onViewUser={(u) => setViewingUser(u)}
         />
       </div>
@@ -581,6 +645,9 @@ export function SuperAdminPlatformUsersView() {
           }}
           onToggleStatus={(u) => {
             handleToggleActive(u.id, u.is_active);
+          }}
+          onDelete={(u) => {
+            handleDeleteUser(u.id, u.name);
           }}
         />
       )}

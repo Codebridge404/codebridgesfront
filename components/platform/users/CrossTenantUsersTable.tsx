@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
@@ -20,8 +20,11 @@ import {
   Check,
   Eye,
   User,
+  Trash2,
+  CheckCircle2,
 } from 'lucide-react';
 import { CrossTenantUser, getRoleBadge } from './types';
+import { resolveMediaUrl, getUserInitials } from '@/lib/mediaUtils';
 
 export type SortField = 'name' | 'role' | 'tenant_name' | 'is_active' | 'created_at';
 export type SortOrder = 'asc' | 'desc';
@@ -37,6 +40,7 @@ interface CrossTenantUsersTableProps {
   onToggleSelectAll: () => void;
   onResetPassword: (email: string, id: string | number) => void;
   onToggleActive: (id: string | number, currentActive: boolean | number) => void;
+  onDeleteUser?: (id: string | number, name: string) => void;
   onViewUser?: (user: CrossTenantUser) => void;
 }
 
@@ -51,6 +55,7 @@ export function CrossTenantUsersTable({
   onToggleSelectAll,
   onResetPassword,
   onToggleActive,
+  onDeleteUser,
   onViewUser,
 }: CrossTenantUsersTableProps) {
   if (loading) {
@@ -176,10 +181,10 @@ export function CrossTenantUsersTable({
                     title={onViewUser ? 'Click to display full user profile' : undefined}
                   >
                     <div className="relative w-8 h-8 rounded-xl bg-brand-subtle text-brand border border-brand-border/60 flex items-center justify-center font-black text-xs shadow-2xs shrink-0 overflow-hidden select-none">
-                      <span>{u.name ? u.name[0]?.toUpperCase() : 'U'}</span>
-                      {(u.avatar_url || (u as any).avatar || (u as any).photo_url) && (
+                      <span>{getUserInitials(u.name)}</span>
+                      {resolveMediaUrl(u.avatar_url || (u as any).avatar || (u as any).photo_url) && (
                         <img
-                          src={u.avatar_url || (u as any).avatar || (u as any).photo_url}
+                          src={resolveMediaUrl(u.avatar_url || (u as any).avatar || (u as any).photo_url)!}
                           alt={u.name}
                           className="absolute inset-0 w-full h-full object-cover"
                           onError={(e) => {
@@ -225,7 +230,7 @@ export function CrossTenantUsersTable({
                       Active
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 text-[10px] font-extrabold border border-rose-200">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200">
                       Suspended
                     </span>
                   )}
@@ -239,7 +244,7 @@ export function CrossTenantUsersTable({
                       <button
                         type="button"
                         onClick={() => onViewUser(u)}
-                        className="px-2.5 py-1.5 rounded-xl bg-brand-subtle hover:bg-brand/15 text-brand text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 border border-brand/20"
+                        className="px-2.5 py-1.5 rounded-xl bg-brand-subtle hover:bg-brand/15 text-brand text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 border border-brand/20 shadow-2xs hover:shadow-xs active:scale-95"
                         title="Display User Profile"
                       >
                         <Eye className="w-3 h-3 text-brand" />
@@ -249,7 +254,7 @@ export function CrossTenantUsersTable({
                     <button
                       type="button"
                       onClick={() => onResetPassword(u.email, u.id)}
-                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs hover:shadow-xs active:scale-95"
                       title="Send Password Reset"
                     >
                       <Key className="w-3 h-3 text-slate-500" />
@@ -258,15 +263,27 @@ export function CrossTenantUsersTable({
                     <button
                       type="button"
                       onClick={() => onToggleActive(u.id, u.is_active)}
-                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 ${
+                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs hover:shadow-xs active:scale-95 ${
                         u.is_active
-                          ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200'
-                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200'
+                          ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
                       }`}
+                      title={u.is_active ? 'Suspend Account (Revoke Sign-in Access)' : 'Activate Account (Grant Sign-in Access)'}
                     >
-                      <Ban className="w-3 h-3" />
+                      {u.is_active ? <Ban className="w-3 h-3 text-amber-600" /> : <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
                       <span>{u.is_active ? 'Suspend' : 'Activate'}</span>
                     </button>
+                    {onDeleteUser && (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteUser(u.id, u.name)}
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs hover:shadow-xs active:scale-95"
+                        title="Permanently Delete User Account"
+                      >
+                        <Trash2 className="w-3 h-3 text-rose-600" />
+                        <span>Delete</span>
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

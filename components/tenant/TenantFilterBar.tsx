@@ -37,7 +37,7 @@ export function TenantFilterBar({
             <div className="p-2.5 rounded-2xl bg-brand-subtle text-brand border border-brand-border/60 shadow-2xs">
               <Building2 className="w-5 h-5" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Client Tenant Management</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Client Organizations</h1>
           </div>
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
             Monitor client store organizations, view assigned workspace owners, edit quotas, and manage subscription tiers.

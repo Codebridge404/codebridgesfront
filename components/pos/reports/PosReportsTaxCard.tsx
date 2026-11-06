@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Landmark, Calculator, Loader2 } from 'lucide-react';
+import { FileText, Download, Landmark, Calculator, Loader2, Clock } from 'lucide-react';
+import { AsyncExportQueueDrawer } from './AsyncExportQueueDrawer';
 import { getTaxReportApi, downloadReportCsvApi } from '@/lib/api';
+import { getPlatformSettings } from '@/lib/platformSettings';
 
 interface PosReportsTaxCardProps {
   startDate: string;
@@ -13,6 +15,7 @@ export function PosReportsTaxCard({ startDate, endDate }: PosReportsTaxCardProps
   const [taxData, setTaxData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [showAsyncDrawer, setShowAsyncDrawer] = useState(false);
 
   useEffect(() => {
     loadTaxData();
@@ -56,7 +59,8 @@ export function PosReportsTaxCard({ startDate, endDate }: PosReportsTaxCardProps
   const grandUsd = Number(taxData?.grand_total_usd || 0);
   const grandKhr = Number(taxData?.grand_total_khr || 0);
   const vatKhr = Number(taxData?.vat_collected_khr || 0);
-  const exchangeRate = taxData?.exchange_rate || '1 USD = 4,100 KHR';
+  const platformRate = getPlatformSettings().exchangeRateUsdToKhr || 4100;
+  const exchangeRate = taxData?.exchange_rate || `1 USD = ${platformRate.toLocaleString()} KHR`;
 
   return (
     <div className="space-y-4 font-sans text-slate-900">
@@ -74,15 +78,26 @@ export function PosReportsTaxCard({ startDate, endDate }: PosReportsTaxCardProps
           </div>
         </div>
 
-        <button
-          type="button"
-          disabled={downloading}
-          onClick={handleDownloadTaxCsv}
-          className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-        >
-          {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          <span>Export Tax Ledger CSV</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setShowAsyncDrawer(true)}
+            className="px-4 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs shadow-2xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Clock className="w-4 h-4 text-indigo-600" />
+            <span>Heavy Tax Audit Queue</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={downloading}
+            onClick={handleDownloadTaxCsv}
+            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            <span>Export Tax Ledger CSV</span>
+          </button>
+        </div>
       </div>
 
       {/* Tax Metrics Grid */}
@@ -141,6 +156,12 @@ export function PosReportsTaxCard({ startDate, endDate }: PosReportsTaxCardProps
           </div>
         </div>
       </div>
+      <AsyncExportQueueDrawer
+        isOpen={showAsyncDrawer}
+        onClose={() => setShowAsyncDrawer(false)}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </div>
   );
 }

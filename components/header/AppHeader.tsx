@@ -29,6 +29,7 @@ import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotific
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
 import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 export interface AppHeaderProps {
   sidebarOpen?: boolean;
@@ -211,7 +212,7 @@ export function AppHeader({
         .toUpperCase()
     : 'U';
 
-  const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
+  const avatarUrl = resolveMediaUrl(user?.avatar_url || user?.profile_image_url || null);
 
   // Context Pill Badge matching ModuleSuiteHeader
   const contextBadge = useMemo(() => {

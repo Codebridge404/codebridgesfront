@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, Search, Filter, Phone, Mail, Building2, Loader2, Store, Eye } from 'lucide-react';
 import { getEmployeesApi, getAuthToken } from '@/lib/api';
 import { UserDetailModal } from '@/components/security/users/UserDetailModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface Employee {
   id: string | number;
@@ -136,9 +137,9 @@ export function StaffRosterTable() {
                     <div className="flex items-center gap-2.5">
                       <div className="relative w-8 h-8 rounded-xl bg-brand-subtle text-brand border border-brand/20 flex items-center justify-center font-black text-xs shrink-0 overflow-hidden select-none">
                         <span>{emp.name.substring(0, 2).toUpperCase()}</span>
-                        {emp.avatar_url && (
+                        {resolveMediaUrl(emp.avatar_url) && (
                           <img
-                            src={emp.avatar_url}
+                            src={resolveMediaUrl(emp.avatar_url)!}
                             alt={emp.name}
                             className="absolute inset-0 w-full h-full object-cover"
                             onError={(e) => {

@@ -1,6 +1,12 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0145
+ */
 'use client';
 
 import React from 'react';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 import {
   Building2,
   Save,
@@ -100,9 +106,9 @@ export function ProfileSettingsTab({
           <div className="relative group shrink-0">
             <div className="w-24 h-24 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-brand/40 shadow-xs">
               {logoPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
+                 
                 <img
-                  src={logoPreview}
+                  src={resolveMediaUrl(logoPreview) || logoPreview}
                   alt="Organization Logo"
                   className="w-full h-full object-contain p-2"
                 />

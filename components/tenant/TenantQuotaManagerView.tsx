@@ -23,6 +23,7 @@ import {
 import { apiFetch } from '@/lib/api';
 import { Tenant, TIER_CONFIG } from './types';
 import { useToast } from '@/components/common';
+import { getTierDefaultQuotas } from '@/lib/platformSettings';
 
 export function TenantQuotaManagerView() {
   const toast = useToast();
@@ -73,9 +74,10 @@ export function TenantQuotaManagerView() {
     let totalUsersMax = 0;
 
     tenants.forEach((t) => {
-      const outMax = t.max_outlets || (t.client_tier === 'enterprise_org' ? 50 : t.client_tier === 'business_runner' ? 5 : 1);
-      const regMax = t.max_registers || (t.client_tier === 'enterprise_org' ? 200 : t.client_tier === 'business_runner' ? 15 : 2);
-      const usrMax = t.max_users || (t.client_tier === 'enterprise_org' ? 500 : t.client_tier === 'business_runner' ? 50 : 5);
+      const def = getTierDefaultQuotas(t.client_tier);
+      const outMax = t.max_outlets || def.maxOutlets;
+      const regMax = t.max_registers || def.maxRegisters;
+      const usrMax = t.max_users || def.maxUsers;
 
       totalOutletsUsed += t.outlets_count || 1;
       totalOutletsMax += outMax;
@@ -122,8 +124,9 @@ export function TenantQuotaManagerView() {
       if (!matchesSearch || !matchesTier) return false;
 
       if (healthFilter === 'high_usage') {
-        const outMax = t.max_outlets || (t.client_tier === 'enterprise_org' ? 50 : t.client_tier === 'business_runner' ? 5 : 1);
-        const usrMax = t.max_users || (t.client_tier === 'enterprise_org' ? 500 : t.client_tier === 'business_runner' ? 50 : 5);
+        const def = getTierDefaultQuotas(t.client_tier);
+        const outMax = t.max_outlets || def.maxOutlets;
+        const usrMax = t.max_users || def.maxUsers;
         const outRatio = (t.outlets_count || 1) / outMax;
         const usrRatio = (t.users_count || 1) / usrMax;
         return outRatio >= 0.8 || usrRatio >= 0.8;
@@ -135,9 +138,10 @@ export function TenantQuotaManagerView() {
 
   const handleOpenEditQuotas = (t: Tenant) => {
     setSelectedTenant(t);
-    const defOutlets = t.max_outlets || (t.client_tier === 'enterprise_org' ? 50 : t.client_tier === 'business_runner' ? 5 : 1);
-    const defRegisters = t.max_registers || (t.client_tier === 'enterprise_org' ? 200 : t.client_tier === 'business_runner' ? 15 : 2);
-    const defUsers = t.max_users || (t.client_tier === 'enterprise_org' ? 500 : t.client_tier === 'business_runner' ? 50 : 5);
+    const def = getTierDefaultQuotas(t.client_tier);
+    const defOutlets = t.max_outlets || def.maxOutlets;
+    const defRegisters = t.max_registers || def.maxRegisters;
+    const defUsers = t.max_users || def.maxUsers;
 
     setQuotaForm({
       max_outlets: defOutlets,
@@ -148,13 +152,12 @@ export function TenantQuotaManagerView() {
   };
 
   const handleApplyTierPreset = (tier: 'free_personal' | 'business_runner' | 'enterprise_org') => {
-    if (tier === 'enterprise_org') {
-      setQuotaForm({ max_outlets: 50, max_registers: 200, max_users: 500 });
-    } else if (tier === 'business_runner') {
-      setQuotaForm({ max_outlets: 5, max_registers: 15, max_users: 50 });
-    } else {
-      setQuotaForm({ max_outlets: 1, max_registers: 2, max_users: 5 });
-    }
+    const preset = getTierDefaultQuotas(tier);
+    setQuotaForm({
+      max_outlets: preset.maxOutlets,
+      max_registers: preset.maxRegisters,
+      max_users: preset.maxUsers,
+    });
   };
 
   const handleSaveQuotas = async (e: React.FormEvent) => {
@@ -439,9 +442,10 @@ export function TenantQuotaManagerView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filteredTenants.map((t) => {
             const tier = TIER_CONFIG[t.client_tier] || TIER_CONFIG.free_personal;
-            const maxOutlets = t.max_outlets || (t.client_tier === 'enterprise_org' ? 50 : t.client_tier === 'business_runner' ? 5 : 1);
-            const maxRegisters = t.max_registers || (t.client_tier === 'enterprise_org' ? 200 : t.client_tier === 'business_runner' ? 15 : 2);
-            const maxUsers = t.max_users || (t.client_tier === 'enterprise_org' ? 500 : t.client_tier === 'business_runner' ? 50 : 5);
+            const def = getTierDefaultQuotas(t.client_tier);
+            const maxOutlets = t.max_outlets || def.maxOutlets;
+            const maxRegisters = t.max_registers || def.maxRegisters;
+            const maxUsers = t.max_users || def.maxUsers;
 
             const outletsCount = t.outlets_count || 1;
             const usersCount = t.users_count || 1;
@@ -595,9 +599,10 @@ export function TenantQuotaManagerView() {
               <tbody className="divide-y divide-white/50 text-xs font-semibold text-slate-700">
                 {filteredTenants.map((t) => {
                   const tier = TIER_CONFIG[t.client_tier] || TIER_CONFIG.free_personal;
-                  const maxOutlets = t.max_outlets || (t.client_tier === 'enterprise_org' ? 50 : t.client_tier === 'business_runner' ? 5 : 1);
-                  const maxRegisters = t.max_registers || (t.client_tier === 'enterprise_org' ? 200 : t.client_tier === 'business_runner' ? 15 : 2);
-                  const maxUsers = t.max_users || (t.client_tier === 'enterprise_org' ? 500 : t.client_tier === 'business_runner' ? 50 : 5);
+                  const def = getTierDefaultQuotas(t.client_tier);
+                  const maxOutlets = t.max_outlets || def.maxOutlets;
+                  const maxRegisters = t.max_registers || def.maxRegisters;
+                  const maxUsers = t.max_users || def.maxUsers;
 
                   const outletsCount = t.outlets_count || 1;
                   const usersCount = t.users_count || 1;

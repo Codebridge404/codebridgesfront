@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0144
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -21,6 +26,7 @@ import {
   User,
   ChevronRight,
 } from 'lucide-react';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 import { getAuthUser, getRoleDisplayName } from '@/lib/api';
 import { getMeetingsApi, getMyActionItemsApi } from '@/lib/api/meetings';
 
@@ -87,7 +93,7 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
   }, []);
 
   const roleName = getRoleDisplayName(user || 'employee', orgName);
-  const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
+  const avatarUrl = resolveMediaUrl(user?.avatar_url || user?.profile_image_url || null);
   const userInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : 'U';
 
   const navLinks = [

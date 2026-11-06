@@ -1,8 +1,14 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-05
+ * Task: BD-0144
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 import {
   X,
   KeyRound,
@@ -215,9 +221,9 @@ export function UserFormModal({
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs overflow-hidden select-none">
                 <span>{formData.name ? formData.name.substring(0, 2).toUpperCase() : 'US'}</span>
-                {formData.avatar_url && (
+                {resolveMediaUrl(formData.avatar_url) && (
                   <img
-                    src={formData.avatar_url}
+                    src={resolveMediaUrl(formData.avatar_url)!}
                     alt="Preview"
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => {

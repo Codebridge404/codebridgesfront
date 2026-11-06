@@ -137,6 +137,121 @@ export async function syncOfflineSalesApi(offlineTransactions: any[]) {
   });
 }
 
+export interface OfflineSyncConflictItem {
+  id: number;
+  tenant_id: number;
+  outlet_id: number;
+  register_id: number;
+  sale_id: number;
+  product_id: number;
+  offline_id: string;
+  attempted_quantity: number;
+  available_at_sync: number;
+  status: 'pending' | 'resolved' | 'dismissed';
+  resolution_strategy?: 'inventory_adjustment' | 'write_off' | 'dismiss' | null;
+  resolution_notes?: string | null;
+  resolved_by?: number | null;
+  resolved_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  product?: {
+    id: number;
+    name: string;
+    sku?: string;
+    barcode?: string;
+    price?: number;
+  };
+  sale?: {
+    id: number;
+    receipt_number: string;
+    grand_total: number;
+    created_at: string;
+  };
+  resolver?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export async function getOfflineSyncConflictsApi(params?: {
+  outlet_id?: string | number;
+  status?: string;
+  register_id?: string | number;
+  per_page?: number;
+}): Promise<{
+  status: string;
+  counts: { pending: number; resolved: number; dismissed: number };
+  data: OfflineSyncConflictItem[];
+  pagination: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}> {
+  const query = new URLSearchParams();
+  if (params?.outlet_id && params.outlet_id !== 'all') query.append('outlet_id', String(params.outlet_id));
+  if (params?.status && params.status !== 'all') query.append('status', params.status);
+  if (params?.register_id) query.append('register_id', String(params.register_id));
+  if (params?.per_page) query.append('per_page', String(params.per_page));
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return await apiFetch(`/offline-sync/conflicts${qs}`);
+}
+
+export async function resolveOfflineSyncConflictApi(
+  id: number | string,
+  data: {
+    resolution_action: 'inventory_adjustment' | 'write_off' | 'dismiss';
+    notes?: string;
+    adjust_quantity?: number;
+  }
+) {
+  return await apiFetch(`/offline-sync/conflicts/${id}/resolve`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// Asynchronous Tax Audit Exports (GDT Compliance)
+export async function queueTaxAuditApi(params?: {
+  start_date?: string;
+  end_date?: string;
+  outlet_id?: string | number;
+}): Promise<{
+  status: string;
+  message: string;
+  data: {
+    export_id: string;
+    status: 'queued' | 'processing' | 'ready' | 'error';
+    poll_url: string;
+  };
+}> {
+  return await apiFetch('/reports/tax-audit/async', {
+    method: 'POST',
+    body: JSON.stringify(params || {}),
+  });
+}
+
+export async function getExportStatusApi(id: string): Promise<{
+  status: string;
+  data: {
+    export_id: string;
+    status: 'queued' | 'processing' | 'ready' | 'error';
+    progress?: number;
+    download_url?: string;
+    filename?: string;
+    error?: string;
+  };
+}> {
+  return await apiFetch(`/reports/export-status/${id}`);
+}
+
+export function getDownloadExportUrl(id: string): string {
+  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+  return `${base}/reports/export-download/${id}`;
+}
+
 // Sales & Tax Reports
 export async function getSalesReportApi(startDate?: string, endDate?: string) {
   const query = new URLSearchParams();

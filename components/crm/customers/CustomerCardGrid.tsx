@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Users, Award, Phone, Mail, Trash2, Edit3, Wallet, Receipt, Gift } from 'lucide-react';
+import { Users, Award, Phone, Mail, Trash2, Edit3, Wallet, Receipt, Gift, FileText } from 'lucide-react';
 
 interface CustomerCardGridProps {
   customers: any[];
@@ -16,6 +16,7 @@ interface CustomerCardGridProps {
   onDelete: (customer: any) => void;
   onTopupCredit?: (customer: any) => void;
   onRedeemVoucher?: (customer: any) => void;
+  onViewStatement?: (customer: any) => void;
 }
 
 const cardVariants: Variants = {
@@ -34,6 +35,7 @@ export const CustomerCardGrid: React.FC<CustomerCardGridProps> = ({
   onDelete,
   onTopupCredit,
   onRedeemVoucher,
+  onViewStatement,
 }) => {
   if (loading) {
     return (
@@ -120,6 +122,17 @@ export const CustomerCardGrid: React.FC<CustomerCardGridProps> = ({
                   >
                     <Receipt className="w-3 h-3" />
                     <span>Top-Up</span>
+                  </button>
+                )}
+                {onViewStatement && (
+                  <button
+                    type="button"
+                    onClick={() => onViewStatement(cust)}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer border border-slate-200 shadow-2xs"
+                    title="View Store Credit Statement"
+                  >
+                    <FileText className="w-3 h-3 text-slate-500" />
+                    <span>Statement</span>
                   </button>
                 )}
                 {onRedeemVoucher && (

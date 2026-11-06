@@ -52,6 +52,7 @@ import { badgeStyles, buttonStyles } from '@/lib/theme';
 import { ProfileSubSidebar, ProfileTab } from './ProfileSubSidebar';
 import { TwoFactorRecoveryCodesModal } from './TwoFactorRecoveryCodesModal';
 import { EmailVerificationOtpModal } from './EmailVerificationOtpModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface UserProfileViewProps {
   user: any;
@@ -339,7 +340,7 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
           <div className="relative group shrink-0">
             {avatarPreview ? (
               <img
-                src={avatarPreview}
+                src={resolveMediaUrl(avatarPreview) || avatarPreview}
                 alt={user?.name || 'Profile'}
                 className="w-20 h-20 rounded-2xl object-cover shadow-lg shadow-brand/20 border-2 border-white ring-2 ring-slate-100"
               />
@@ -440,7 +441,7 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
                   <div className="flex items-center gap-4">
                     {avatarPreview ? (
                       <img
-                        src={avatarPreview}
+                        src={resolveMediaUrl(avatarPreview) || avatarPreview}
                         alt="Profile Avatar"
                         className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-2xs"
                       />

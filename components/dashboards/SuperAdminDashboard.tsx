@@ -66,7 +66,7 @@ function SuperAdminDashboardContent() {
           <div className="space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Platform Operations &amp; Executive Cockpit
+                Executive Dashboard
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brand-subtle text-brand border border-brand/20 inline-flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-brand" />

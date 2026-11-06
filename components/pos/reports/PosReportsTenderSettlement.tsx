@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Banknote, QrCode, CreditCard } from 'lucide-react';
+import { getPlatformSettings } from '@/lib/platformSettings';
 
 interface PosReportsTenderSettlementProps {
   cashUsd: number;
@@ -46,7 +47,9 @@ export function PosReportsTenderSettlement({
             </div>
             <div>
               <p className="text-xs font-black text-slate-900">Cash (USD &amp; KHR)</p>
-              <p className="text-[10px] text-slate-400 font-medium">៛{(cashUsd * 4100).toLocaleString()} KHR Equiv.</p>
+              <p className="text-[10px] text-slate-400 font-medium">
+                ៛{(cashUsd * (getPlatformSettings().exchangeRateUsdToKhr || 4100)).toLocaleString()} KHR Equiv.
+              </p>
             </div>
           </div>
           <div className="text-right">

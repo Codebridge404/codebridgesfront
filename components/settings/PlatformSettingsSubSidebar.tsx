@@ -1,15 +1,35 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-06
+ * Task: Super Admin Dynamic Platform Settings Suite (BD-0151)
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import {
+  Power,
+  Coins,
+  Layers,
   Key,
-  Sliders,
+  Mail,
+  ShieldCheck,
+  BellRing,
+  Database,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
 
-export type PlatformSettingsTab = 'integrations' | 'policies';
+export type PlatformSettingsTab =
+  | 'general'
+  | 'currency-tax'
+  | 'tier-quotas'
+  | 'integrations'
+  | 'email-smtp'
+  | 'policies'
+  | 'alerts'
+  | 'data-retention';
 
 export interface PlatformSettingsSubSidebarProps {
   activeTab: PlatformSettingsTab;
@@ -20,16 +40,52 @@ export interface PlatformSettingsSubSidebarProps {
 
 const PLATFORM_SECTIONS = [
   {
+    id: 'general' as PlatformSettingsTab,
+    label: 'Platform & Maintenance',
+    description: 'Maintenance mode & system branding',
+    icon: Power,
+  },
+  {
+    id: 'currency-tax' as PlatformSettingsTab,
+    label: 'Currency, FX & Tax',
+    description: 'NBC exchange rates & VAT standards',
+    icon: Coins,
+  },
+  {
+    id: 'tier-quotas' as PlatformSettingsTab,
+    label: 'Tier Blueprints',
+    description: 'Default quotas & trial periods',
+    icon: Layers,
+  },
+  {
     id: 'integrations' as PlatformSettingsTab,
-    label: 'Master Integrations',
-    description: 'Central NBC Bakong KHQR & SMS gateway',
+    label: 'Master Gateways',
+    description: 'NBC Bakong KHQR & SMS telecom',
     icon: Key,
   },
   {
+    id: 'email-smtp' as PlatformSettingsTab,
+    label: 'Email & SMTP Relay',
+    description: 'Transactional mail server & tests',
+    icon: Mail,
+  },
+  {
     id: 'policies' as PlatformSettingsTab,
-    label: 'Platform Policies',
-    description: 'Session timeouts, 2FA rules & cashier PINs',
-    icon: Sliders,
+    label: 'Security & Sessions',
+    description: '2FA rules, lockouts & PIN fast-switch',
+    icon: ShieldCheck,
+  },
+  {
+    id: 'alerts' as PlatformSettingsTab,
+    label: 'Incident Webhooks',
+    description: 'Telegram bot & Slack alarm routing',
+    icon: BellRing,
+  },
+  {
+    id: 'data-retention' as PlatformSettingsTab,
+    label: 'Data Lifecycle',
+    description: 'Audit log archiving & storage auto-prune',
+    icon: Database,
   },
 ];
 
@@ -52,8 +108,8 @@ export function PlatformSettingsSubSidebar({
       <div className={`px-2 pt-1 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} gap-2`}>
         {isExpanded && (
           <div className="min-w-0">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-400 truncate">Setting Menu</h2>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">Global Platform Settings</p>
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-400 truncate">Settings Studio</h2>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">Dynamic Governance Engine</p>
           </div>
         )}
         <button

@@ -9,6 +9,7 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Briefcase, Building2, Phone, Mail, UserX, Edit3, Eye } from 'lucide-react';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface EmployeeCardGridProps {
   employees: any[];
@@ -78,9 +79,9 @@ export const EmployeeCardGrid: React.FC<EmployeeCardGridProps> = ({
                     {emp.first_name ? emp.first_name[0] : ''}
                     {emp.last_name ? emp.last_name[0] : ''}
                   </span>
-                  {(emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url) && (
+                  {resolveMediaUrl(emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url) && (
                     <img
-                      src={emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url}
+                      src={resolveMediaUrl(emp.avatar_url || emp.avatar || emp.photo_url || emp.logo_url)!}
                       alt={`${emp.first_name || ''} ${emp.last_name || ''}`}
                       className="absolute inset-0 w-full h-full object-cover"
                       onError={(e) => {

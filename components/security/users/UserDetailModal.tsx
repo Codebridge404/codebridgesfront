@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 import {
   X,
   User,
@@ -28,6 +29,8 @@ import {
   Briefcase,
   Layers,
   Sparkles,
+  Ban,
+  Trash2,
 } from 'lucide-react';
 
 export interface UserDetailModalProps {
@@ -36,6 +39,7 @@ export interface UserDetailModalProps {
   onEdit?: (user: any) => void;
   onResetPassword?: (user: any) => void;
   onToggleStatus?: (user: any) => void;
+  onDelete?: (user: any) => void;
   tenantName?: string;
   readOnly?: boolean;
 }
@@ -46,6 +50,7 @@ export function UserDetailModal({
   onEdit,
   onResetPassword,
   onToggleStatus,
+  onDelete,
   tenantName,
   readOnly = false,
 }: UserDetailModalProps) {
@@ -69,13 +74,14 @@ export function UserDetailModal({
     [user.first_name, user.last_name].filter(Boolean).join(' ') ||
     'Unnamed User';
 
-  const avatarUrl =
+  const avatarUrl = resolveMediaUrl(
     user.avatar_url ||
     user.avatar ||
     user.photo_url ||
     user.logo_url ||
     user.image ||
-    null;
+    null
+  );
 
   const orgTitle =
     tenantName ||
@@ -94,7 +100,7 @@ export function UserDetailModal({
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const hasWriteActions = !readOnly && (Boolean(onEdit) || Boolean(onResetPassword) || Boolean(onToggleStatus));
+  const hasWriteActions = !readOnly && (Boolean(onEdit) || Boolean(onResetPassword) || Boolean(onToggleStatus) || Boolean(onDelete));
 
   return createPortal(
     <div
@@ -307,22 +313,41 @@ export function UserDetailModal({
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2.5 flex-wrap">
             {hasWriteActions ? (
               <>
-                {onToggleStatus && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onToggleStatus(user);
-                    }}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                      isActive
-                        ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
-                        : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-                    }`}
-                  >
-                    {isActive ? 'Suspend User' : 'Activate User'}
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {onToggleStatus && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onToggleStatus(user);
+                      }}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95 ${
+                        isActive
+                          ? 'border-amber-200 text-amber-800 bg-amber-50 hover:bg-amber-100'
+                          : 'border-emerald-200 text-emerald-800 bg-emerald-50 hover:bg-emerald-100'
+                      }`}
+                      title={isActive ? 'Suspend User Access (Locks Account)' : 'Activate User Account'}
+                    >
+                      {isActive ? <Ban className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                      <span>{isActive ? 'Suspend User' : 'Activate User'}</span>
+                    </button>
+                  )}
+
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onDelete(user);
+                      }}
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-95"
+                      title="Permanently remove user from platform"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Account</span>
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-2 ml-auto">
                   {onResetPassword && (

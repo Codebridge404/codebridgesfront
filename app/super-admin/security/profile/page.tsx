@@ -30,7 +30,13 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-4">
+      <div className="pb-1">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Admin Profile</h1>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">
+          Manage your platform root administrator credentials, security keys, and active device sessions
+        </p>
+      </div>
       <UserProfileView user={user} />
     </div>
   );

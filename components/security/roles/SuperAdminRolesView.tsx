@@ -211,7 +211,7 @@ export const SuperAdminRolesView: React.FC = () => {
               <ShieldCheck className="w-5 h-5" />
             </span>
             <h1 className="text-xl font-extrabold text-slate-900">
-              Roles &amp; Permissions
+              Dynamic Roles &amp; RBAC
             </h1>
           </div>
           <p className="text-xs text-slate-500 font-medium">

@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { Users, Check, AlertCircle, KeyRound, Lock, ShieldCheck, Eye } from 'lucide-react';
 import { UserDetailModal } from '@/components/security/users/UserDetailModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface StaffUser {
   id: string | number;
@@ -79,9 +80,9 @@ export function PosAccessStaffTable({
                       >
                         <div className="relative w-8 h-8 rounded-xl bg-brand text-white font-black text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-2xs select-none">
                           <span>{u.name ? u.name.slice(0, 2).toUpperCase() : 'OP'}</span>
-                          {(u.avatar_url || u.avatar) && (
+                          {resolveMediaUrl(u.avatar_url || u.avatar) && (
                             <img
-                              src={u.avatar_url || u.avatar}
+                              src={resolveMediaUrl(u.avatar_url || u.avatar)!}
                               alt={u.name}
                               className="absolute inset-0 w-full h-full object-cover"
                               onError={(e) => {

@@ -1,13 +1,14 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { resolveMediaUrl, getUserInitials } from '@/lib/mediaUtils';
 import {
   Users,
   Shield,
@@ -294,10 +295,10 @@ export function UserTable({
                         title={`View ${user.name || 'User'}'s full profile`}
                       >
                         <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs uppercase overflow-hidden select-none">
-                          <span>{user.name ? user.name.substring(0, 2) : 'US'}</span>
-                          {(user.avatar_url || user.avatar || user.photo_url || user.logo_url) && (
+                          <span>{getUserInitials(user.name)}</span>
+                          {resolveMediaUrl(user.avatar_url || user.avatar || user.photo_url || user.logo_url) && (
                             <img
-                              src={user.avatar_url || user.avatar || user.photo_url || user.logo_url}
+                              src={resolveMediaUrl(user.avatar_url || user.avatar || user.photo_url || user.logo_url)!}
                               alt={user.name || 'User avatar'}
                               className="absolute inset-0 w-full h-full object-cover"
                               onError={(e) => {
@@ -459,13 +460,13 @@ export function UserTable({
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all cursor-pointer ${
                           isActive
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                            : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                         }`}
-                        title={isActive ? 'Click to Suspend Account' : 'Click to Activate Account'}
+                        title={isActive ? 'Click to Suspend Account (Revoke Sign-in Access)' : 'Click to Activate Account (Grant Sign-in Access)'}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
-                            isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                            isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
                           }`}
                         />
                         <span>{isActive ? 'Active' : 'Suspended'}</span>

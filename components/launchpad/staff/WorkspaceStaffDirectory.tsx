@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
@@ -30,6 +30,7 @@ import {
 import { getRoleDisplayName, getAuthUser } from '@/lib/api';
 import { buttonStyles } from '@/lib/theme';
 import { UserDetailModal } from '@/components/security/users/UserDetailModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 export interface WorkspaceStaffDirectoryProps {
   staff: any[];
@@ -355,9 +356,9 @@ export function WorkspaceStaffDirectory({
                             )}`}
                           >
                             <span>{member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}</span>
-                            {(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
+                            {resolveMediaUrl(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
                               <img
-                                src={member.avatar_url || member.avatar || member.photo_url || member.logo_url}
+                                src={resolveMediaUrl(member.avatar_url || member.avatar || member.photo_url || member.logo_url)!}
                                 alt={member.name}
                                 className="absolute inset-0 w-full h-full object-cover"
                                 onError={(e) => {
@@ -529,9 +530,9 @@ export function WorkspaceStaffDirectory({
                         )}`}
                       >
                         <span>{member.name ? member.name.slice(0, 2).toUpperCase() : 'U'}</span>
-                        {(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
+                        {resolveMediaUrl(member.avatar_url || member.avatar || member.photo_url || member.logo_url) && (
                           <img
-                            src={member.avatar_url || member.avatar || member.photo_url || member.logo_url}
+                            src={resolveMediaUrl(member.avatar_url || member.avatar || member.photo_url || member.logo_url)!}
                             alt={member.name}
                             className="absolute inset-0 w-full h-full object-cover"
                             onError={(e) => {
@@ -663,6 +664,13 @@ export function WorkspaceStaffDirectory({
           onToggleStatus={(m) => {
             onToggleStatus(m);
           }}
+          onDelete={
+            currentAuthUser &&
+            String(viewingProfileMember.id) !== String(currentAuthUser.id) &&
+            viewingProfileMember.role !== 'owner'
+              ? (m) => onDeleteStaff(m.id, m.name)
+              : undefined
+          }
         />
       )}
     </div>

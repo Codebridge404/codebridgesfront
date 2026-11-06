@@ -61,7 +61,7 @@ export function SuperAdminBillingView() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                Bill-Subscription
+                Subscription Plans &amp; Tiers
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-brand-subtle text-brand text-[10px] font-extrabold border border-brand/20 uppercase">
                 Subscriber Hub

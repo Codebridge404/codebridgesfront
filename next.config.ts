@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/storage/:path*',
-        destination: 'http://localhost:8080/storage/:path*',
+        destination: (process.env.API_GATEWAY_URL || (process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : '') || 'http://localhost:8080') + '/storage/:path*',
       },
     ];
   },

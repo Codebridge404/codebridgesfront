@@ -65,7 +65,7 @@ export function SuperAdminReportsView() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <BarChart3 className="w-7 h-7 text-brand" />
-            Financial Reports &amp; Analytics Hub
+            SaaS Revenue Reports
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Enterprise revenue analysis, profit margins, cashier shift balances &amp; tax settlement reports

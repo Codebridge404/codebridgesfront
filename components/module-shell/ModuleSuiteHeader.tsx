@@ -16,6 +16,7 @@ import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotific
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
+import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface ModuleSuiteHeaderProps {
   currentModuleId: 'pos' | 'crm' | 'hrm' | 'accounting' | 'inventory' | 'organization' | 'meeting-management' | 'meetings' | string;
@@ -134,7 +135,7 @@ export function ModuleSuiteHeader({
     ? '/organization/profile'
     : '/profile';
   const roleTitle = user ? getRoleDisplayName(user, activeOrg) : '';
-  const avatarUrl = user?.avatar_url || user?.profile_image_url || null;
+  const avatarUrl = resolveMediaUrl(user?.avatar_url || user?.profile_image_url || null);
   const userInitials = user?.name
     ? user.name
         .split(' ')

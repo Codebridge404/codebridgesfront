@@ -122,7 +122,7 @@ export function SuperAdminApiKeysView() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             <Key className="w-7 h-7 text-brand" />
-            Developer &amp; Merchant API Keys
+            Developer API Keys
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Generate and manage external API keys to integrate CodeBridges POS with custom e-commerce stores, ERPs, and warehouse automations.

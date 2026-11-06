@@ -86,6 +86,13 @@ export async function resolveReconciliationExceptionApi(id: string | number, pay
   });
 }
 
+export async function classifyReconciliationApi(data?: { settlement_records?: any[]; lines?: any[] }) {
+  return await apiFetch('/reconciliation/classify', {
+    method: 'POST',
+    body: JSON.stringify(data || {}),
+  });
+}
+
 // Finance & Ledgers
 export async function getExpensesApi() {
   return await apiFetch('/expenses');

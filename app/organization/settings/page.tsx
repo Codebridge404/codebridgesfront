@@ -194,6 +194,9 @@ function GlobalOrganizationSettingsContent() {
 
     try {
       let updatedLogoUrl = formData.logo_url;
+      const currentUser = getAuthUser();
+      const activeTenantId = currentUser?.tenant_id || (typeof window !== 'undefined' ? localStorage.getItem('active_tenant_id') : null);
+      const activeOrgName = (typeof window !== 'undefined' ? localStorage.getItem('active_org') : null) || formData.name;
 
       if (logoFile) {
         const payloadData = new FormData();
@@ -204,6 +207,8 @@ function GlobalOrganizationSettingsContent() {
         if (formData.address) payloadData.append('address', formData.address);
         if (formData.country) payloadData.append('country', formData.country);
         if (formData.currency) payloadData.append('currency', formData.currency);
+        if (activeTenantId) payloadData.append('tenant_id', String(activeTenantId));
+        if (activeOrgName) payloadData.append('org_name', activeOrgName);
         payloadData.append('logo', logoFile);
 
         const res = await updateTenantProfileApi(payloadData);
@@ -223,6 +228,8 @@ function GlobalOrganizationSettingsContent() {
           address: formData.address,
           country: formData.country,
           currency: formData.currency,
+          ...(activeTenantId ? { tenant_id: activeTenantId } : {}),
+          ...(activeOrgName ? { org_name: activeOrgName } : {}),
         };
 
         const res = await updateTenantProfileApi(payloadData);

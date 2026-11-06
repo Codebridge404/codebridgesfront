@@ -6,3 +6,4 @@ export * from './PosReportsCategoryPerformance';
 export * from './PosReportsFilterBar';
 export * from './PosReportsManagementView';
 export * from './PosReportsTaxCard';
+export * from './AsyncExportQueueDrawer';

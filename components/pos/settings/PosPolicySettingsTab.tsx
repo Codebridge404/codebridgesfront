@@ -10,6 +10,9 @@ import Link from 'next/link';
 import { DollarSign, Building2, ShieldCheck, ArrowRight, Percent, Receipt, RefreshCw, Loader2, ShieldAlert, Send, CheckCircle2 } from 'lucide-react';
 import { syncNbcExchangeRateApi } from '@/lib/api/payments';
 import { testVarianceAlertApi } from '@/lib/api/shifts';
+import { OfflineSyncConflictModal } from '../offline/OfflineSyncConflictModal';
+import { WifiOff, AlertTriangle } from 'lucide-react';
+import { getPlatformSettings } from '@/lib/platformSettings';
 
 interface PosPolicySettingsTabProps {
   settings: any;
@@ -194,7 +197,7 @@ export function PosPolicySettingsTab({
                     step="0.1"
                     min="0"
                     max="100"
-                    value={settings.taxRate ?? 10}
+                    value={settings.taxRate ?? (getPlatformSettings().defaultTaxRate || 10)}
                     onChange={(e) => onChange('taxRate', parseFloat(e.target.value) || 0)}
                     className="w-full pl-4 pr-9 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-mono font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
                   />

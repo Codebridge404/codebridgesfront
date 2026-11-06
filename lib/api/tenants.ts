@@ -358,6 +358,48 @@ export async function getCustomerCreditInvoicesApi(customerId: number | string) 
   return await apiFetch(`/customers/${customerId}/credit/invoices`);
 }
 
+export async function getCustomerCreditInvoiceDetailApi(invoiceId: number | string) {
+  return await apiFetch(`/customers/credit/invoices/${invoiceId}`);
+}
+
+export async function getCustomerStatementApi(
+  customerId: number | string,
+  startDate?: string,
+  endDate?: string
+) {
+  const query = new URLSearchParams();
+  if (startDate) query.append('start_date', startDate);
+  if (endDate) query.append('end_date', endDate);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return await apiFetch(`/customers/${customerId}/credit/statement${qs}`);
+}
+
+export interface IssueDigitalVoucherPayload {
+  value: number;
+  title?: string;
+  validity_days?: number;
+  customer_id?: number | string | null;
+  notes?: string | null;
+}
+
+export async function getDigitalVouchersApi(params?: {
+  status?: string;
+  customer_id?: number | string;
+}) {
+  const query = new URLSearchParams();
+  if (params?.status && params.status !== 'all') query.append('status', params.status);
+  if (params?.customer_id) query.append('customer_id', String(params.customer_id));
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return await apiFetch(`/vouchers${qs}`);
+}
+
+export async function issueDigitalVoucherApi(payload: IssueDigitalVoucherPayload) {
+  return await apiFetch('/vouchers/issue', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function redeemDigitalVoucherApi(payload: {
   voucher_code: string;
   customer_id: number | string;

@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
  * Date: 2026-11-05
- * Task: BD-0141
+ * Task: BD-0146
  */
 
 'use client';
@@ -294,6 +294,9 @@ export const SuperAdminEmployeesView: React.FC = () => {
           onEdit={(emp) => {
             setViewingEmployee(null);
             handleOpenEditModal(emp);
+          }}
+          onDelete={(emp) => {
+            handleDeleteEmployee(emp);
           }}
         />
       )}

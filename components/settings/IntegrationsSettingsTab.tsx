@@ -1,16 +1,26 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-06
+ * Task: Super Admin Dynamic Platform Settings Suite (BD-0151)
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { Smartphone, Eye, EyeOff, Save, Check, Loader2, QrCode } from 'lucide-react';
 import { buttonStyles } from '@/lib/theme';
+import { PlatformSettings } from '@/lib/platformSettings';
 
 interface IntegrationsSettingsTabProps {
-  bakongMerchantId: string;
-  setBakongMerchantId: (val: string) => void;
-  bakongBankName: string;
-  setBakongBankName: (val: string) => void;
-  bakongSecret: string;
-  setBakongSecret: (val: string) => void;
+  settings?: PlatformSettings;
+  onChange?: <K extends keyof PlatformSettings>(key: K, value: PlatformSettings[K]) => void;
+  // Legacy prop support
+  bakongMerchantId?: string;
+  setBakongMerchantId?: (val: string) => void;
+  bakongBankName?: string;
+  setBakongBankName?: (val: string) => void;
+  bakongSecret?: string;
+  setBakongSecret?: (val: string) => void;
   title?: string;
   description?: string;
   merchantIdLabel?: string;
@@ -28,6 +38,8 @@ interface IntegrationsSettingsTabProps {
 }
 
 export function IntegrationsSettingsTab({
+  settings,
+  onChange,
   bakongMerchantId,
   setBakongMerchantId,
   bakongBankName,
@@ -51,6 +63,38 @@ export function IntegrationsSettingsTab({
 }: IntegrationsSettingsTabProps) {
   const [showSecret, setShowSecret] = useState(false);
   const [showSmsKey, setShowSmsKey] = useState(false);
+
+  // Unified getters
+  const currentMerchantId = settings ? settings.bakongMerchantId : (bakongMerchantId ?? '');
+  const currentBankName = settings ? settings.bakongBankName : (bakongBankName ?? '');
+  const currentSecret = settings ? settings.bakongSecret : (bakongSecret ?? '');
+  const currentSmsProvider = settings ? settings.smsGatewayProvider : (smsGatewayProvider ?? 'plasgate');
+  const currentSmsApiKey = settings ? settings.smsApiKey : (smsApiKey ?? '');
+
+  const handleMerchantIdChange = (val: string) => {
+    if (onChange) onChange('bakongMerchantId', val);
+    if (setBakongMerchantId) setBakongMerchantId(val);
+  };
+
+  const handleBankNameChange = (val: string) => {
+    if (onChange) onChange('bakongBankName', val);
+    if (setBakongBankName) setBakongBankName(val);
+  };
+
+  const handleSecretChange = (val: string) => {
+    if (onChange) onChange('bakongSecret', val);
+    if (setBakongSecret) setBakongSecret(val);
+  };
+
+  const handleSmsProviderChange = (val: string) => {
+    if (onChange) onChange('smsGatewayProvider', val);
+    if (setSmsGatewayProvider) setSmsGatewayProvider(val);
+  };
+
+  const handleSmsApiKeyChange = (val: string) => {
+    if (onChange) onChange('smsApiKey', val);
+    if (setSmsApiKey) setSmsApiKey(val);
+  };
 
   return (
     <form onSubmit={onSave} className="space-y-6">
@@ -90,8 +134,8 @@ export function IntegrationsSettingsTab({
             </label>
             <input
               type="text"
-              value={bakongMerchantId}
-              onChange={(e) => setBakongMerchantId(e.target.value)}
+              value={currentMerchantId}
+              onChange={(e) => handleMerchantIdChange(e.target.value)}
               placeholder={merchantIdPlaceholder}
               className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-mono font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
             />
@@ -104,8 +148,8 @@ export function IntegrationsSettingsTab({
             </label>
             <input
               type="text"
-              value={bakongBankName}
-              onChange={(e) => setBakongBankName(e.target.value)}
+              value={currentBankName}
+              onChange={(e) => handleBankNameChange(e.target.value)}
               className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
             />
             <p className="text-[11px] text-slate-400">Primary banking partner (e.g. ABA Bank, Acleda, Wing).</p>
@@ -118,8 +162,8 @@ export function IntegrationsSettingsTab({
             <div className="relative">
               <input
                 type={showSecret ? 'text' : 'password'}
-                value={bakongSecret}
-                onChange={(e) => setBakongSecret(e.target.value)}
+                value={currentSecret}
+                onChange={(e) => handleSecretChange(e.target.value)}
                 placeholder={secretKeyPlaceholder}
                 className="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-mono font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
               />
@@ -154,12 +198,13 @@ export function IntegrationsSettingsTab({
                   Telecom Provider
                 </label>
                 <select
-                  value={smsGatewayProvider}
-                  onChange={(e) => setSmsGatewayProvider && setSmsGatewayProvider(e.target.value)}
+                  value={currentSmsProvider}
+                  onChange={(e) => handleSmsProviderChange(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all cursor-pointer"
                 >
                   <option value="plasgate" className="text-slate-900 bg-white">Plasgate Telecom Gateway (Cambodia)</option>
                   <option value="twilio" className="text-slate-900 bg-white">Twilio Global SMS Gateway</option>
+                  <option value="aws_sns" className="text-slate-900 bg-white">AWS Simple Notification Service (SNS)</option>
                 </select>
               </div>
 
@@ -170,8 +215,8 @@ export function IntegrationsSettingsTab({
                 <div className="relative">
                   <input
                     type={showSmsKey ? 'text' : 'password'}
-                    value={smsApiKey}
-                    onChange={(e) => setSmsApiKey && setSmsApiKey(e.target.value)}
+                    value={currentSmsApiKey}
+                    onChange={(e) => handleSmsApiKeyChange(e.target.value)}
                     className="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-mono font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
                   />
                   <button

@@ -146,7 +146,7 @@ export function SuperAdminModulesView() {
             <span>Platform Ecosystem Management</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
-            Platform Modules Studio
+            Platform Modules Catalog
           </h1>
           <p className="text-xs text-slate-500 font-medium">Create, edit, delete, and license dynamic modules across tenant workspaces.</p>
         </div>

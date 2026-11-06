@@ -26,6 +26,7 @@ import { CustomerModal } from './CustomerModal';
 import { CustomerMetricsCards } from './CustomerMetricsCards';
 import { CustomerCardGrid } from './CustomerCardGrid';
 import { CustomerCreditTopupModal } from './CustomerCreditTopupModal';
+import { CustomerCreditStatementModal } from './CustomerCreditStatementModal';
 import { VoucherRedeemModal } from './VoucherRedeemModal';
 
 export const SuperAdminCustomersView: React.FC = () => {
@@ -37,6 +38,7 @@ export const SuperAdminCustomersView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [topupCustomer, setTopupCustomer] = useState<any | null>(null);
+  const [statementCustomer, setStatementCustomer] = useState<any | null>(null);
   const [voucherCustomer, setVoucherCustomer] = useState<any | null>(null);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
@@ -257,6 +259,7 @@ export const SuperAdminCustomersView: React.FC = () => {
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteCustomer}
         onTopupCredit={(cust) => setTopupCustomer(cust)}
+        onViewStatement={(cust) => setStatementCustomer(cust)}
         onRedeemVoucher={(cust) => setVoucherCustomer(cust)}
       />
 
@@ -281,6 +284,15 @@ export const SuperAdminCustomersView: React.FC = () => {
         />
       )}
 
+      {/* Customer Store Credit Ledger Statement Modal */}
+      {statementCustomer && (
+        <CustomerCreditStatementModal
+          isOpen={Boolean(statementCustomer)}
+          onClose={() => setStatementCustomer(null)}
+          customerId={statementCustomer.id}
+          customerName={statementCustomer.name}
+        />
+      )}
       {/* Digital Voucher Redemption Modal */}
       <VoucherRedeemModal
         isOpen={isVoucherModalOpen || Boolean(voucherCustomer)}
