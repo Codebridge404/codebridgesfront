@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-17
+ * Task: BD-0160 - POS Terminal & Current Order Dynamic Organization Receipt Template Integration
+ */
 'use client';
 
 import React from 'react';

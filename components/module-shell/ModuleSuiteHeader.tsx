@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { User, Menu, Building2, Settings, Shield, LogOut } from 'lucide-react';
 import { getAuthUser, getAuthToken, logoutApi, getRoleDisplayName } from '@/lib/api';
 import { getMeetingNotificationsApi } from '@/lib/api/meetings';
-import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotificationsDrawer';
+import { GlobalNotificationsDrawer } from '@/components/header/GlobalNotificationsDrawer';
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
@@ -307,7 +307,7 @@ export function ModuleSuiteHeader({
       </header>
 
       {/* Global Notifications Center Drawer */}
-      <MeetingNotificationsDrawer
+      <GlobalNotificationsDrawer
         isOpen={notificationsOpen}
         onClose={() => {
           setNotificationsOpen(false);

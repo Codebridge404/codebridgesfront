@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-05
- * Task: BD-0140
+ * Date: 2026-11-17
+ * Task: BD-0161 - Preserve HTTP status, error code, and structured payload on API errors
  */
 
 export function getApiUrl(): string {
@@ -139,8 +139,10 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   const baseUrl = getApiUrl();
 
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const appKey = process.env.NEXT_PUBLIC_APP_KEY || 'client_web_admin_cb2026';
   const headers: Record<string, string> = {
     'Accept': 'application/json',
+    'X-App-Key': appKey,
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers as Record<string, string> || {}),
   };
@@ -219,6 +221,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
+              'X-App-Key': appKey,
             },
             body: JSON.stringify({ refresh_token: refreshToken }),
           });
@@ -265,7 +268,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
     }
 
     const errMsg = data?.message || data?.error || (data?.errors ? Object.values(data.errors).flat().join(', ') : `Request failed with status ${response.status}`);
-    throw new Error(errMsg);
+    const apiError: any = new Error(errMsg);
+    apiError.status = response.status;
+    apiError.code = data?.code;
+    apiError.payload = data;
+    throw apiError;
   }
 
   return data;

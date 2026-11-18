@@ -34,6 +34,7 @@ interface PosSuiteHeaderProps {
   onOpenQuickSwitchModal?: () => void;
   outletName?: string;
   terminalCode?: string;
+  orderContextSlot?: React.ReactNode;
 }
 
 export function PosSuiteHeader({
@@ -51,6 +52,7 @@ export function PosSuiteHeader({
   onOpenQuickSwitchModal,
   outletName = 'Main Store Outlet',
   terminalCode = 'REG-01',
+  orderContextSlot,
 }: PosSuiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -400,6 +402,13 @@ export function PosSuiteHeader({
             );
           })}
         </nav>
+
+        {/* Order Context (Walk-in Customer / Table) on Terminal */}
+        {orderContextSlot && (
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
+            {orderContextSlot}
+          </div>
+        )}
 
         {/* Mobile quick indicators */}
         <div className="flex md:hidden items-center gap-2 text-[10px] font-extrabold">

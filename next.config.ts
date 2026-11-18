@@ -1,4 +1,14 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-18
+ * Task: BD-0173 - OpenNext Cloudflare Workers Dev & Build Integration
+ */
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
 
 const nextConfig: NextConfig = {
   async rewrites() {

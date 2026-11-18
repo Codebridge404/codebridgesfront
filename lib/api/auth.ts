@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-04
- * Task: 2FA Recovery Codes & Email OTP UI (BD-0133)
+ * Date: 2026-11-17
+ * Task: BD-0162 - Strict 2FA Login Challenge & Setup Password Confirmation
  */
 import { apiFetch, getAuthToken, setAuthToken, setRefreshToken, setAuthUser, removeAuthToken } from './client';
 
@@ -159,6 +159,33 @@ export async function inviteStaffApi(email: string, role: string, outlet_id?: st
   return await apiFetch('/users/invite', {
     method: 'POST',
     body: JSON.stringify({ email, role, outlet_id }),
+  });
+}
+
+export async function getInvitationsApi(params?: { status?: string; search?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.status) qs.set('status', params.status);
+  if (params?.search) qs.set('search', params.search);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return await apiFetch(`/invitations${query}`);
+}
+
+export async function createInvitationApi(data: { email: string; role: string; outlet_id?: string | number; tenant_id?: string | number }) {
+  return await apiFetch('/invitations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function resendInvitationApi(id: number | string) {
+  return await apiFetch(`/invitations/${id}/resend`, {
+    method: 'POST',
+  });
+}
+
+export async function revokeInvitationApi(id: number | string) {
+  return await apiFetch(`/invitations/${id}`, {
+    method: 'DELETE',
   });
 }
 
@@ -375,6 +402,57 @@ export function getRoleDisplayName(userOrRole?: any, activeOrgName?: string): st
 // -------------------------------------------------------------
 // Two-Factor Authentication (2FA) & Recovery Codes
 // -------------------------------------------------------------
+
+export async function verify2faChallengeApi(challenge_id: string, code: string) {
+  const res = await apiFetch('/auth/2fa/challenge', {
+    method: 'POST',
+    body: JSON.stringify({ challenge_id, code }),
+  });
+
+  const authToken = res?.token || res?.access_token || res?.data?.access_token;
+  const refreshToken = res?.refresh_token || res?.data?.refresh_token;
+  const user = res?.user || res?.data?.user;
+
+  if (authToken) {
+    setAuthToken(authToken);
+    if (refreshToken) {
+      setRefreshToken(refreshToken);
+    }
+    if (user) {
+      setAuthUser(user);
+    }
+    if (typeof window !== 'undefined') {
+      const orgName = user?.tenant_name || user?.company_name;
+      if (orgName) {
+        localStorage.setItem('active_org', orgName);
+        window.dispatchEvent(new CustomEvent('cb_org_changed', { detail: { orgName } }));
+      }
+    }
+  }
+
+  return res;
+}
+
+export async function setup2faApi(password?: string) {
+  return await apiFetch('/auth/2fa/setup', {
+    method: 'POST',
+    body: JSON.stringify(password ? { password } : {}),
+  });
+}
+
+export async function confirm2faApi(code: string) {
+  return await apiFetch('/auth/2fa/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+export async function disable2faApi(password: string) {
+  return await apiFetch('/auth/2fa/disable', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+}
 
 export async function getTwoFactorRecoveryCodesApi() {
   return await apiFetch('/auth/2fa/recovery-codes');

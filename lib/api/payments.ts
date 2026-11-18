@@ -172,6 +172,18 @@ export async function syncNbcExchangeRateApi(rate?: number) {
   });
 }
 
+export async function getExchangeRateHistoryApi(params?: { per_page?: number }) {
+  const qs = params?.per_page ? `?per_page=${params.per_page}` : '';
+  return await apiFetch(`/currencies/exchange-rate/history${qs}`);
+}
+
+export async function convertCurrencyApi(payload: { amount: number; from: 'USD' | 'KHR'; to: 'USD' | 'KHR' }) {
+  return await apiFetch('/currencies/exchange-rate/convert', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 // -------------------------------------------------------------
 // Vouchers & Gift Redemption
 // -------------------------------------------------------------

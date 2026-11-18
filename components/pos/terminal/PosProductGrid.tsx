@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-13
+ * Task: BD-0158
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -30,7 +36,8 @@ function PosProductCard({
 }) {
   const [imgError, setImgError] = useState(false);
   const imageUrl = product.image_url || product.image;
-  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+  const stockLevel = product.stock_on_hand ?? product.stock;
+  const isOutOfStock = stockLevel !== undefined && stockLevel <= 0;
 
   return (
     <motion.div
@@ -43,9 +50,9 @@ function PosProductCard({
       whileTap={!isOutOfStock ? { scale: 0.96, transition: pressSpring } : undefined}
       onClick={() => {
         if (isOutOfStock) return;
-        if (product.stock !== undefined && product.stock <= 2 && product.stock > 0) {
+        if (stockLevel !== undefined && stockLevel <= 2 && stockLevel > 0) {
           onLowStockAlert?.(
-            `Low Stock Warning: Only ${product.stock} units remaining in inventory for "${product.name}"`
+            `Low Stock Warning: Only ${stockLevel} units remaining in inventory for "${product.name}"`
           );
         }
         onAddToCart(product);
@@ -61,27 +68,27 @@ function PosProductCard({
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[80px]">
           {product.category || 'General'}
         </span>
-        {product.stock !== undefined && (
+        {stockLevel !== undefined && (
           <span
             className={`text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
               isOutOfStock
                 ? 'bg-rose-100 text-rose-700'
-                : product.stock <= 2
+                : stockLevel <= 2
                 ? 'bg-rose-100 text-rose-700 border border-rose-300 animate-pulse font-black'
-                : product.stock <= 5
+                : stockLevel <= 5
                 ? 'bg-amber-100 text-amber-700'
                 : 'bg-emerald-50 text-emerald-700'
             }`}
           >
             {isOutOfStock ? (
               'Out of Stock'
-            ) : product.stock <= 2 ? (
+            ) : stockLevel <= 2 ? (
               <>
                 <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
-                <span>Only {product.stock} left!</span>
+                <span>Only {stockLevel} left!</span>
               </>
             ) : (
-              `${product.stock} left`
+              `${stockLevel} left`
             )}
           </span>
         )}

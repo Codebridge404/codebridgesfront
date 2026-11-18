@@ -15,9 +15,10 @@ import {
   RegionalSettingsTab,
   PaymentsSettingsTab,
   SmsSettingsTab,
+  NotificationProvidersStudioTab,
 } from '@/components/settings';
 
-const VALID_GLOBAL_TABS: GlobalSettingsTab[] = ['profile', 'regional', 'payments', 'sms'];
+const VALID_GLOBAL_TABS: GlobalSettingsTab[] = ['profile', 'regional', 'payments', 'sms', 'notifications'];
 
 function GlobalOrganizationSettingsContent() {
   const searchParams = useSearchParams();
@@ -365,6 +366,8 @@ function GlobalOrganizationSettingsContent() {
           {activeTab === 'payments' && <PaymentsSettingsTab />}
 
           {activeTab === 'sms' && <SmsSettingsTab />}
+
+          {activeTab === 'notifications' && <NotificationProvidersStudioTab isSuperAdmin={false} />}
         </main>
       </div>
     </div>

@@ -1,13 +1,17 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-05
- * Task: POS Terminal Current Order Live Receipt Customization Template Integration (BD-0143)
+ * Date: 2026-11-17
+ * Task: BD-0160 - POS Terminal & Current Order Dynamic Organization Receipt Template Integration
  */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { calculateCartTax, getPosTaxSettings, PosTaxSettings } from '@/lib/posTaxUtils';
-import { getPosReceiptSettings, PosReceiptSettings } from '@/lib/posReceiptUtils';
+import {
+  formatReceiptNumber,
+  getPosReceiptSettings,
+  PosReceiptSettings,
+} from '@/lib/posReceiptUtils';
 import { ThermalReceiptPaper } from '@/components/receipt/ThermalReceiptPaper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { appleSpring, pressSpring } from '@/lib/animations';
@@ -17,17 +21,12 @@ import {
   PauseCircle,
   Plus,
   Minus,
-  Banknote,
-  QrCode,
-  CreditCard,
   Tag,
   ArrowRight,
   X,
-  Sparkles,
   Package,
   Receipt,
   Printer,
-  Store,
 } from 'lucide-react';
 import { CartItem } from '../types';
 
@@ -68,6 +67,8 @@ interface PosCartPanelProps {
   table?: any;
   orderType?: string;
   cashier?: any;
+  outlet?: any;
+  receiptSettings?: PosReceiptSettings | null;
 }
 
 export function PosCartPanel({
@@ -86,10 +87,29 @@ export function PosCartPanel({
   table,
   orderType,
   cashier,
+  outlet,
+  receiptSettings: propReceiptSettings,
 }: PosCartPanelProps) {
-  const [viewMode, setViewMode] = useState<'cart' | 'receipt'>('cart');
-  const [receiptSettings, setReceiptSettings] = useState<PosReceiptSettings>(getPosReceiptSettings);
+  const [viewMode, setViewMode] = useState<'cart' | 'receipt'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('cb_pos_cart_view_mode');
+      if (savedMode === 'receipt' || savedMode === 'cart') return savedMode;
+    }
+    return 'cart';
+  });
+
+  const [receiptSettings, setReceiptSettings] = useState<PosReceiptSettings>(() => {
+    return propReceiptSettings || getPosReceiptSettings();
+  });
+
+  useEffect(() => {
+    if (propReceiptSettings) {
+      setReceiptSettings(propReceiptSettings);
+    }
+  }, [propReceiptSettings]);
+
   const [couponInput, setCouponInput] = useState('');
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const discountAmount = appliedCoupon
@@ -98,6 +118,13 @@ export function PosCartPanel({
       : appliedCoupon.value
     : 0;
   const [taxSettings, setTaxSettings] = useState<PosTaxSettings>(getPosTaxSettings);
+
+  const handleSwitchViewMode = (mode: 'cart' | 'receipt') => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cb_pos_cart_view_mode', mode);
+    }
+  };
 
   useEffect(() => {
     const handleSettingsUpdated = () => {
@@ -142,7 +169,10 @@ export function PosCartPanel({
   }));
 
   const draftSale = {
-    receipt_number: 'CURRENT-ORDER',
+    receipt_number: formatReceiptNumber(
+      receiptSettings.receiptStartNumber ?? 0,
+      receiptSettings.receiptDigits ?? 5
+    ),
     order_type: orderType || 'dine_in',
     table_name: table?.name || (orderType === 'dine_in' ? 'Open Table' : ''),
     customer_name: customer?.name || 'Walk-in Customer',
@@ -156,15 +186,24 @@ export function PosCartPanel({
   };
 
   const draftOutlet = {
-    name: receiptSettings.storeName,
-    address: receiptSettings.storeAddress,
-    phone: receiptSettings.storePhone,
-    receipt_header: receiptSettings.receiptHeader,
-    receipt_footer: receiptSettings.receiptFooter,
-    logo_url: receiptSettings.receiptLogoUrl,
-    paper_width: receiptSettings.paperWidth,
-    vat_tin: receiptSettings.vatTin,
-    tax_label: taxLabel,
+    name: receiptSettings.storeName || outlet?.name,
+    address: receiptSettings.storeAddress || outlet?.address || '',
+    phone: receiptSettings.storePhone || outlet?.phone || '',
+    receipt_header:
+      receiptSettings.receiptHeader !== undefined && receiptSettings.receiptHeader !== null
+        ? receiptSettings.receiptHeader
+        : outlet?.receipt_header || '',
+    receipt_footer:
+      receiptSettings.receiptFooter !== undefined && receiptSettings.receiptFooter !== null
+        ? receiptSettings.receiptFooter
+        : outlet?.receipt_footer || '',
+    logo_url:
+      receiptSettings.receiptLogoUrl !== undefined && receiptSettings.receiptLogoUrl !== null
+        ? receiptSettings.receiptLogoUrl
+        : outlet?.receipt_logo_url || outlet?.logo_url || '',
+    paper_width: receiptSettings.paperWidth || outlet?.paper_width || '80mm',
+    vat_tin: receiptSettings.vatTin || outlet?.vat_tin || '',
+    tax_label: receiptSettings.taxLabel || taxLabel,
   };
 
   const handlePrintSlip = () => {
@@ -205,12 +244,12 @@ export function PosCartPanel({
         }
       `}</style>
 
-      {/* Cart Header with Organization Receipt Customization Slogan & Branding */}
-      <div className="p-3.5 border-b border-slate-200/70 shrink-0 bg-transparent space-y-2.5">
+      {/* Compact Cart Header */}
+      <div className="px-3 py-2.5 border-b border-slate-200/70 shrink-0 bg-transparent">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand text-white flex items-center justify-center font-bold shadow-xs shadow-brand/20 shrink-0">
-              <ShoppingBag className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center font-bold shadow-xs shadow-brand/20 shrink-0">
+              <ShoppingBag className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
               <h3 className="font-extrabold text-xs text-slate-900 leading-none truncate">
@@ -227,7 +266,7 @@ export function PosCartPanel({
             <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-[10px] font-extrabold">
               <button
                 type="button"
-                onClick={() => setViewMode('cart')}
+                onClick={() => handleSwitchViewMode('cart')}
                 className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
                   viewMode === 'cart'
                     ? 'bg-white text-slate-900 shadow-2xs font-bold'
@@ -240,7 +279,7 @@ export function PosCartPanel({
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode('receipt')}
+                onClick={() => handleSwitchViewMode('receipt')}
                 className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
                   viewMode === 'receipt'
                     ? 'bg-white text-brand shadow-2xs font-black'
@@ -249,7 +288,7 @@ export function PosCartPanel({
                 title="Preview order using organization receipt customization template"
               >
                 <Receipt className="w-3 h-3 text-brand" />
-                <span>Receipt Slip</span>
+                <span>Slip</span>
               </button>
             </div>
 
@@ -261,7 +300,7 @@ export function PosCartPanel({
                   title="Hold this cart"
                   className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 active:scale-[0.93] text-amber-700 border border-amber-200 text-xs font-bold transition-all cursor-pointer"
                 >
-                  <PauseCircle className="w-4 h-4" />
+                  <PauseCircle className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
@@ -269,39 +308,11 @@ export function PosCartPanel({
                   title="Clear basket"
                   className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 active:scale-[0.93] text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
           </div>
-        </div>
-
-        {/* Organization Receipt Customization Slogan & Branding Bar */}
-        <div className="px-3 py-1.5 rounded-xl bg-slate-50/90 border border-slate-200/80 flex items-center justify-between text-[11px] gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {receiptSettings.receiptLogoUrl ? (
-              <img
-                src={receiptSettings.receiptLogoUrl}
-                alt="Logo"
-                className="w-5 h-5 rounded object-contain shrink-0 grayscale contrast-125"
-              />
-            ) : (
-              <Store className="w-3.5 h-3.5 text-brand shrink-0" />
-            )}
-            <div className="min-w-0">
-              <p className="font-extrabold text-slate-800 truncate text-[11px] leading-tight">
-                {receiptSettings.storeName}
-              </p>
-              {receiptSettings.receiptHeader && (
-                <p className="text-[10px] text-slate-500 italic truncate leading-tight">
-                  {receiptSettings.receiptHeader}
-                </p>
-              )}
-            </div>
-          </div>
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500 font-black uppercase shrink-0">
-            {receiptSettings.paperWidth} Slip
-          </span>
         </div>
       </div>
 
@@ -346,14 +357,14 @@ export function PosCartPanel({
                   dateStyle: 'medium',
                   timeStyle: 'short',
                 })}
-                print_badge="*** CURRENT ORDER SLIP ***"
+                hide_badge
               />
             </div>
           )}
         </div>
       ) : (
         /* Cart Line Items List */
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2.5 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto p-2.5 space-y-1.5 custom-scrollbar">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400">
               <div className="w-12 h-12 rounded-2xl bg-slate-100/80 flex items-center justify-center text-slate-400">
@@ -380,7 +391,7 @@ export function PosCartPanel({
                   onDragEnd={(_, info) => {
                     if (info.offset.x < -45) onRemoveItem(idx);
                   }}
-                  className="p-3 rounded-xl bg-white/70 border border-white/80 shadow-2xs flex items-center justify-between gap-3 group hover:bg-white/90 transition-colors"
+                  className="p-2 rounded-xl bg-white/80 border border-slate-200/70 shadow-2xs flex items-center justify-between gap-2 group hover:bg-white transition-colors"
                 >
                   <CartItemThumbnail item={item} />
 
@@ -437,10 +448,10 @@ export function PosCartPanel({
 
       {/* Cart Footer: Discount, Totals & Checkout */}
       {cart.length > 0 && (
-        <div className="p-4 border-t border-slate-200/70 bg-slate-50/50 backdrop-blur-sm shrink-0 space-y-3">
-          {/* Coupon Input */}
+        <div className="p-3 border-t border-slate-200/70 bg-slate-50/60 backdrop-blur-sm shrink-0 space-y-2">
+          {/* Collapsible Coupon Input */}
           {appliedCoupon ? (
-            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
+            <div className="px-2.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5 text-emerald-600" />
                 <span className="font-extrabold">{appliedCoupon.code}</span>
@@ -456,7 +467,7 @@ export function PosCartPanel({
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-          ) : (
+          ) : showCouponInput || couponError ? (
             <form onSubmit={handleApplyCoupon} className="flex gap-1.5">
               <div className="relative flex-1">
                 <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -465,26 +476,50 @@ export function PosCartPanel({
                   placeholder="Coupon code..."
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                  className="w-full pl-8 pr-2 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-brand font-mono"
+                  autoFocus
+                  className="w-full pl-8 pr-2 py-1 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-brand font-mono"
                 />
               </div>
               <button
                 type="submit"
                 disabled={!couponInput.trim()}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.95] text-slate-800 border border-slate-200 font-extrabold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.95] text-slate-800 border border-slate-200 font-extrabold text-xs transition-all disabled:opacity-50 cursor-pointer"
               >
                 Apply
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCouponInput(false);
+                  setCouponInput('');
+                }}
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-600 cursor-pointer"
+                title="Cancel coupon"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </form>
-          )}
+          ) : null}
           {couponError && (
             <p className="text-[10px] text-rose-600 font-medium">{couponError}</p>
           )}
 
           {/* Subtotal, Tax, and Grand Total */}
-          <div className="space-y-1.5 text-xs text-slate-600 font-medium">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
+          <div className="space-y-1 text-xs text-slate-600 font-medium">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span>Subtotal</span>
+                {!appliedCoupon && !showCouponInput && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCouponInput(true)}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-200/70 hover:bg-slate-200 text-[10px] font-bold text-slate-600 transition-colors cursor-pointer"
+                  >
+                    <Tag className="w-2.5 h-2.5" />
+                    <span>+ Coupon</span>
+                  </button>
+                )}
+              </div>
               <span className="font-bold text-slate-800 font-mono">
                 ${subtotal.toFixed(2)}
               </span>
@@ -501,51 +536,12 @@ export function PosCartPanel({
                 <span className="font-mono">${tax.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-base font-black text-slate-900 pt-1.5 border-t border-slate-200">
+            <div className="flex justify-between text-base font-black text-slate-900 pt-1 border-t border-slate-200">
               <span>Grand Total</span>
               <span className="text-brand font-mono">
                 ${grandTotal.toFixed(2)}
               </span>
             </div>
-          </div>
-
-          {/* Organization Receipt Return Policy Snippet */}
-          {receiptSettings.receiptFooter && (
-            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-2 text-[10px] text-slate-600">
-              <Receipt className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
-              <div className="min-w-0">
-                <span className="font-extrabold text-slate-700 block leading-tight">Receipt Policy:</span>
-                <span className="italic leading-snug line-clamp-2">{receiptSettings.receiptFooter}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Direct Tender Triggers */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => onOpenCheckout('cash')}
-              className="py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:scale-[0.95] border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
-            >
-              <Banknote className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Cash</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenCheckout('khqr')}
-              className="py-2 rounded-xl bg-brand-subtle hover:bg-brand/10 active:scale-[0.95] border border-brand/20 text-brand text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
-            >
-              <QrCode className="w-3.5 h-3.5 text-brand" />
-              <span>KHQR</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenCheckout('card')}
-              className="py-2 rounded-xl bg-blue-50 hover:bg-blue-100 active:scale-[0.95] border border-blue-200 text-blue-800 text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer"
-            >
-              <CreditCard className="w-3.5 h-3.5 text-blue-600" />
-              <span>Card</span>
-            </button>
           </div>
 
           {/* Primary Charge Button */}
@@ -555,7 +551,7 @@ export function PosCartPanel({
             type="button"
             disabled={isProcessing}
             onClick={() => onOpenCheckout('cash')}
-            className="w-full py-3 rounded-2xl bg-brand hover:bg-brand-hover active:scale-[0.98] text-white font-black text-sm shadow-md shadow-brand/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 rounded-2xl bg-brand hover:bg-brand-hover active:scale-[0.98] text-white font-black text-sm shadow-md shadow-brand/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <span>Charge ${grandTotal.toFixed(2)}</span>
             <ArrowRight className="w-4 h-4" />

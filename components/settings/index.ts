@@ -17,4 +17,5 @@ export * from './SecuritySessionsTab';
 export * from './SuperAdminPlatformSettingsView';
 export * from './SettingsSubSidebar';
 export * from './PlatformSettingsSubSidebar';
+export * from './notifications';
 export * from './tabs';

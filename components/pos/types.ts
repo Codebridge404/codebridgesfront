@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   category?: string;
   stock_on_hand?: number;
+  stock_available?: number;
   stock?: number;
   barcode?: string;
   image?: string;

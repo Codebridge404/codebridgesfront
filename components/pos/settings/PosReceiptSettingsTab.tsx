@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Receipt, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Receipt, Upload, Trash2 } from 'lucide-react';
 import { updateOutletReceiptBrandingApi } from '@/lib/api';
+import { ThermalReceiptPaper } from '@/components/receipt/ThermalReceiptPaper';
+import { formatReceiptNumber } from '@/lib/posReceiptUtils';
 
 interface PosReceiptSettingsTabProps {
   settings: any;
@@ -126,6 +128,74 @@ export function PosReceiptSettingsTab({
             </p>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Business Phone (Tel)
+              </label>
+              <input
+                type="text"
+                value={settings.outletPhone || ''}
+                onChange={(e) => onChange('outletPhone', e.target.value)}
+                placeholder="e.g. +855 12 345 678"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-slate-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Business Address
+              </label>
+              <input
+                type="text"
+                value={settings.outletAddress || ''}
+                onChange={(e) => onChange('outletAddress', e.target.value)}
+                placeholder="e.g. #123 Street 2004, Phnom Penh"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-slate-400"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200/60">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Receipt Starting Number
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={settings.receiptStartNumber ?? 0}
+                onChange={(e) => onChange('receiptStartNumber', Math.max(0, parseInt(e.target.value || '0', 10) || 0))}
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-300/80 bg-transparent text-slate-900 text-xs font-mono font-bold focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Sequence preview:{' '}
+                <span className="font-mono font-bold text-slate-700">
+                  {formatReceiptNumber(settings.receiptStartNumber ?? 0, settings.receiptDigits ?? 5)},{' '}
+                  {formatReceiptNumber((settings.receiptStartNumber ?? 0) + 1, settings.receiptDigits ?? 5)}
+                </span>
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Receipt Number Digits
+              </label>
+              <select
+                value={settings.receiptDigits ?? 5}
+                onChange={(e) => onChange('receiptDigits', Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-transparent border border-slate-300/80 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand cursor-pointer"
+              >
+                {[3, 4, 5, 6, 7, 8].map((d) => (
+                  <option key={d} value={d} className="bg-white text-slate-900">
+                    {d} Digits ({formatReceiptNumber(settings.receiptStartNumber ?? 0, d)})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Receipt Header Subtitle / Slogan
@@ -189,85 +259,50 @@ export function PosReceiptSettingsTab({
       {/* Right: Thermal Receipt Full Live Preview Paper */}
       <div className="lg:col-span-5 p-6 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] flex flex-col items-center">
         <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider mb-3 block">
-          Thermal 80mm Live Preview
+          Thermal {settings.paperWidth || '80mm'} Live Preview
         </span>
-        <div className="w-[280px] bg-white p-5 border border-slate-300 shadow-md rounded-2xl font-mono text-[10px] leading-tight text-slate-900 select-none">
-          {/* Original Badge */}
-          <div className="text-center mb-2">
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
-              *** ORIGINAL RECEIPT ***
-            </span>
-          </div>
-
-          {/* Header branding */}
-          <div className="text-center space-y-1 pb-3 border-b border-dashed border-slate-300">
-            {logoPreview && (
-              <div className="flex justify-center mb-1">
-                <img
-                  src={logoPreview}
-                  alt="Store Logo"
-                  className="max-h-10 max-w-[130px] object-contain grayscale contrast-125"
-                />
-              </div>
-            )}
-            <h2 className="font-extrabold text-xs uppercase tracking-tight text-slate-900">
-              {settings.outletName || storeName || 'Main Store'}
-            </h2>
-            <p className="text-[9px] text-slate-600 leading-snug">
-              Phnom Penh, Cambodia
-            </p>
-            <p className="text-[9px] text-slate-600">Tel: +855 23 888 999</p>
-            {settings.receiptHeader && (
-              <p className="text-[9px] italic text-slate-500 pt-1 border-t border-slate-100 mt-1">
-                {settings.receiptHeader}
-              </p>
-            )}
-          </div>
-
-          {/* Simulated Order Items */}
-          <div className="py-2.5 border-b border-dashed border-slate-300 space-y-1 text-[9px]">
-            <div className="flex justify-between font-bold border-b border-slate-100 pb-1 mb-1">
-              <span>ITEM</span>
-              <span>QTY x PRICE</span>
-              <span>TOTAL</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="truncate max-w-[120px]">Organic Avocado</span>
-              <span>2 x $1.50</span>
-              <span className="font-bold">$3.00</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="truncate max-w-[120px]">Fresh Coconut Water</span>
-              <span>1 x $2.00</span>
-              <span className="font-bold">$2.00</span>
-            </div>
-          </div>
-
-          {/* Total */}
-          <div className="py-2 border-b border-dashed border-slate-300 space-y-1 text-[9px]">
-            <div className="flex justify-between font-extrabold text-xs">
-              <span>GRAND TOTAL:</span>
-              <span>$5.00</span>
-            </div>
-            <div className="flex justify-between text-slate-500">
-              <span>Payment Method:</span>
-              <span className="font-bold">Bakong KHQR</span>
-            </div>
-          </div>
-
-          {/* Footer Message */}
-          <div className="pt-3 text-center space-y-1.5">
-            <p className="text-[9px] text-slate-600 italic leading-snug">
-              {settings.receiptFooter || 'Thank you for your visit! Please come again.'}
-            </p>
-            <div className="pt-1 flex flex-col items-center justify-center gap-0.5">
-              <div className="w-40 h-6 bg-slate-900 flex items-center justify-between px-2 text-white font-mono text-[8px] tracking-widest rounded-xs">
-                <span>|||||||||||||||||||||||||||||||</span>
-              </div>
-              <span className="text-[8px] text-slate-400 font-mono">REC-2026-0001</span>
-            </div>
-          </div>
-        </div>
+        <ThermalReceiptPaper
+          sale={{
+            receipt_number: formatReceiptNumber(
+              settings.receiptStartNumber ?? 0,
+              settings.receiptDigits ?? 5
+            ),
+            order_type: 'takeaway',
+            customer_name: 'Walk-in Customer',
+            subtotal: 5.0,
+            discount_total: 0,
+            tax_total: 0,
+            grand_total: 5.0,
+          }}
+          lines={[
+            {
+              product_name: 'Organic Avocado Premium Hass',
+              quantity: 2,
+              unit_price: 1.5,
+              subtotal: 3.0,
+            },
+            {
+              product_name: 'Fresh Coconut Water',
+              quantity: 1,
+              unit_price: 2.0,
+              subtotal: 2.0,
+            },
+          ]}
+          outlet={{
+            name: settings.outletName || storeName || 'Main Store',
+            address: settings.outletAddress,
+            phone: settings.outletPhone,
+            receipt_header: settings.receiptHeader,
+            receipt_footer: settings.receiptFooter,
+            logo_url: logoPreview || settings.receiptLogoUrl || '',
+            paper_width: settings.paperWidth || '80mm',
+            vat_tin: settings.vat_tin || settings.vatTin,
+            tax_label: settings.taxLabel,
+          }}
+          payments={[{ tender_type: 'khqr', amount: 5.0 }]}
+          formattedDate="Nov 18, 2026, 12:00 PM"
+          hide_badge
+        />
       </div>
     </div>
   );

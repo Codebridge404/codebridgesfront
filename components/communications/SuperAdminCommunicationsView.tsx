@@ -10,9 +10,11 @@ import {
 } from '@/lib/api/support';
 import { useToast } from '@/components/common';
 import { CreateBroadcastModal } from './CreateBroadcastModal';
+import { TelegramAlertsStudioView } from '@/components/security/TelegramAlertsStudioView';
 
 export function SuperAdminCommunicationsView() {
   const toast = useToast();
+  const [commTab, setCommTab] = useState<'broadcasts' | 'telegram'>('broadcasts');
   const [announcements, setAnnouncements] = useState<PlatformAnnouncement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -94,6 +96,36 @@ export function SuperAdminCommunicationsView() {
         </button>
       </div>
 
+      {/* Communications Studio Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3">
+        <button
+          type="button"
+          onClick={() => setCommTab('broadcasts')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer transition-all ${
+            commTab === 'broadcasts'
+              ? 'bg-brand text-white shadow-xs'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          Merchant Broadcasts
+        </button>
+        <button
+          type="button"
+          onClick={() => setCommTab('telegram')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer transition-all ${
+            commTab === 'telegram'
+              ? 'bg-brand text-white shadow-xs'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          Security Telegram Alerts Studio
+        </button>
+      </div>
+
+      {commTab === 'telegram' ? (
+        <TelegramAlertsStudioView />
+      ) : (
+        <>
       {/* Broadcasts List */}
       {loading ? (
         <div className="bg-white p-12 rounded-3xl border border-slate-200/90 text-center flex flex-col items-center justify-center gap-3">
@@ -185,6 +217,8 @@ export function SuperAdminCommunicationsView() {
         onClose={() => setShowCreateModal(false)}
         onSuccess={loadAnnouncements}
       />
+        </>
+      )}
     </div>
   );
 }

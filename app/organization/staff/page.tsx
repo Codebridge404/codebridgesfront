@@ -1,6 +1,13 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-06
+ * Task: BD-0153
+ */
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import {
   Users,
   Search,
@@ -13,12 +20,21 @@ import {
   Building2,
   X,
 } from 'lucide-react';
-import { getUsersApi, updateUserApi, deleteUserApi, getOutletsApi, getRolePermissionsApi, getAuthUser } from '@/lib/api';
+import {
+  getUsersApi,
+  updateUserApi,
+  deleteUserApi,
+  getOutletsApi,
+  getRolePermissionsApi,
+  getRolesApi,
+  getAuthUser,
+} from '@/lib/api';
 import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/components/security/users';
 import { useConfirm, useToast } from '@/components/common';
 import { WorkspaceStaffDirectory } from '@/components/launchpad/staff/WorkspaceStaffDirectory';
 import { WorkspaceStaffInviteSearch } from '@/components/launchpad/staff/WorkspaceStaffInviteSearch';
 import { WorkspaceStaffCreateForm, AVAILABLE_ROLES } from '@/components/launchpad/staff/WorkspaceStaffCreateForm';
+import { PendingInvitationsCard } from '@/components/organization/staff/PendingInvitationsCard';
 
 export default function OrganizationStaffPage() {
   const confirm = useConfirm();
@@ -46,14 +62,16 @@ export default function OrganizationStaffPage() {
 
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [permissionsMatrix, setPermissionsMatrix] = useState<any>(null);
+  const [dynamicRoles, setDynamicRoles] = useState<any[]>([]);
   const [orgName, setOrgName] = useState<string>('Primary Organization');
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [usersRes, outletsRes] = await Promise.allSettled([
+      const [usersRes, outletsRes, rolesRes] = await Promise.allSettled([
         getUsersApi('all', undefined, 'staff'),
         getOutletsApi(),
+        getRolesApi(),
       ]);
       if (usersRes.status === 'fulfilled') {
         const d = usersRes.value?.data ?? usersRes.value;
@@ -62,6 +80,12 @@ export default function OrganizationStaffPage() {
       if (outletsRes.status === 'fulfilled') {
         const d = outletsRes.value?.data ?? outletsRes.value;
         setOutlets(Array.isArray(d) ? d : []);
+      }
+      if (rolesRes.status === 'fulfilled') {
+        const rd = rolesRes.value?.data ?? rolesRes.value;
+        if (Array.isArray(rd)) {
+          setDynamicRoles(rd);
+        }
       }
     } finally {
       setLoading(false);
@@ -77,7 +101,27 @@ export default function OrganizationStaffPage() {
       setOrgName(active);
     }
     loadData();
+
+    const handleRolesUpdated = () => {
+      loadData();
+    };
+
+    window.addEventListener('cb_roles_updated', handleRolesUpdated);
+    return () => {
+      window.removeEventListener('cb_roles_updated', handleRolesUpdated);
+    };
   }, []);
+
+  const availableRolesList = useMemo(() => {
+    if (dynamicRoles.length > 0) {
+      return dynamicRoles.map((r: any) => ({
+        value: r.slug || r.name.toLowerCase().replace(/\s+/g, '_'),
+        label: r.name,
+        description: r.description || (r.is_system ? 'System role template' : 'Tenant custom role'),
+      }));
+    }
+    return AVAILABLE_ROLES;
+  }, [dynamicRoles]);
 
   const activeCount = useMemo(() => staff.filter((u) => u.is_active !== false).length, [staff]);
   const disabledCount = useMemo(() => staff.filter((u) => u.is_active === false).length, [staff]);
@@ -207,12 +251,21 @@ export default function OrganizationStaffPage() {
         onClose={() => setEditingStaff(null)}
         onSubmit={handleSaveEdit}
         saving={savingEdit}
-        dynamicRoles={AVAILABLE_ROLES.map((r) => ({
-          id: r.value,
-          name: r.label,
-          slug: r.value,
-          is_system: true,
-        }))}
+        dynamicRoles={
+          dynamicRoles.length > 0
+            ? dynamicRoles.map((r) => ({
+                id: String(r.id || r.slug || r.name),
+                name: r.name,
+                slug: r.slug || r.name.toLowerCase().replace(/\s+/g, '_'),
+                is_system: r.is_system ?? false,
+              }))
+            : AVAILABLE_ROLES.map((r) => ({
+                id: r.value,
+                name: r.label,
+                slug: r.value,
+                is_system: true,
+              }))
+        }
       />
 
       {/* Add Staff Popup Screen (Modal with 2 Options) */}
@@ -276,14 +329,14 @@ export default function OrganizationStaffPage() {
               {addModalTab === 'create' ? (
                 <WorkspaceStaffCreateForm
                   outlets={outlets}
-                  availableRoles={AVAILABLE_ROLES}
+                  availableRoles={availableRolesList}
                   onSuccess={handleSubSuccess}
                   onCancel={() => setShowAddModal(false)}
                 />
               ) : (
                 <WorkspaceStaffInviteSearch
                   outlets={outlets}
-                  availableRoles={AVAILABLE_ROLES}
+                  availableRoles={availableRolesList}
                   onSuccess={handleSubSuccess}
                   onOpenCreateNew={() => setAddModalTab('create')}
                 />
@@ -310,7 +363,7 @@ export default function OrganizationStaffPage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Staff Roster &amp; Roles
+            Staff Directory
           </h1>
           <p className="text-xs text-slate-500 font-medium max-w-2xl">
             Centralized management for employee accounts, frontline register PIN credentials, RBAC module capabilities, and store branch assignments.
@@ -324,18 +377,26 @@ export default function OrganizationStaffPage() {
             onClick={loadData}
             disabled={loading}
             className="p-2.5 rounded-2xl border border-slate-300/80 hover:bg-slate-100 text-slate-600 transition-all cursor-pointer shadow-2xs"
-            title="Refresh Staff Roster"
+            title="Refresh Staff Directory"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand' : ''}`} />
           </button>
 
-          <button
-            type="button"
-            onClick={handleOpenPermissions}
+          <Link
+            href="/organization/roles"
             className="px-4 py-2.5 rounded-2xl border border-slate-300/80 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
           >
             <ShieldCheck className="w-4 h-4 text-brand" />
-            <span>Role Capabilities</span>
+            <span>Dynamic Roles &amp; RBAC</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleOpenPermissions}
+            className="px-3 py-2.5 rounded-2xl border border-slate-300/80 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            title="View Capabilities Matrix"
+          >
+            <span>Matrix</span>
           </button>
 
           <button
@@ -426,7 +487,8 @@ export default function OrganizationStaffPage() {
       </div>
 
       {/* 3. Direct Staff Directory Canvas (No redundant tabs) */}
-      <div className="w-full">
+      <div className="w-full space-y-6">
+        <PendingInvitationsCard />
         <WorkspaceStaffDirectory
           staff={staff}
           loading={loading}

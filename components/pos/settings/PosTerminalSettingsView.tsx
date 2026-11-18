@@ -38,6 +38,8 @@ const DEFAULT_SETTINGS = {
   terminalId: 'POS-TERM-001',
   outletId: '',
   outletName: 'Main Store',
+  outletAddress: '',
+  outletPhone: '',
   baseCurrency: 'USD',
   secondaryCurrency: 'KHR',
   exchangeRate: 4100,
@@ -66,6 +68,8 @@ const DEFAULT_SETTINGS = {
   receiptHeader: '',
   receiptFooter: 'Thank you for shopping with us! Please come again.',
   receiptLogoUrl: '',
+  receiptStartNumber: 0,
+  receiptDigits: 5,
 };
 
 function PosTerminalSettingsContent() {
@@ -141,8 +145,16 @@ function PosTerminalSettingsContent() {
         const list = Array.isArray(res) ? res : res?.data || [];
         setOutlets(list);
         const targetOutletId = settings.outletId || (list.length > 0 ? String(list[0].id) : null);
-        if (list.length > 0 && !settings.outletId) {
-          setSettings((prev) => ({ ...prev, outletId: String(list[0].id), outletName: list[0].name }));
+        const activeOutletObj =
+          list.find((o: any) => String(o.id) === String(targetOutletId)) || list[0];
+        if (activeOutletObj) {
+          setSettings((prev) => ({
+            ...prev,
+            outletId: prev.outletId || String(activeOutletObj.id),
+            outletName: prev.outletName || activeOutletObj.name || 'Main Store',
+            outletAddress: prev.outletAddress || activeOutletObj.address || '',
+            outletPhone: prev.outletPhone || activeOutletObj.phone || '',
+          }));
         }
 
         if (targetOutletId) {
@@ -214,6 +226,10 @@ function PosTerminalSettingsContent() {
             receiptHeader: settings.receiptHeader,
             receiptFooter: settings.receiptFooter,
             receiptLogoUrl: settings.receiptLogoUrl,
+            outletAddress: settings.outletAddress,
+            outletPhone: settings.outletPhone,
+            receiptStartNumber: Number(settings.receiptStartNumber) || 0,
+            receiptDigits: Number(settings.receiptDigits) || 5,
           },
         });
 
@@ -234,6 +250,8 @@ function PosTerminalSettingsContent() {
       localStorage.setItem('cb_pos_receipt_footer', settings.receiptFooter || '');
       if (settings.receiptLogoUrl) {
         localStorage.setItem('cb_active_org_logo', settings.receiptLogoUrl);
+      } else {
+        localStorage.removeItem('cb_active_org_logo');
       }
 
       window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: settings }));
@@ -246,14 +264,55 @@ function PosTerminalSettingsContent() {
     }, 300);
   };
 
-  const handleResetDefaults = () => {
-    if (confirm('Reset all terminal hardware, receipt, and policy settings to factory defaults?')) {
-      const reset = { ...DEFAULT_SETTINGS, outletId: outlets[0]?.id ? String(outlets[0].id) : '' };
-      setSettings(reset);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('cb_pos_terminal_settings', JSON.stringify(reset));
+  const handleResetDefaults = async () => {
+    if (!confirm('Reset all terminal hardware, receipt, and policy settings to factory defaults?')) {
+      return;
+    }
+
+    const activeOutlet =
+      outlets.find((o: any) => String(o.id) === String(settings.outletId)) || outlets[0];
+    const targetOutletId = activeOutlet?.id ? String(activeOutlet.id) : settings.outletId || '';
+
+    const reset = {
+      ...DEFAULT_SETTINGS,
+      outletId: targetOutletId,
+      outletName: activeOutlet?.name || DEFAULT_SETTINGS.outletName,
+      outletAddress: activeOutlet?.address || '',
+      outletPhone: activeOutlet?.phone || '',
+    };
+
+    setSettings(reset);
+    setLoading(true);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cb_pos_terminal_settings', JSON.stringify(reset));
+      localStorage.setItem('cb_pos_receipt_header', reset.receiptHeader || '');
+      localStorage.setItem('cb_pos_receipt_footer', reset.receiptFooter || '');
+      localStorage.removeItem('cb_active_org_logo');
+      window.dispatchEvent(new CustomEvent('cb_terminal_settings_updated', { detail: reset }));
+    }
+
+    if (targetOutletId) {
+      try {
+        await updateOutletTerminalSettingsApi(targetOutletId, {
+          business_type: reset.businessType,
+          is_kds_enabled: reset.kdsEnabled !== false,
+          is_cfd_enabled: reset.cfdEnabled !== false,
+          terminal_settings: reset,
+        });
+        await updateOutletReceiptBrandingApi(targetOutletId, {
+          receipt_header: '',
+          receipt_footer: reset.receiptFooter,
+          receipt_logo_url: '',
+        });
+        toast.success('POS settings reset to defaults and synced.');
+      } catch (err) {
+        console.warn('Failed to sync reset defaults to backend outlet:', err);
+        toast.info('Local settings reset. Backend sync failed.');
       }
     }
+
+    setLoading(false);
   };
 
   return (

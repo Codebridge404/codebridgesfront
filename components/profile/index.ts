@@ -7,3 +7,5 @@ export * from './UserProfileView';
 export * from './ProfileSubSidebar';
 export * from './TwoFactorRecoveryCodesModal';
 export * from './EmailVerificationOtpModal';
+export * from './PasskeyManagerCard';
+export * from './SessionInactivityCard';

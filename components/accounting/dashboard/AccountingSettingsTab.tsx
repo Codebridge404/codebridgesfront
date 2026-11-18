@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Settings, CheckCircle2, Save } from 'lucide-react';
+import { ExchangeRateToolsCard } from './ExchangeRateToolsCard';
 
 interface AccountingAccessTabProps {
   loadingStaff: boolean;
@@ -104,6 +105,8 @@ export function AccountingSettingsTab({ settingsSaved, setSettingsSaved }: Accou
           <span>Save Configuration</span>
         </button>
       </div>
+
+      <ExchangeRateToolsCard />
     </div>
   );
 }

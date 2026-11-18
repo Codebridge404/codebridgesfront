@@ -444,7 +444,18 @@ export async function getMeetingAttachmentsApi(meetingId: number | string): Prom
   return await apiFetch(`/meetings/${meetingId}/attachments`);
 }
 
-export async function uploadMeetingAttachmentApi(meetingId: number | string, data: { file_name: string; file_url?: string; file_type?: string; file_size?: number }) {
+export async function uploadMeetingAttachmentApi(
+  meetingId: number | string,
+  data: File | { file_name: string; file_url?: string; file_type?: string; file_size?: number }
+) {
+  if (typeof File !== 'undefined' && data instanceof File) {
+    const formData = new FormData();
+    formData.append('file', data);
+    return await apiFetch(`/meetings/${meetingId}/attachments`, {
+      method: 'POST',
+      body: formData,
+    });
+  }
   return await apiFetch(`/meetings/${meetingId}/attachments`, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -650,4 +661,14 @@ export async function downloadMeetingIcsApi(id: number | string, filename?: stri
   a.click();
   document.body.removeChild(a);
   window.URL.revokeObjectURL(downloadUrl);
+}
+
+export interface MeetingAttachmentItem {
+  id: number;
+  meeting_id: number;
+  file_name: string;
+  file_path: string;
+  file_type?: string | null;
+  file_size?: number | null;
+  created_at?: string | null;
 }

@@ -47,11 +47,13 @@ import {
   logoutAllDevicesApi,
   getRoleDisplayName,
 } from '@/lib/api';
-import { toggle2faApi } from '@/lib/api/auth';
+import { toggle2faApi, setup2faApi, confirm2faApi } from '@/lib/api/auth';
 import { badgeStyles, buttonStyles } from '@/lib/theme';
 import { ProfileSubSidebar, ProfileTab } from './ProfileSubSidebar';
 import { TwoFactorRecoveryCodesModal } from './TwoFactorRecoveryCodesModal';
 import { EmailVerificationOtpModal } from './EmailVerificationOtpModal';
+import { PasskeyManagerCard } from './PasskeyManagerCard';
+import { SessionInactivityCard } from './SessionInactivityCard';
 import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface UserProfileViewProps {
@@ -84,6 +86,11 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
   const [showRecoveryCodesModal, setShowRecoveryCodesModal] = useState(false);
   const [showEmailOtpModal, setShowEmailOtpModal] = useState(false);
   const [newRecoveryCodes, setNewRecoveryCodes] = useState<string[]>([]);
+  const [reconfigPassword, setReconfigPassword] = useState('');
+  const [reconfigQrUrl, setReconfigQrUrl] = useState<string | null>(null);
+  const [reconfigCode, setReconfigCode] = useState('');
+  const [showReconfig2fa, setShowReconfig2fa] = useState(false);
+  const [reconfigError, setReconfigError] = useState<string | null>(null);
 
   // Status & Feedback States
   const [savingProfile, setSavingProfile] = useState(false);
@@ -295,6 +302,43 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
       }
     } catch (err: any) {
       alert(err.message || 'Failed to toggle 2FA.');
+    } finally {
+      setToggling2fa(false);
+    }
+  };
+
+  const handleReconfigSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReconfigError(null);
+    setToggling2fa(true);
+    try {
+      const res = await setup2faApi(reconfigPassword);
+      setTwoFactorSecret(res.secret || null);
+      setReconfigQrUrl(res.qr_code_url || null);
+    } catch (err: any) {
+      setReconfigError(err?.message || 'Password verification failed.');
+    } finally {
+      setToggling2fa(false);
+    }
+  };
+
+  const handleReconfigConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReconfigError(null);
+    setToggling2fa(true);
+    try {
+      const res = await confirm2faApi(reconfigCode);
+      setTwoFactorEnabled(true);
+      setShowReconfig2fa(false);
+      setReconfigPassword('');
+      setReconfigCode('');
+      setReconfigQrUrl(null);
+      if (Array.isArray(res.recovery_codes)) {
+        setNewRecoveryCodes(res.recovery_codes);
+        setShowRecoveryCodesModal(true);
+      }
+    } catch (err: any) {
+      setReconfigError(err?.message || 'Invalid 6-digit verification code.');
     } finally {
       setToggling2fa(false);
     }
@@ -608,18 +652,32 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleToggle2FA}
-                    disabled={toggling2fa}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50 shrink-0 ${
-                      twoFactorEnabled
-                        ? 'bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200/80'
-                        : 'bg-brand hover:bg-brand-hover text-white shadow-brand/20'
-                    }`}
-                  >
-                    {toggling2fa ? 'Processing...' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA Protection'}
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {twoFactorEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowReconfig2fa((prev) => !prev);
+                          setReconfigError(null);
+                        }}
+                        className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer"
+                      >
+                        Reconfigure
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleToggle2FA}
+                      disabled={toggling2fa}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50 shrink-0 ${
+                        twoFactorEnabled
+                          ? 'bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200/80'
+                          : 'bg-brand hover:bg-brand-hover text-white shadow-brand/20'
+                      }`}
+                    >
+                      {toggling2fa ? 'Processing...' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA Protection'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* 2FA Secret Reveal Box */}
@@ -664,7 +722,66 @@ export function UserProfileView({ user: initialUser }: UserProfileViewProps) {
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                {/* Active 2FA Reconfiguration Guard (Requires Current Password) */}
+                {showReconfig2fa && twoFactorEnabled && (
+                  <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 text-xs">
+                    <p className="font-extrabold text-slate-900">Reconfigure Authenticator App</p>
+                    {reconfigError && (
+                      <p className="text-rose-600 font-semibold">{reconfigError}</p>
+                    )}
+                    {!reconfigQrUrl ? (
+                      <form onSubmit={handleReconfigSetup} className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="password"
+                          required
+                          value={reconfigPassword}
+                          onChange={(e) => setReconfigPassword(e.target.value)}
+                          placeholder="Confirm current password"
+                          className="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs"
+                        />
+                        <button
+                          type="submit"
+                          disabled={toggling2fa || !reconfigPassword}
+                          className="px-4 py-2 rounded-xl bg-brand text-white font-bold cursor-pointer disabled:opacity-50"
+                        >
+                          Generate New Secret
+                        </button>
+                      </form>
+                    ) : (
+                      <form onSubmit={handleReconfigConfirm} className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <img src={reconfigQrUrl} alt="2FA QR Code" className="w-24 h-24 rounded-xl border bg-white p-1" />
+                          <p className="text-slate-600">Scan the new QR code, then enter the 6-digit code to activate it.</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            required
+                            value={reconfigCode}
+                            onChange={(e) => setReconfigCode(e.target.value)}
+                            placeholder="6-digit TOTP code"
+                            className="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono"
+                          />
+                          <button
+                            type="submit"
+                            disabled={toggling2fa || !reconfigCode}
+                            className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold cursor-pointer disabled:opacity-50"
+                          >
+                            Confirm &amp; Activate
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Passkeys & Biometric Login Card */}
+              <PasskeyManagerCard />
+
+              {/* Session Inactivity Timeout & Heartbeat Card */}
+              <SessionInactivityCard />
 
               {/* Password Form */}
               <form onSubmit={handleUpdatePassword} className="p-6 sm:p-8 rounded-3xl bg-transparent border border-slate-300/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-5">

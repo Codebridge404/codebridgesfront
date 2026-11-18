@@ -34,7 +34,7 @@ export default function RootLayout({
       className="h-full antialiased font-sans"
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-canvas text-slate-800 relative selection:bg-brand selection:text-white" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col text-slate-800 dark:text-slate-100 relative selection:bg-brand selection:text-white" suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -45,10 +45,20 @@ export default function RootLayout({
                   var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (p.theme === 'dark' || (p.theme === 'system' && prefersDark)) {
                     document.documentElement.classList.add('dark');
+                    document.documentElement.style.colorScheme = 'dark';
+                  } else {
+                    document.documentElement.style.colorScheme = 'light';
+                    if (p.lightBgColor) {
+                      document.documentElement.style.setProperty('--color-light-bg', p.lightBgColor);
+                      document.documentElement.style.setProperty('--color-canvas', p.lightBgColor);
+                    }
                   }
+                  if (p.highContrast) document.documentElement.classList.add('high-contrast');
                   if (p.fontSize) document.documentElement.setAttribute('data-font-size', p.fontSize);
-                  if (p.canvasStyle) document.documentElement.setAttribute('data-canvas-style', p.canvasStyle);
+                  document.documentElement.setAttribute('data-canvas-style', p.canvasStyle || 'mesh');
                   if (p.accentColor) document.documentElement.style.setProperty('--color-brand', p.accentColor);
+                } else {
+                  document.documentElement.setAttribute('data-canvas-style', 'mesh');
                 }
               } catch (e) {}
             `,

@@ -1,7 +1,13 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-06
+ * Task: BD-0153
+ */
+
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Check, Sparkles, RefreshCw, Key } from 'lucide-react';
+import { ShieldCheck, Check, Sparkles, RefreshCw, Key, Copy, Lock } from 'lucide-react';
 import { RoleItem } from './RolesListSidebar';
 
 interface PermissionItem {
@@ -20,6 +26,7 @@ interface RolePermissionsMatrixProps {
   onTogglePermission: (id: string) => void;
   onSaveRolePermissions: () => void;
   saving: boolean;
+  onCloneRole?: (role: RoleItem) => void;
 }
 
 export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
@@ -31,6 +38,7 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
   onTogglePermission,
   onSaveRolePermissions,
   saving,
+  onCloneRole,
 }) => {
   if (!selectedRole) {
     return (
@@ -76,19 +84,59 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onSaveRolePermissions}
-          disabled={saving}
-          className="px-5 py-2.5 rounded-2xl bg-brand hover:bg-brand-hover disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-brand/20 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
-        >
-          {saving ? (
-            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+        <div className="flex items-center gap-2">
+          {selectedRole.is_system ? (
+            onCloneRole ? (
+              <button
+                type="button"
+                onClick={() => onCloneRole(selectedRole)}
+                className="px-4 py-2.5 rounded-2xl bg-brand hover:bg-brand-hover text-white font-bold text-xs shadow-md shadow-brand/20 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Clone as Custom Role</span>
+              </button>
+            ) : (
+              <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                System Role (Protected)
+              </span>
+            )
           ) : (
-            <Sparkles className="w-3.5 h-3.5" />
+            <button
+              onClick={onSaveRolePermissions}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-2xl bg-brand hover:bg-brand-hover disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-brand/20 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+            >
+              {saving ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span>{saving ? 'Saving Scope...' : 'Save Permissions'}</span>
+            </button>
           )}
-          <span>{saving ? 'Saving Scope...' : 'Save Permissions'}</span>
-        </button>
+        </div>
       </div>
+
+      {/* Protected Template Advisory for System Roles */}
+      {selectedRole.is_system && (
+        <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+            <span className="font-medium">
+              This is a built-in system template. To customize permissions for your staff, create an organization role or clone this template.
+            </span>
+          </div>
+          {onCloneRole && (
+            <button
+              type="button"
+              onClick={() => onCloneRole(selectedRole)}
+              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-[11px] shrink-0 transition-colors cursor-pointer self-start sm:self-auto"
+            >
+              Clone Template
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Category Filter Tabs */}
       <div className="w-full min-w-0 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -133,12 +181,17 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                 {pList.map((p) => {
                   const isChecked = currentRolePerms.includes(p.id);
+                  const isInteractive = !selectedRole.is_system;
+
                   return (
                     <button
                       type="button"
                       key={p.id}
-                      onClick={() => onTogglePermission(p.id)}
-                      className={`p-3.5 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all cursor-pointer ${
+                      onClick={() => isInteractive && onTogglePermission(p.id)}
+                      disabled={!isInteractive}
+                      className={`p-3.5 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all ${
+                        isInteractive ? 'cursor-pointer' : 'cursor-default opacity-85'
+                      } ${
                         isChecked
                           ? 'bg-brand/10 border-brand/40 text-brand font-bold shadow-2xs backdrop-blur-sm'
                           : 'bg-transparent border-slate-300/80 text-slate-600 hover:border-slate-400 hover:bg-slate-200/40 backdrop-blur-sm'
@@ -173,3 +226,4 @@ export const RolePermissionsMatrix: React.FC<RolePermissionsMatrixProps> = ({
     </div>
   );
 };
+

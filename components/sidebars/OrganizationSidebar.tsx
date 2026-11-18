@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-05
- * Task: BD-0138
+ * Date: 2026-11-06
+ * Task: BD-0153
  */
 
 'use client';
@@ -16,6 +16,7 @@ import {
   Building2,
   Grid,
   Users,
+  ShieldCheck,
   Store,
   Boxes,
   Briefcase,
@@ -120,7 +121,8 @@ export function OrganizationSidebar({ sidebarOpen }: OrganizationSidebarProps) {
         title: 'Store Operations & Fleet',
         items: [
           { name: 'Store Outlets & Hubs', href: '/organization/outlets', icon: Building2 },
-          { name: 'Staff Roster & Roles', href: '/organization/staff', icon: Users },
+          { name: 'Staff Directory', href: '/organization/staff', icon: Users },
+          { name: 'Dynamic Roles & RBAC', href: '/organization/roles', icon: ShieldCheck },
         ],
       },
     ];

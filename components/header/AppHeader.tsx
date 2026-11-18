@@ -25,7 +25,7 @@ import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
 import { getAuthUser, getAuthToken, logoutApi, getRoleDisplayName } from '@/lib/api';
 import { getMeetingNotificationsApi } from '@/lib/api/meetings';
-import { MeetingNotificationsDrawer } from '@/components/meetings/MeetingNotificationsDrawer';
+import { GlobalNotificationsDrawer } from './GlobalNotificationsDrawer';
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
 import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
@@ -482,7 +482,7 @@ export function AppHeader({
       </header>
 
       {/* Global Notifications Center Drawer */}
-      <MeetingNotificationsDrawer
+      <GlobalNotificationsDrawer
         isOpen={notificationsOpen}
         onClose={() => {
           setNotificationsOpen(false);

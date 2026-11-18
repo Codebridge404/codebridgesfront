@@ -1,3 +1,8 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-17
+ * Task: BD-0164 - Meeting Attachments Panel with Duplicate Prevention
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -28,6 +33,7 @@ import {
 } from '@/lib/api/meetings';
 import { cardStyles } from '@/lib/theme';
 import { useToast } from '@/components/common';
+import { MeetingAttachmentsSection } from './MeetingAttachmentsSection';
 
 export function MeetingMinutesView() {
   const toast = useToast();
@@ -405,6 +411,8 @@ export function MeetingMinutesView() {
               </div>
             )}
           </div>
+
+          {selectedMeetingId && <MeetingAttachmentsSection meetingId={selectedMeetingId} />}
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import {
   LayoutDashboard, Building2, Layers, CreditCard, Users, BarChart3, LifeBuoy,
   ShieldCheck, Sliders, DollarSign, Key, Lock, Server, Receipt, UserCheck, Shield,
   ChevronDown, ChevronRight, ExternalLink, Sparkles, LucideIcon, Settings,
+  MonitorSmartphone, ShieldAlert,
 } from 'lucide-react';
 import { SYSTEM_VERSION_DISPLAY } from '@/lib/version';
 
@@ -69,8 +70,10 @@ export const platformNavGroups: NavGroup[] = [
     title: 'Security & Governance',
     items: [
       { name: 'User Management', href: '/super-admin/users', icon: Users, badge: 'Admin' },
+      { name: 'Active User Sessions', href: '/super-admin/security/sessions', icon: MonitorSmartphone, badge: 'Live' },
       { name: 'Platform Settings', href: '/super-admin/settings', icon: Settings },
       { name: 'Dynamic Roles & RBAC', href: '/super-admin/security/roles', icon: Shield },
+      { name: 'Security Events & Threat Defense', href: '/super-admin/security/events', icon: ShieldAlert, badge: 'WAF' },
       { name: 'Immutable Audit Trail', href: '/super-admin/security/audit-logs', icon: Lock },
       { name: 'Admin Profile', href: '/super-admin/security/profile', icon: UserCheck },
     ],

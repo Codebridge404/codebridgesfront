@@ -27,6 +27,7 @@ export type PlatformSettingsTab =
   | 'tier-quotas'
   | 'integrations'
   | 'email-smtp'
+  | 'notification-providers'
   | 'policies'
   | 'alerts'
   | 'data-retention';
@@ -68,6 +69,12 @@ const PLATFORM_SECTIONS = [
     label: 'Email & SMTP Relay',
     description: 'Transactional mail server & tests',
     icon: Mail,
+  },
+  {
+    id: 'notification-providers' as PlatformSettingsTab,
+    label: 'Notification Providers',
+    description: 'Telegram, SMTP, Webhooks & SMS relays',
+    icon: BellRing,
   },
   {
     id: 'policies' as PlatformSettingsTab,

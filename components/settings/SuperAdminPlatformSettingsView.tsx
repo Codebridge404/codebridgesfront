@@ -36,6 +36,7 @@ import { EmailSmtpSettingsTab } from './EmailSmtpSettingsTab';
 import { SecuritySettingsTab } from './SecuritySettingsTab';
 import { AlertsWebhooksSettingsTab } from './AlertsWebhooksSettingsTab';
 import { DataRetentionSettingsTab } from './DataRetentionSettingsTab';
+import { NotificationProvidersStudioTab } from './notifications';
 
 const VALID_TABS: PlatformSettingsTab[] = [
   'general',
@@ -43,6 +44,7 @@ const VALID_TABS: PlatformSettingsTab[] = [
   'tier-quotas',
   'integrations',
   'email-smtp',
+  'notification-providers',
   'policies',
   'alerts',
   'data-retention',
@@ -233,6 +235,10 @@ function SuperAdminPlatformSettingsContent() {
               saved={saved}
               onSave={handleSave}
             />
+          )}
+
+          {activeTab === 'notification-providers' && (
+            <NotificationProvidersStudioTab isSuperAdmin={true} />
           )}
 
           {activeTab === 'policies' && (

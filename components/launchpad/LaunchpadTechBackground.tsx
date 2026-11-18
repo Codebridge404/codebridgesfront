@@ -21,9 +21,30 @@ export function LaunchpadTechBackground() {
     active: false,
   });
   const [isClient, setIsClient] = useState(false);
+  const [canvasStyle, setCanvasStyle] = useState<string>('mesh');
+
+  useEffect(() => {
+    const syncCanvasStyle = (event?: Event) => {
+      const customEvent = event as CustomEvent<{ canvasStyle?: string }> | undefined;
+      if (customEvent?.detail?.canvasStyle) {
+        setCanvasStyle(customEvent.detail.canvasStyle);
+        return;
+      }
+      const attr = document.documentElement.getAttribute('data-canvas-style');
+      if (attr) setCanvasStyle(attr);
+    };
+    syncCanvasStyle();
+    window.addEventListener('cb_theme_updated', syncCanvasStyle);
+    window.addEventListener('storage', syncCanvasStyle);
+    return () => {
+      window.removeEventListener('cb_theme_updated', syncCanvasStyle);
+      window.removeEventListener('storage', syncCanvasStyle);
+    };
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
+    if (canvasStyle !== 'grid') return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -55,11 +76,11 @@ export function LaunchpadTechBackground() {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [canvasStyle]);
 
-  // Canvas particle constellation & magnetic proximity network
+  // Canvas particle constellation & magnetic proximity network (Technical Grid mode only)
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient || canvasStyle !== 'grid') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -157,20 +178,34 @@ export function LaunchpadTechBackground() {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isClient]);
+  }, [isClient, canvasStyle]);
 
   return (
-    <div
-      ref={containerRef}
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
-      style={
-        {
-          '--mouse-x': '50vw',
-          '--mouse-y': '25vh',
-        } as React.CSSProperties
-      }
-    >
+    <>
+      {/* Aurora Mesh Surface Layer (subtle ambient glows, zero grid) */}
+      <div
+        data-tech-bg="mesh"
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none opacity-65"
+      >
+        <div className="absolute top-[-10%] left-[-5%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-blue-400/10 via-indigo-400/6 to-transparent blur-3xl transform-gpu" />
+        <div className="absolute top-[15%] right-[-10%] w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-cyan-400/10 via-blue-500/6 to-transparent blur-3xl transform-gpu" />
+        <div className="absolute bottom-[-15%] left-[20%] w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-purple-400/8 via-sky-400/6 to-transparent blur-3xl transform-gpu" />
+      </div>
+
+      {/* Technical Grid Surface Layer (engineering grid, cursor spotlight, radar, particles) */}
+      <div
+        ref={containerRef}
+        data-tech-bg="grid"
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
+        style={
+          {
+            '--mouse-x': '50vw',
+            '--mouse-y': '25vh',
+          } as React.CSSProperties
+        }
+      >
       {/* 1. Fluid Ambient Aurora Blooms */}
       <div className="absolute top-[-10%] left-[-5%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-blue-400/12 via-indigo-400/8 to-transparent blur-3xl transform-gpu animate-pulse" />
       <div className="absolute top-[15%] right-[-10%] w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-cyan-400/12 via-blue-500/8 to-transparent blur-3xl transform-gpu" />
@@ -248,7 +283,8 @@ export function LaunchpadTechBackground() {
 
       {/* 6. High-Performance Canvas Micro-Particle Constellation */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-75" />
-    </div>
+      </div>
+    </>
   );
 }
 

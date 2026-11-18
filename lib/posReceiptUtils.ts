@@ -15,12 +15,14 @@ export interface PosReceiptSettings {
   autoPrintReceipt: boolean;
   vatTin?: string;
   taxLabel?: string;
+  receiptStartNumber: number;
+  receiptDigits: number;
 }
 
 export const DEFAULT_RECEIPT_SETTINGS: PosReceiptSettings = {
   storeName: 'CodeBridges Store',
-  storeAddress: 'Main Commercial Ave, Phnom Penh',
-  storePhone: '+855 23 888 999',
+  storeAddress: '',
+  storePhone: '',
   receiptHeader: '',
   receiptFooter: 'Thank you for your purchase! Please come again.',
   receiptLogoUrl: '',
@@ -28,7 +30,15 @@ export const DEFAULT_RECEIPT_SETTINGS: PosReceiptSettings = {
   autoPrintReceipt: true,
   vatTin: '',
   taxLabel: 'VAT',
+  receiptStartNumber: 0,
+  receiptDigits: 5,
 };
+
+export function formatReceiptNumber(sequenceNumber: number, digits = 5): string {
+  const safeDigits = Math.min(12, Math.max(1, Number(digits) || 5));
+  const safeSeq = Math.max(0, Math.floor(Number(sequenceNumber) || 0));
+  return String(safeSeq).padStart(safeDigits, '0');
+}
 
 export function getPosReceiptSettings(): PosReceiptSettings {
   if (typeof window === 'undefined') {
@@ -62,16 +72,18 @@ export function getPosReceiptSettings(): PosReceiptSettings {
     DEFAULT_RECEIPT_SETTINGS.storeName;
 
   const storeAddress =
-    terminalSettings.outletAddress ||
-    authUser?.outlet?.address ||
-    authUser?.active_outlet?.address ||
-    DEFAULT_RECEIPT_SETTINGS.storeAddress;
+    terminalSettings.outletAddress !== undefined && terminalSettings.outletAddress !== null
+      ? terminalSettings.outletAddress
+      : authUser?.outlet?.address ||
+        authUser?.active_outlet?.address ||
+        DEFAULT_RECEIPT_SETTINGS.storeAddress;
 
   const storePhone =
-    terminalSettings.outletPhone ||
-    authUser?.outlet?.phone ||
-    authUser?.active_outlet?.phone ||
-    DEFAULT_RECEIPT_SETTINGS.storePhone;
+    terminalSettings.outletPhone !== undefined && terminalSettings.outletPhone !== null
+      ? terminalSettings.outletPhone
+      : authUser?.outlet?.phone ||
+        authUser?.active_outlet?.phone ||
+        DEFAULT_RECEIPT_SETTINGS.storePhone;
 
   const receiptHeader =
     terminalSettings.receiptHeader !== undefined && terminalSettings.receiptHeader !== null
@@ -93,7 +105,15 @@ export function getPosReceiptSettings(): PosReceiptSettings {
   const paperWidth = terminalSettings.paperWidth === '58mm' ? '58mm' : '80mm';
   const autoPrintReceipt = terminalSettings.autoPrintReceipt !== undefined ? Boolean(terminalSettings.autoPrintReceipt) : true;
   const vatTin = terminalSettings.vat_tin || terminalSettings.vatTin || '';
-  const taxLabel = terminalSettings.taxLabel || 'VAT';
+  const taxLabel = terminalSettings.taxLabel || terminalSettings.tax_label || 'VAT';
+  const receiptStartNumber =
+    terminalSettings.receiptStartNumber !== undefined && terminalSettings.receiptStartNumber !== null
+      ? Math.max(0, Number(terminalSettings.receiptStartNumber) || 0)
+      : DEFAULT_RECEIPT_SETTINGS.receiptStartNumber;
+  const receiptDigits =
+    terminalSettings.receiptDigits !== undefined && terminalSettings.receiptDigits !== null
+      ? Math.min(12, Math.max(1, Number(terminalSettings.receiptDigits) || 5))
+      : DEFAULT_RECEIPT_SETTINGS.receiptDigits;
 
   return {
     storeName,
@@ -106,6 +126,8 @@ export function getPosReceiptSettings(): PosReceiptSettings {
     autoPrintReceipt,
     vatTin,
     taxLabel,
+    receiptStartNumber,
+    receiptDigits,
   };
 }
 
@@ -115,15 +137,26 @@ export function mergeReceiptOutlet(outlet?: any): any {
     ...defaults,
     ...(outlet || {}),
     name: outlet?.name || defaults.storeName,
-    address: outlet?.address || defaults.storeAddress,
-    phone: outlet?.phone || defaults.storePhone,
-    receipt_header: outlet?.receipt_header !== undefined && outlet?.receipt_header !== null && outlet?.receipt_header !== ''
-      ? outlet.receipt_header
-      : defaults.receiptHeader,
-    receipt_footer: outlet?.receipt_footer !== undefined && outlet?.receipt_footer !== null && outlet?.receipt_footer !== ''
-      ? outlet.receipt_footer
-      : defaults.receiptFooter,
-    logo_url: outlet?.logo_url || outlet?.receipt_logo_url || defaults.receiptLogoUrl,
+    address:
+      outlet?.address !== undefined && outlet?.address !== null
+        ? outlet.address
+        : defaults.storeAddress,
+    phone:
+      outlet?.phone !== undefined && outlet?.phone !== null
+        ? outlet.phone
+        : defaults.storePhone,
+    receipt_header:
+      outlet?.receipt_header !== undefined && outlet?.receipt_header !== null
+        ? outlet.receipt_header
+        : defaults.receiptHeader,
+    receipt_footer:
+      outlet?.receipt_footer !== undefined && outlet?.receipt_footer !== null
+        ? outlet.receipt_footer
+        : defaults.receiptFooter,
+    logo_url:
+      outlet?.logo_url !== undefined && outlet?.logo_url !== null
+        ? outlet.logo_url
+        : outlet?.receipt_logo_url || defaults.receiptLogoUrl,
     vat_tin: outlet?.vat_tin || defaults.vatTin,
     paper_width: outlet?.paper_width || defaults.paperWidth,
   };

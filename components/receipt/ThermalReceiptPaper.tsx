@@ -1,6 +1,11 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-17
+ * Task: BD-0160 - POS Terminal & Current Order Dynamic Organization Receipt Template Integration
+ */
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { mergeReceiptOutlet } from '@/lib/posReceiptUtils';
 
 interface ThermalReceiptPaperProps {
@@ -13,6 +18,7 @@ interface ThermalReceiptPaperProps {
   is_reprint?: boolean;
   print_count?: number;
   print_badge?: string;
+  hide_badge?: boolean;
   formattedDate: string;
 }
 
@@ -26,9 +32,16 @@ export function ThermalReceiptPaper({
   is_reprint,
   print_count,
   print_badge,
+  hide_badge = false,
   formattedDate,
 }: ThermalReceiptPaperProps) {
-  const outlet = mergeReceiptOutlet(rawOutlet);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const outlet = mounted ? mergeReceiptOutlet(rawOutlet) : (rawOutlet || {});
   const primaryPayment = payments && payments.length > 0 ? payments[0] : null;
   const is58mm = outlet.paper_width === "58mm";
 
@@ -38,17 +51,19 @@ export function ThermalReceiptPaper({
       className={`${is58mm ? "w-[230px]" : "w-[300px]"} bg-white p-4 sm:p-5 border border-slate-200 shadow-sm rounded-xl font-mono text-[11px] leading-tight text-slate-900 select-text`}
     >
       {/* Original / Reprint Badge */}
-      <div className="text-center mb-3">
-        <span
-          className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-            is_reprint || (print_count && print_count > 1)
-              ? 'bg-amber-100 text-amber-800 border border-amber-300'
-              : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-          }`}
-        >
-          {print_badge || (is_reprint ? `*** REPRINT RECEIPT (#${print_count || 2}) ***` : '*** ORIGINAL RECEIPT ***')}
-        </span>
-      </div>
+      {!hide_badge && (
+        <div className="text-center mb-3">
+          <span
+            className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+              is_reprint || (print_count && print_count > 1)
+                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+            }`}
+          >
+            {print_badge || (is_reprint ? `*** REPRINT RECEIPT (#${print_count || 2}) ***` : '*** ORIGINAL RECEIPT ***')}
+          </span>
+        </div>
+      )}
 
       {/* Store / Outlet Branding Header */}
       <div className="text-center space-y-1 pb-3 border-b border-dashed border-slate-300">
@@ -114,30 +129,37 @@ export function ThermalReceiptPaper({
         )}
       </div>
 
-      {/* Line Items List */}
+      {/* Line Items List (4 Columns: Item, QTY, Price, Total) */}
       <div className="py-3 border-b border-dashed border-slate-300 space-y-2">
-        <div className="flex justify-between font-bold text-[10px] text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100">
-          <span>Item</span>
-          <span>Total</span>
+        <div className="grid grid-cols-12 gap-1 font-bold text-[9.5px] text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200">
+          <span className="col-span-5 text-left">Item</span>
+          <span className="col-span-2 text-center">QTY</span>
+          <span className="col-span-2 text-right">Price</span>
+          <span className="col-span-3 text-right">Total</span>
         </div>
 
         {lines && lines.length > 0 ? (
           lines.map((line: any, idx: number) => (
             <div key={idx} className="space-y-0.5">
-              <div className="flex justify-between font-semibold">
-                <span className="truncate max-w-[180px]">{line.product_name}</span>
-                <span>${Number(line.subtotal || 0).toFixed(2)}</span>
-              </div>
-              <div className="text-[10px] text-slate-500 flex justify-between">
-                <span>
-                  {line.quantity} x ${Number(line.unit_price || 0).toFixed(2)}
+              <div className="grid grid-cols-12 gap-1 items-start text-[10.5px]">
+                <span className="col-span-5 font-semibold text-left whitespace-normal break-words leading-snug">
+                  {line.product_name}
                 </span>
-                {Number(line.discount_amount) > 0 && (
-                  <span className="text-rose-600 font-bold">
-                    -${Number(line.discount_amount).toFixed(2)}
-                  </span>
-                )}
+                <span className="col-span-2 text-center tabular-nums text-slate-700">
+                  {line.quantity}
+                </span>
+                <span className="col-span-2 text-right tabular-nums text-slate-700">
+                  {Number(line.unit_price || 0).toFixed(2)}
+                </span>
+                <span className="col-span-3 text-right font-bold tabular-nums text-slate-900">
+                  ${Number(line.subtotal || 0).toFixed(2)}
+                </span>
               </div>
+              {Number(line.discount_amount) > 0 && (
+                <div className="text-[9.5px] text-rose-600 font-bold text-right">
+                  Disc: -${Number(line.discount_amount).toFixed(2)}
+                </div>
+              )}
             </div>
           ))
         ) : (

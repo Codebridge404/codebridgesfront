@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-05
- * Task: BD-0138
+ * Date: 2026-11-17
+ * Task: BD-0170 - System-Wide Light/Dark/System Theme & High-Contrast Engine
  */
 
 'use client';
@@ -30,6 +30,7 @@ export interface UserThemePreferences {
   theme: 'light' | 'dark' | 'system';
   fontSize: 'compact' | 'standard' | 'large';
   accentColor: string;
+  lightBgColor: string;
   canvasStyle: 'mesh' | 'flat' | 'grid';
   soundEnabled: boolean;
   highContrast: boolean;
@@ -39,10 +40,18 @@ const DEFAULT_PREFERENCES: UserThemePreferences = {
   theme: 'light',
   fontSize: 'standard',
   accentColor: '#2563EB',
+  lightBgColor: '#F8FAFD',
   canvasStyle: 'mesh',
   soundEnabled: true,
   highContrast: false,
 };
+
+const LIGHT_BG_COLORS = [
+  { name: 'Aurora Ice', hex: '#F8FAFD', desc: 'Default' },
+  { name: 'Enterprise Gray', hex: '#EAEBED', desc: 'RGB(234, 235, 237)' },
+  { name: 'Soft Sky', hex: '#F0F6FF', desc: 'Cool tint' },
+  { name: 'Pure White', hex: '#FFFFFF', desc: 'Clean paper' },
+];
 
 const ACCENT_COLORS = [
   { name: 'Royal Sapphire', hex: '#2563EB', hover: '#1D4ED8', subtle: '#EFF6FF', border: '#BFDBFE' },
@@ -63,8 +72,10 @@ export function applyUserThemePreferences(prefs: UserThemePreferences) {
   const isDark = prefs.theme === 'dark' || (prefs.theme === 'system' && prefersDark);
   if (isDark) {
     root.classList.add('dark');
+    root.style.colorScheme = 'dark';
   } else {
     root.classList.remove('dark');
+    root.style.colorScheme = 'light';
   }
 
   // 2. Font Size
@@ -73,12 +84,28 @@ export function applyUserThemePreferences(prefs: UserThemePreferences) {
   // 3. Canvas Style
   root.setAttribute('data-canvas-style', prefs.canvasStyle);
 
-  // 4. Accent Color
+  // 4. Accent Color (theme-aware subtle & border tokens)
   const selectedAccent = ACCENT_COLORS.find((c) => c.hex.toLowerCase() === prefs.accentColor.toLowerCase()) || ACCENT_COLORS[0];
   root.style.setProperty('--color-brand', selectedAccent.hex);
   root.style.setProperty('--color-brand-hover', selectedAccent.hover);
-  root.style.setProperty('--color-brand-subtle', selectedAccent.subtle);
-  root.style.setProperty('--color-brand-border', selectedAccent.border);
+  root.style.setProperty(
+    '--color-brand-subtle',
+    isDark ? `color-mix(in srgb, ${selectedAccent.hex} 18%, transparent)` : selectedAccent.subtle
+  );
+  root.style.setProperty(
+    '--color-brand-border',
+    isDark ? `color-mix(in srgb, ${selectedAccent.hex} 38%, transparent)` : selectedAccent.border
+  );
+
+  // 4b. Light Mode Background Color
+  if (!isDark) {
+    const lightBg = prefs.lightBgColor || '#F8FAFD';
+    root.style.setProperty('--color-light-bg', lightBg);
+    root.style.setProperty('--color-canvas', lightBg);
+  } else {
+    root.style.removeProperty('--color-light-bg');
+    root.style.removeProperty('--color-canvas');
+  }
 
   // 5. High Contrast
   if (prefs.highContrast) {
@@ -116,17 +143,15 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
   }, [isOpen]);
 
   const updatePreference = <K extends keyof UserThemePreferences>(key: K, value: UserThemePreferences[K]) => {
-    setPrefs((prev) => {
-      const next = { ...prev, [key]: value };
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('cb_user_preferences', JSON.stringify(next));
-        applyUserThemePreferences(next);
-        window.dispatchEvent(new CustomEvent('cb_theme_updated', { detail: next }));
-      }
-      setSavedBadge(true);
-      setTimeout(() => setSavedBadge(false), 1500);
-      return next;
-    });
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cb_user_preferences', JSON.stringify(next));
+      applyUserThemePreferences(next);
+      window.dispatchEvent(new CustomEvent('cb_theme_updated', { detail: next }));
+    }
+    setSavedBadge(true);
+    setTimeout(() => setSavedBadge(false), 1500);
   };
 
   const handleResetDefaults = () => {
@@ -297,33 +322,110 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
               </div>
             </div>
 
-            {/* 4. Canvas Background Glow */}
-            <div className="space-y-2">
+            {/* 3b. Light Mode Background Color */}
+            {prefs.theme !== 'dark' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                    <Sun className="w-3.5 h-3.5" />
+                    <span>Light Mode Background Color</span>
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500 cursor-pointer">
+                    <span>Custom:</span>
+                    <input
+                      type="color"
+                      value={prefs.lightBgColor || '#F8FAFD'}
+                      onChange={(e) => updatePreference('lightBgColor', e.target.value.toUpperCase())}
+                      className="w-6 h-6 rounded-lg border border-slate-300 cursor-pointer p-0 bg-transparent"
+                    />
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {LIGHT_BG_COLORS.map((bg) => {
+                    const active = (prefs.lightBgColor || '#F8FAFD').toLowerCase() === bg.hex.toLowerCase();
+                    return (
+                      <button
+                        key={bg.hex}
+                        type="button"
+                        onClick={() => updatePreference('lightBgColor', bg.hex)}
+                        className={`flex items-center gap-2 p-2.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                          active
+                            ? 'border-brand bg-brand/5 shadow-xs ring-1 ring-brand'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-lg shrink-0 border border-slate-300 flex items-center justify-center shadow-2xs"
+                          style={{ backgroundColor: bg.hex }}
+                        >
+                          {active && <Check className="w-3 h-3 text-brand" />}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-extrabold truncate text-slate-800 dark:text-slate-200">
+                            {bg.name}
+                          </p>
+                          <p className="text-[9px] text-slate-400 truncate">{bg.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 4. Canvas Background Surface with Live Mini-Previews */}
+            <div className="space-y-2.5">
               <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                 <Layout className="w-3.5 h-3.5" />
                 <span>Canvas Background Surface</span>
               </label>
               <div className="grid grid-cols-3 gap-2.5">
                 {[
-                  { id: 'mesh', label: 'Aurora Mesh', desc: 'Ambient glassmorphic glow' },
-                  { id: 'flat', label: 'Minimal Flat', desc: 'Solid uniform canvas' },
-                  { id: 'grid', label: 'Technical Grid', desc: 'Precision graph backdrop' },
+                  { id: 'flat', label: 'Minimal Flat', desc: 'Pure solid color' },
+                  { id: 'mesh', label: 'Aurora Mesh', desc: 'Soft ambient glow' },
+                  { id: 'grid', label: 'Technical Grid', desc: 'Engineering grid' },
                 ].map((item) => {
                   const active = prefs.canvasStyle === item.id;
+                  const previewBg = prefs.theme === 'dark' ? '#090d16' : (prefs.lightBgColor || '#F8FAFD');
                   return (
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => updatePreference('canvasStyle', item.id as any)}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                      onClick={() => updatePreference('canvasStyle', item.id as UserThemePreferences['canvasStyle'])}
+                      className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
                         active
                           ? 'border-brand bg-brand/5 dark:bg-brand/10 shadow-xs ring-1 ring-brand'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <Sparkles className={`w-3.5 h-3.5 ${active ? 'text-brand' : 'text-slate-400'}`} />
-                        {active && <Check className="w-3.5 h-3.5 text-brand" />}
+                      <div
+                        className="relative h-10 w-full rounded-xl mb-2 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden"
+                        style={{ backgroundColor: previewBg }}
+                      >
+                        {item.id === 'mesh' && (
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              background:
+                                'radial-gradient(circle at 15% 20%, rgba(37,99,235,0.22), transparent 55%), radial-gradient(circle at 85% 80%, rgba(139,92,246,0.18), transparent 55%)',
+                            }}
+                          />
+                        )}
+                        {item.id === 'grid' && (
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage:
+                                'linear-gradient(to right, rgba(37,99,235,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(37,99,235,0.18) 1px, transparent 1px)',
+                              backgroundSize: '10px 10px',
+                            }}
+                          />
+                        )}
+                        {active && (
+                          <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand text-white flex items-center justify-center shadow-xs">
+                            <Check className="w-2.5 h-2.5" />
+                          </span>
+                        )}
                       </div>
                       <p className={`text-xs font-black ${active ? 'text-brand' : 'text-slate-800 dark:text-slate-200'}`}>
                         {item.label}

@@ -6,12 +6,13 @@ import {
   Globe,
   QrCode,
   Smartphone,
+  Bell,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
 
-export type GlobalSettingsTab = 'profile' | 'regional' | 'payments' | 'sms';
+export type GlobalSettingsTab = 'profile' | 'regional' | 'payments' | 'sms' | 'notifications';
 
 export interface SettingsSubSidebarProps {
   activeTab: GlobalSettingsTab;
@@ -44,6 +45,12 @@ const GLOBAL_SECTIONS = [
     label: 'SMS Notifications',
     description: 'Telecom provider gateway & alerts',
     icon: Smartphone,
+  },
+  {
+    id: 'notifications' as GlobalSettingsTab,
+    label: 'Notification Providers',
+    description: 'Telegram bots, SMTP, webhooks & SMS relays',
+    icon: Bell,
   },
 ];
 

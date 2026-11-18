@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-04
- * Task: Cross-Outlet Stock Lookup in POS Terminal (BD-0132)
+ * Date: 2026-11-17
+ * Task: BD-0160 - POS Terminal & Current Order Dynamic Organization Receipt Template Integration
  */
 'use client';
 
@@ -104,6 +104,17 @@ function PosTerminalContent() {
           onOpenReturnsModal={() => t.setShowReturnModal(true)}
           onSyncOffline={t.autoSyncOfflineQueue}
           onOpenQuickSwitchModal={() => t.setShowQuickSwitchModal(true)}
+          orderContextSlot={
+            <PosOrderContextBar
+              variant="header"
+              customer={custTable.selectedCustomer}
+              table={custTable.selectedTable}
+              orderType={custTable.orderType}
+              onOpenCustomerModal={() => setShowCustomerModal(true)}
+              onOpenTableModal={() => setShowTableModal(true)}
+              tablesEnabled={tablesEnabled}
+            />
+          }
         />
       </div>
 
@@ -169,17 +180,8 @@ function PosTerminalContent() {
           </div>
         </div>
 
-        {/* Right 4 Cols: Order Context Bar + Pinned Cart Panel */}
-        <div className="lg:col-span-4 h-full flex flex-col min-h-0 overflow-hidden space-y-2">
-          <PosOrderContextBar
-            customer={custTable.selectedCustomer}
-            table={custTable.selectedTable}
-            orderType={custTable.orderType}
-            onOpenCustomerModal={() => setShowCustomerModal(true)}
-            onOpenTableModal={() => setShowTableModal(true)}
-            tablesEnabled={tablesEnabled}
-          />
-
+        {/* Right 4 Cols: Full-Height Pinned Cart Panel */}
+        <div className="lg:col-span-4 h-full flex flex-col min-h-0 overflow-hidden">
           <div className="flex-1 min-h-0">
             <PosCartPanel
               cart={t.cart}
@@ -205,6 +207,8 @@ function PosTerminalContent() {
               table={custTable.selectedTable}
               orderType={custTable.orderType}
               cashier={t.user}
+              outlet={t.activeOutlet}
+              receiptSettings={t.receiptSettings}
             />
           </div>
         </div>
