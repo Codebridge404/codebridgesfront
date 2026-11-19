@@ -138,7 +138,7 @@ export function TwoFactorRecoveryCodesModal({
   if (!isOpen || !mounted || typeof window === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
       <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/90 space-y-5 animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -282,7 +282,7 @@ export function TwoFactorRecoveryCodesModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all cursor-pointer shadow-md"
+              className="px-5 py-2 rounded-2xl bg-brand hover:bg-brand-hover-hover text-white text-xs font-bold transition-all cursor-pointer shadow-md"
             >
               Done &amp; Saved
             </button>

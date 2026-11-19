@@ -197,7 +197,7 @@ export function MeetingDashboardView() {
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
             activeTab === 'all'
-              ? 'bg-slate-900 text-white shadow-2xs'
+              ? 'bg-brand text-white shadow-2xs'
               : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
           }`}
         >

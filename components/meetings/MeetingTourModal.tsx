@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -12,6 +18,7 @@ import {
   Shield,
   HelpCircle,
 } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface MeetingTourModalProps {
   isOpen: boolean;
@@ -24,7 +31,7 @@ export function MeetingTourModal({ isOpen, onClose }: MeetingTourModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs select-none animate-in fade-in">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop select-none animate-in fade-in">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -182,6 +189,6 @@ export function MeetingTourModal({ isOpen, onClose }: MeetingTourModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

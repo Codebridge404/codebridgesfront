@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +18,7 @@ import { UserFormModal, PermissionsMatrixModal, UserFormData } from '@/component
 import { WorkspaceStaffDirectory } from './staff/WorkspaceStaffDirectory';
 import { WorkspaceStaffInviteSearch } from './staff/WorkspaceStaffInviteSearch';
 import { WorkspaceStaffCreateForm, AVAILABLE_ROLES } from './staff/WorkspaceStaffCreateForm';
+import { Portal } from '@/components/ui/Portal';
 
 interface WorkspaceStaffModalProps {
   isOpen: boolean;
@@ -171,8 +178,8 @@ export function WorkspaceStaffModal({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         {/* Backdrop Scrim */}
         <motion.div
           variants={scrimFade}
@@ -180,7 +187,7 @@ export function WorkspaceStaffModal({
           animate="animate"
           exit="exit"
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/45 backdrop-blur-md"
+          className="fixed inset-0 cb-modal-backdrop"
         />
 
         {/* Existing Security Modal: Permissions Matrix */}
@@ -309,6 +316,6 @@ export function WorkspaceStaffModal({
         </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

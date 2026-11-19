@@ -81,7 +81,7 @@ export function UserFormModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto transition-all"
+      className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto transition-all"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

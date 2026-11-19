@@ -28,7 +28,7 @@ import { getMeetingNotificationsApi } from '@/lib/api/meetings';
 import { GlobalNotificationsDrawer } from './GlobalNotificationsDrawer';
 import { isSuperAdmin as checkSuperAdmin, isOrgAdmin, isEmployee } from '@/lib/rbac';
 import { CreateOrgModal } from '@/components/tenant/CreateOrgModal';
-import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
+import { ProfileSettingsDrawer } from '@/components/settings/ProfileSettingsDrawer';
 import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 export interface AppHeaderProps {
@@ -52,14 +52,11 @@ export function AppHeader({
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [impersonating, setImpersonating] = useState<any>(null);
 
   // Live Notification Drawer state matching ModuleSuiteHeader
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const loadNotificationsCount = async () => {
     const token = getAuthToken();
@@ -157,16 +154,6 @@ export function AppHeader({
       clearInterval(notifInterval);
     };
   }, [initialUser]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowProfileDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const onLogout = async () => {
     setShowProfileDropdown(false);
@@ -372,11 +359,11 @@ export function AppHeader({
                 )}
               </button>
 
-              {/* Interactive User Profile Dropdown matching ModuleSuiteHeader */}
-              <div className="relative pl-2 sm:pl-3 border-l border-slate-200" ref={dropdownRef}>
+              {/* Interactive User Profile Slide Drawer Trigger */}
+              <div className="relative pl-2 sm:pl-3 border-l border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  onClick={() => setShowProfileDropdown(true)}
                   className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer text-left"
                 >
                   {avatarUrl ? (
@@ -393,70 +380,11 @@ export function AppHeader({
                   <div className="hidden md:block">
                     <p className="text-xs font-bold leading-tight text-slate-900 flex items-center gap-1">
                       {user.name || 'User'}
-                      <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                      <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform ${showProfileDropdown ? '-rotate-90' : ''}`} />
                     </p>
                     <p className="text-[10px] text-brand font-bold capitalize truncate max-w-[120px]">{roleTitle}</p>
                   </div>
                 </button>
-
-                {showProfileDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 font-sans text-slate-800 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-4 py-3 bg-slate-50/70 flex items-start gap-3">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={user.name || 'User'}
-                          className="w-10 h-10 rounded-xl object-cover shadow-2xs border border-slate-200 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shadow-2xs shrink-0">
-                          {userInitials}
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900 truncate">{user.name || 'User'}</p>
-                        <p className="text-[11px] text-slate-500 truncate">{user.email || ''}</p>
-                        <span className={`inline-block mt-1 ${badgeStyles.brand}`}>
-                          {roleTitle}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="py-1 text-xs">
-                      <Link
-                        href={profileRoute}
-                        onClick={() => setShowProfileDropdown(false)}
-                        className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                      >
-                        <User className="w-4 h-4 text-slate-400" />
-                        <span>My Profile</span>
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowProfileDropdown(false);
-                          setShowSettingsModal(true);
-                        }}
-                        className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors cursor-pointer"
-                      >
-                        <Settings className="w-4 h-4 text-slate-400" />
-                        <span>Setting</span>
-                      </button>
-                    </div>
-
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={onLogout}
-                        className="w-full px-4 py-2 text-left hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-2.5 cursor-pointer transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Sign Out</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             </>
           )}
@@ -473,13 +401,22 @@ export function AppHeader({
             }}
           />
         )}
-
-        {/* Global User Theme & Display Preferences Modal */}
-        <UserSettingsModal
-          isOpen={showSettingsModal}
-          onClose={() => setShowSettingsModal(false)}
-        />
       </header>
+
+      {/* Unified Right-Side Profile & Display Preferences Drawer */}
+      {user && (
+        <ProfileSettingsDrawer
+          isOpen={showProfileDropdown}
+          onClose={() => setShowProfileDropdown(false)}
+          side="right"
+          user={user}
+          avatarUrl={avatarUrl}
+          userInitials={userInitials}
+          roleTitle={roleTitle}
+          profileRoute={profileRoute}
+          onLogout={onLogout}
+        />
+      )}
 
       {/* Global Notifications Center Drawer */}
       <GlobalNotificationsDrawer

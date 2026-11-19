@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { Truck, Plus, Trash2, X, AlertCircle, Loader2 } from 'lucide-react';
 import { createTransferApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateTransferModalProps {
   isOpen: boolean;
@@ -91,7 +98,7 @@ export function CreateTransferModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
@@ -233,6 +240,6 @@ export function CreateTransferModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

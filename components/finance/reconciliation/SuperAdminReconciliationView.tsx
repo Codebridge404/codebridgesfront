@@ -266,7 +266,7 @@ export function SuperAdminReconciliationView() {
                             setSelectedException(ex);
                             setResolutionNotes(ex.notes || '');
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-hover-hover text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
                         >
                           Resolve Discrepancy
                         </button>

@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface CloseShiftModalProps {
   isOpen: boolean;
@@ -32,13 +39,13 @@ export function CloseShiftModal({
   onClose,
 }: CloseShiftModalProps) {
   return (
-    <AnimatePresence>
+    <Portal><AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 cb-modal-backdrop z-[9999] flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -141,6 +148,6 @@ export function CloseShiftModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

@@ -43,6 +43,7 @@ import {
 } from '@/lib/api/sessions';
 import { useToast, useConfirm } from '@/components/common';
 import { RefreshTokensPanel } from './RefreshTokensPanel';
+import { Portal } from '@/components/ui/Portal';
 
 export function ActiveSessionsStudioView() {
   const toast = useToast();
@@ -363,7 +364,7 @@ export function ActiveSessionsStudioView() {
               }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer ${
                 statusFilter === tab
-                  ? 'bg-slate-900 text-white shadow-xs'
+                  ? 'bg-brand text-white shadow-xs'
                   : 'bg-transparent text-slate-600 hover:bg-slate-200/60'
               }`}
             >
@@ -588,9 +589,9 @@ export function ActiveSessionsStudioView() {
       </div>
 
       {/* 5. Session Forensic Inspector Modal */}
-      <AnimatePresence>
+      <Portal><AnimatePresence>
         {inspectingSession && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -692,7 +693,7 @@ export function ActiveSessionsStudioView() {
                 <button
                   type="button"
                   onClick={() => setInspectingSession(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+                  className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs"
                 >
                   Close Inspector
                 </button>
@@ -700,12 +701,12 @@ export function ActiveSessionsStudioView() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence></Portal>
 
       {/* 6. Revoke Single Session Confirmation Modal */}
-      <AnimatePresence>
+      <Portal><AnimatePresence>
         {revokingSession && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -764,7 +765,7 @@ export function ActiveSessionsStudioView() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence></Portal>
         </>
       )}
     </div>

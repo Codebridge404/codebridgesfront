@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Key, X } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateApiKeyModalProps {
   showCreateModal: boolean;
@@ -32,7 +39,7 @@ export function CreateApiKeyModal({
   if (!showCreateModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -113,6 +120,6 @@ export function CreateApiKeyModal({
           </div>
         </form>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }

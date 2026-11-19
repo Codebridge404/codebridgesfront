@@ -22,6 +22,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { ApiRequestLogItem } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface RequestLogDetailModalProps {
   log: ApiRequestLogItem | null;
@@ -50,8 +51,8 @@ export function RequestLogDetailModal({
   const isSlow = log.duration_ms >= 500;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop">
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -325,7 +326,7 @@ export function RequestLogDetailModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }
 

@@ -1,9 +1,16 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { X, AlertTriangle, ShieldCheck, Ban } from 'lucide-react';
 import { cancelMeetingApi, MeetingItem } from '@/lib/api/meetings';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface MeetingCancelModalProps {
   isOpen: boolean;
@@ -56,7 +63,7 @@ export function MeetingCancelModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop animate-in fade-in duration-150">
       <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200/90 shadow-2xl p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
@@ -149,6 +156,6 @@ export function MeetingCancelModal({
           </button>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

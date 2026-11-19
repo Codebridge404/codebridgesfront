@@ -115,7 +115,7 @@ export function PosEodDispatchModal({
   if (!isOpen || !mounted || typeof window === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-150">
       <div className="bg-white w-full max-w-3xl rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/90 space-y-5 animate-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">

@@ -440,7 +440,7 @@ export function SuperAdminApiKeysView() {
           onClick={() => setActiveTab('clients')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'clients'
-              ? 'bg-slate-900 text-white shadow-xs font-black'
+              ? 'bg-brand text-white shadow-xs font-black'
               : 'text-slate-600 hover:bg-slate-200/60'
           }`}
         >
@@ -456,7 +456,7 @@ export function SuperAdminApiKeysView() {
           onClick={() => setActiveTab('personal')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'personal'
-              ? 'bg-slate-900 text-white shadow-xs font-black'
+              ? 'bg-brand text-white shadow-xs font-black'
               : 'text-slate-600 hover:bg-slate-200/60'
           }`}
         >
@@ -472,7 +472,7 @@ export function SuperAdminApiKeysView() {
           onClick={() => setActiveTab('telemetry')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'telemetry'
-              ? 'bg-slate-900 text-white shadow-xs font-black'
+              ? 'bg-brand text-white shadow-xs font-black'
               : 'text-slate-600 hover:bg-slate-200/60'
           }`}
         >

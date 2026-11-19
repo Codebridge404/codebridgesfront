@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -14,6 +20,7 @@ import {
 } from 'lucide-react';
 import { bulkCreateProductsApi } from '@/lib/api';
 import { downloadSampleProductCsvTemplate, parseProductImportCsv } from './productCsvUtils';
+import { Portal } from '@/components/ui/Portal';
 
 interface ProductImportModalProps {
   isOpen: boolean;
@@ -103,7 +110,7 @@ export function ProductImportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -278,6 +285,6 @@ export function ProductImportModal({
           </button>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

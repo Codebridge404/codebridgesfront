@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -22,6 +28,7 @@ import {
 } from '@/lib/api/meetings';
 import { cardStyles } from '@/lib/theme';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 export function BoardroomApprovalsView() {
   const toast = useToast();
@@ -258,7 +265,7 @@ export function BoardroomApprovalsView() {
 
       {/* Reject Reason Dialog */}
       {rejectingMeeting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+        <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop animate-in fade-in duration-150">
           <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div>
@@ -302,7 +309,7 @@ export function BoardroomApprovalsView() {
               </button>
             </div>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

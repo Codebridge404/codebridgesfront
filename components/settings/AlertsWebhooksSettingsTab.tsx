@@ -191,7 +191,7 @@ export function AlertsWebhooksSettingsTab({
             type="button"
             onClick={handleTestPing}
             disabled={testingWebhook}
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="px-4 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-hover-hover transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             {testingWebhook ? (
               <>

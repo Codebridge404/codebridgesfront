@@ -1,7 +1,14 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { KeyRound, X, Check, AlertCircle } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosAccessPinModalProps {
   isOpen: boolean;
@@ -31,7 +38,7 @@ export function PosAccessPinModal({
   if (!isOpen || !staff) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop">
       <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-200 shadow-2xl space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
@@ -113,6 +120,6 @@ export function PosAccessPinModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

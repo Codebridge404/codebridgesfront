@@ -200,7 +200,7 @@ export function EmailSmtpSettingsTab({
               type="button"
               onClick={handleSendTestEmail}
               disabled={sendingTest || !testEmail}
-              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand-hover-hover transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {sendingTest ? (
                 <>

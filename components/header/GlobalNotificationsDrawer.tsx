@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/meetings';
 import { getVarianceAlertsApi } from '@/lib/api/shifts';
 import { getPlatformAnnouncementsApi } from '@/lib/api/support';
+import { Portal } from '@/components/ui/Portal';
 
 interface GlobalNotificationsDrawerProps {
   isOpen: boolean;
@@ -185,7 +186,7 @@ export function GlobalNotificationsDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-2xs animate-in fade-in duration-200">
+    <Portal><div className="fixed inset-0 z-[9999] flex justify-end cb-modal-backdrop animate-in fade-in duration-200">
       <div className="w-full max-w-sm sm:max-w-md bg-white h-full shadow-2xl border-l border-slate-200/90 flex flex-col justify-between animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 space-y-3">
@@ -318,6 +319,6 @@ export function GlobalNotificationsDrawer({
           )}
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

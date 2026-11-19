@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { X, Landmark, Loader2, CheckCircle2 } from 'lucide-react';
 import { createBankAccountApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface AddBankAccountModalProps {
   isOpen: boolean;
@@ -47,7 +54,7 @@ export function AddBankAccountModal({ isOpen, onClose, onSuccess }: AddBankAccou
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans select-none">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans select-none">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -155,7 +162,7 @@ export function AddBankAccountModal({ isOpen, onClose, onSuccess }: AddBankAccou
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }
 

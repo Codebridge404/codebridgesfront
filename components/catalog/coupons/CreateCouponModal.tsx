@@ -1,6 +1,13 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateCouponModalProps {
   showModal: boolean;
@@ -32,7 +39,7 @@ export function CreateCouponModal({
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-4">
         <h3 className="text-base font-extrabold text-slate-900">Create Promotional Coupon</h3>
 
@@ -103,6 +110,6 @@ export function CreateCouponModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

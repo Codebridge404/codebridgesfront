@@ -51,7 +51,7 @@ export function SuperAdminTablesView() {
         <button
           onClick={loadTables}
           disabled={loading}
-          className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Floor Map
         </button>

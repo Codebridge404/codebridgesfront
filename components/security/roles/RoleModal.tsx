@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, Check, Sparkles, RefreshCw } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface PermissionItem {
   id: string;
@@ -41,9 +48,9 @@ export const RoleModal: React.FC<RoleModalProps> = ({
   groupedPermissions,
 }) => {
   return (
-    <AnimatePresence>
+    <Portal><AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -168,6 +175,6 @@ export const RoleModal: React.FC<RoleModalProps> = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 };

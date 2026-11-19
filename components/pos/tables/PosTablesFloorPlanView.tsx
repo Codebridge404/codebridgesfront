@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -20,6 +26,7 @@ import {
 } from 'lucide-react';
 import { getTablesApi, updateTableStatusApi, createTableApi } from '@/lib/api';
 import { PosSplitBillModal } from './PosSplitBillModal';
+import { Portal } from '@/components/ui/Portal';
 
 export interface RestaurantTable {
   id: string | number;
@@ -183,7 +190,7 @@ export function PosTablesFloorPlanView() {
               onClick={() => setSelectedZone(z)}
               className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0 cursor-pointer ${
                 selectedZone === z
-                  ? 'bg-slate-900 text-white shadow-xs'
+                  ? 'bg-brand text-white shadow-xs'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -307,7 +314,7 @@ export function PosTablesFloorPlanView() {
 
       {/* Add Table Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <form
             onSubmit={handleCreateTable}
             className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4"
@@ -378,7 +385,7 @@ export function PosTablesFloorPlanView() {
               </button>
             </div>
           </form>
-        </div>
+        </div></Portal>
       )}
       {/* Split Bill Modal */}
       {splittingTable && (

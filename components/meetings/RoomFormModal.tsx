@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,6 +14,7 @@ import {
   MeetingRoomItem,
 } from '@/lib/api';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface RoomFormModalProps {
   isOpen: boolean;
@@ -75,7 +82,7 @@ export function RoomFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 select-none">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 select-none">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200/90 shadow-2xl p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
@@ -156,6 +163,6 @@ export function RoomFormModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

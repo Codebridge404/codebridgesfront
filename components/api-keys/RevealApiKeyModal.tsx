@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, AlertTriangle, Check, Copy } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 export interface NewKeyData {
   key: string;
@@ -26,7 +33,7 @@ export function RevealApiKeyModal({
   if (!newKeyData) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -73,12 +80,12 @@ export function RevealApiKeyModal({
         <div className="pt-2">
           <button
             onClick={onClose}
-            className="w-full py-3.5 bg-slate-900 hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+            className="w-full py-3.5 bg-brand hover:bg-brand-hover-hover text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
           >
             I Have Saved My Secret API Key
           </button>
         </div>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }

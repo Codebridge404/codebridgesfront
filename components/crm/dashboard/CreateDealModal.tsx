@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { Briefcase, X, Loader2 } from 'lucide-react';
 import { Deal } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export interface StageOption {
   key: string;
@@ -47,7 +54,7 @@ export function CreateDealModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans">
       <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-200 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <h3 className="font-black text-base text-slate-900 flex items-center gap-2">
@@ -157,6 +164,6 @@ export function CreateDealModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

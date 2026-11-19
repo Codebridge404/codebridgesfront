@@ -258,7 +258,7 @@ export function ApiRequestLogsStudioView() {
                 }}
                 className={`px-2.5 py-1 rounded-lg text-2xs font-black transition-all cursor-pointer ${
                   method === m
-                    ? 'bg-slate-900 text-white shadow-xs'
+                    ? 'bg-brand text-white shadow-xs'
                     : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600'
                 }`}
               >

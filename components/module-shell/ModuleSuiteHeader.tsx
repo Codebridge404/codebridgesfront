@@ -15,7 +15,7 @@ import { getMeetingNotificationsApi } from '@/lib/api/meetings';
 import { GlobalNotificationsDrawer } from '@/components/header/GlobalNotificationsDrawer';
 import { AppIcons } from '@/components/ui/icons';
 import { badgeStyles } from '@/lib/theme';
-import { UserSettingsModal } from '@/components/settings/UserSettingsModal';
+import { ProfileSettingsDrawer } from '@/components/settings/ProfileSettingsDrawer';
 import { resolveMediaUrl } from '@/lib/mediaUtils';
 
 interface ModuleSuiteHeaderProps {
@@ -37,11 +37,8 @@ export function ModuleSuiteHeader({
   const [activeOrg, setActiveOrg] = useState<string>('CodeBridges');
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
-
-  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const loadNotificationsCount = async () => {
     const token = getAuthToken();
@@ -87,14 +84,6 @@ export function ModuleSuiteHeader({
 
     window.addEventListener('cb_org_changed', handleOrgChange);
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
     if (getAuthToken()) {
       loadNotificationsCount();
     }
@@ -106,7 +95,6 @@ export function ModuleSuiteHeader({
 
     return () => {
       window.removeEventListener('cb_org_changed', handleOrgChange);
-      document.removeEventListener('mousedown', handleClickOutside);
       clearInterval(interval);
     };
   }, []);
@@ -216,11 +204,11 @@ export function ModuleSuiteHeader({
             )}
           </button>
 
-          {/* Interactive User Profile Dropdown matching AppHeader */}
-          <div className="relative pl-2 sm:pl-3 border-l border-slate-200" ref={userMenuRef}>
+          {/* Interactive User Profile Slide Drawer Trigger */}
+          <div className="relative pl-2 sm:pl-3 border-l border-slate-200">
             <button
               type="button"
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              onClick={() => setUserMenuOpen(true)}
               className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer text-left"
             >
               {avatarUrl ? (
@@ -237,71 +225,11 @@ export function ModuleSuiteHeader({
               <div className="hidden md:block">
                 <p className="text-xs font-bold leading-tight text-slate-900 flex items-center gap-1">
                   {user?.name || 'User'}
-                  <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  <AppIcons.Dropdown className={`w-3 h-3 text-slate-400 transition-transform ${userMenuOpen ? '-rotate-90' : ''}`} />
                 </p>
                 <p className="text-[10px] text-brand font-bold capitalize truncate max-w-[120px]">{roleTitle}</p>
               </div>
             </button>
-
-            {/* User Menu Dropdown matching AppHeader styling */}
-            {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 font-sans text-slate-800 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-4 py-3 bg-slate-50/70 flex items-start gap-3">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={user?.name || 'User'}
-                      className="w-10 h-10 rounded-xl object-cover shadow-2xs border border-slate-200 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand to-brand-hover text-white font-black flex items-center justify-center text-xs shadow-2xs shrink-0">
-                      {userInitials}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'User'}</p>
-                    <p className="text-[11px] text-slate-500 truncate">{user?.email || ''}</p>
-                    <span className={`inline-block mt-1 ${badgeStyles.brand}`}>
-                      {roleTitle}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="py-1 text-xs">
-                  <Link
-                    href={profileRoute}
-                    onClick={() => setUserMenuOpen(false)}
-                    className="px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors"
-                  >
-                    <User className="w-4 h-4 text-slate-400" />
-                    <span>My Profile</span>
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      setShowSettingsModal(true);
-                    }}
-                    className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2.5 font-bold text-slate-700 hover:text-brand transition-colors cursor-pointer"
-                  >
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    <span>Setting</span>
-                  </button>
-                </div>
-
-                {/* Sign Out */}
-                <div className="pt-1">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-2 text-left hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-2.5 cursor-pointer transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -315,10 +243,17 @@ export function ModuleSuiteHeader({
         }}
       />
 
-      {/* Global User Theme & Display Preferences Modal */}
-      <UserSettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
+      {/* Unified Right-Side Profile & Display Preferences Drawer */}
+      <ProfileSettingsDrawer
+        isOpen={userMenuOpen}
+        onClose={() => setUserMenuOpen(false)}
+        side="right"
+        user={user}
+        avatarUrl={avatarUrl}
+        userInitials={userInitials}
+        roleTitle={roleTitle}
+        profileRoute={profileRoute}
+        onLogout={handleLogout}
       />
     </>
   );

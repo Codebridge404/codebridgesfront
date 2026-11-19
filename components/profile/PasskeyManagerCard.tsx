@@ -35,6 +35,7 @@ import {
   getPasskeyAssertion,
   isWebAuthnSupported,
 } from '@/lib/webauthn';
+import { Portal } from '@/components/ui/Portal';
 
 type ReauthAction =
   | { type: 'enroll' }
@@ -307,7 +308,7 @@ export function PasskeyManagerCard() {
 
       {/* Step-Up Reauthentication Modal */}
       {pendingAction && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-slate-900">
@@ -387,7 +388,7 @@ export function PasskeyManagerCard() {
               </div>
             </form>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

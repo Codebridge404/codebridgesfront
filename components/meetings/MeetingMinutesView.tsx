@@ -34,6 +34,7 @@ import {
 import { cardStyles } from '@/lib/theme';
 import { useToast } from '@/components/common';
 import { MeetingAttachmentsSection } from './MeetingAttachmentsSection';
+import { Portal } from '@/components/ui/Portal';
 
 export function MeetingMinutesView() {
   const toast = useToast();
@@ -418,7 +419,7 @@ export function MeetingMinutesView() {
 
       {/* Formal Executive Printable MOM Modal */}
       {showExportModal && selectedMeeting && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 space-y-6 shadow-2xl border border-slate-200 font-sans">
             {/* Modal Controls Bar */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
@@ -570,7 +571,7 @@ export function MeetingMinutesView() {
               </div>
             </div>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

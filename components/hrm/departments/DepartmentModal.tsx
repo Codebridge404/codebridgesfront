@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Building2, X } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface DepartmentFormData {
   name: string;
@@ -32,7 +39,7 @@ export const DepartmentModal: React.FC<DepartmentModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -101,6 +108,6 @@ export const DepartmentModal: React.FC<DepartmentModalProps> = ({
           </div>
         </form>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 };

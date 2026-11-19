@@ -77,7 +77,7 @@ export function Tabs({
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer',
               isActive
-                ? 'bg-slate-900 text-white shadow-xs'
+                ? 'bg-brand text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             )}
           >

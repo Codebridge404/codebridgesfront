@@ -1,9 +1,16 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { SupportTicket } from './types';
+import { Portal } from '@/components/ui/Portal';
 
 interface TicketReplyModalProps {
   ticket: SupportTicket | null;
@@ -38,8 +45,8 @@ export function TicketReplyModal({ ticket, isOpen, onClose, onSave }: TicketRepl
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -161,6 +168,6 @@ export function TicketReplyModal({ ticket, isOpen, onClose, onSave }: TicketRepl
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

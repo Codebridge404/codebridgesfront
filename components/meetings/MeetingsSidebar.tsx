@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   CalendarClock,
   Calendar,
@@ -27,8 +27,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { resolveMediaUrl } from '@/lib/mediaUtils';
-import { getAuthUser, getRoleDisplayName } from '@/lib/api';
+import { getAuthUser, getRoleDisplayName, logoutApi } from '@/lib/api';
 import { getMeetingsApi, getMyActionItemsApi } from '@/lib/api/meetings';
+import { ProfileSettingsDrawer } from '@/components/settings/ProfileSettingsDrawer';
 
 interface MeetingsSidebarProps {
   sidebarOpen: boolean;
@@ -36,8 +37,10 @@ interface MeetingsSidebarProps {
 }
 
 export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSidebarProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [orgName, setOrgName] = useState<string>('My Workspace');
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
   const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
@@ -199,11 +202,12 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
       <div className="pt-3 border-t border-slate-200/80 space-y-2 mt-4 shrink-0">
         {sidebarOpen ? (
           <>
-            {/* User Profile Mini-Card */}
-            <Link
-              href="/profile"
-              className="p-2.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 flex items-center gap-2.5 transition-all cursor-pointer group"
-              title="Manage Your Profile Settings"
+            {/* User Profile Mini-Card (opens Left Slide Drawer) */}
+            <button
+              type="button"
+              onClick={() => setProfileDrawerOpen(true)}
+              className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-brand-subtle/50 border border-slate-200/80 hover:border-brand-border flex items-center gap-2.5 transition-all cursor-pointer group"
+              title="Open Profile & Display Preferences"
             >
               {avatarUrl ? (
                 <img
@@ -212,18 +216,18 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
                   className="w-8 h-8 rounded-xl object-cover border border-slate-200 shrink-0 shadow-2xs"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="w-8 h-8 rounded-xl bg-brand text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                   {userInitials}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                <p className="text-xs font-bold text-slate-900 truncate group-hover:text-brand transition-colors">
                   {user?.name || 'My Profile'}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate">{roleName}</p>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-500 transition-colors shrink-0" />
-            </Link>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-brand transition-colors shrink-0" />
+            </button>
 
             {/* Digital Door Signage Kiosk Button */}
             <Link
@@ -241,21 +245,40 @@ export function MeetingsSidebar({ sidebarOpen, onOpenBookingModal }: MeetingsSid
           </>
         ) : (
           <div className="flex justify-center" title={user?.name || 'My Profile'}>
-            <Link
-              href="/profile"
-              className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200/80 hover:border-indigo-300 transition-colors"
+            <button
+              type="button"
+              onClick={() => setProfileDrawerOpen(true)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200/80 hover:border-brand-border transition-colors cursor-pointer"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="User" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center">
+                <div className="w-full h-full bg-brand text-white font-black text-xs flex items-center justify-center">
                   {userInitials}
                 </div>
               )}
-            </Link>
+            </button>
           </div>
         )}
       </div>
+
+      {/* Unified Left-Side Profile & Display Preferences Drawer */}
+      {user && (
+        <ProfileSettingsDrawer
+          isOpen={profileDrawerOpen}
+          onClose={() => setProfileDrawerOpen(false)}
+          side="left"
+          user={user}
+          avatarUrl={avatarUrl}
+          userInitials={userInitials}
+          roleTitle={roleName}
+          profileRoute={user?.role === 'super_admin' ? '/super-admin/security/profile' : '/profile'}
+          onLogout={async () => {
+            await logoutApi();
+            router.push('/login');
+          }}
+        />
+      )}
     </aside>
   );
 }

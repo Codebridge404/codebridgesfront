@@ -27,6 +27,7 @@ import {
   getReorderSuggestionsApi,
   autoReorderPurchaseOrdersApi,
 } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface ReorderItem {
   product_id: number;
@@ -186,7 +187,7 @@ export const ReorderSuggestionsDrawer: React.FC<ReorderSuggestionsDrawerProps> =
     .reduce((acc, curr) => acc + Number(curr.items_count || 0), 0);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/40 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
+    <Portal><div className="fixed inset-0 z-[9999] overflow-hidden cb-modal-backdrop flex justify-end animate-in fade-in duration-200">
       <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col font-sans border-l border-slate-200 text-slate-800">
         {/* 1. Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
@@ -458,7 +459,7 @@ export const ReorderSuggestionsDrawer: React.FC<ReorderSuggestionsDrawerProps> =
           </div>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 };
 

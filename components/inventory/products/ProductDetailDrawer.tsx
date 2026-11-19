@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useRef } from 'react';
@@ -24,6 +30,7 @@ import {
 } from 'lucide-react';
 import { uploadProductImageApi } from '@/lib/api';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 export interface ProductDetailDrawerProps {
   isOpen: boolean;
@@ -111,15 +118,15 @@ export function ProductDetailDrawer({
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden font-sans select-none">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] overflow-hidden font-sans select-none">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          className="absolute inset-0 cb-modal-backdrop transition-opacity"
         />
 
         <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
@@ -491,6 +498,6 @@ export function ProductDetailDrawer({
           </motion.div>
         </div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

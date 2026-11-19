@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +17,7 @@ import {
 import { ModuleCard } from '@/components/ui';
 import { useToast } from '@/components/common';
 import { PlatformModuleRecord, createPlatformModuleApi, updatePlatformModuleApi } from '@/lib/api/modules';
+import { Portal } from '@/components/ui/Portal';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
   Store, Boxes, Users, DollarSign, Briefcase, Zap, CalendarClock,
@@ -243,7 +250,7 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
   const previewLogoUrl = iconMode !== 'vector' ? (logoData || logoUrl || undefined) : undefined;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans animate-in fade-in duration-150">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
@@ -613,6 +620,6 @@ export function PlatformModuleModal({ isOpen, onClose, module, onSaved }: Platfo
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

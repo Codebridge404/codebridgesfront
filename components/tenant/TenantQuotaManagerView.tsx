@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -24,6 +30,7 @@ import { apiFetch } from '@/lib/api';
 import { Tenant, TIER_CONFIG } from './types';
 import { useToast } from '@/components/common';
 import { getTierDefaultQuotas } from '@/lib/platformSettings';
+import { Portal } from '@/components/ui/Portal';
 
 export function TenantQuotaManagerView() {
   const toast = useToast();
@@ -681,7 +688,7 @@ export function TenantQuotaManagerView() {
 
       {/* 5. Adjust Quota Limits Modal (Apple Fluid Design) */}
       {editQuotasModalOpen && selectedTenant && (
-        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4 select-none">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 select-none">
           <div className="relative w-full max-w-lg bg-white/90 backdrop-blur-2xl rounded-3xl border border-white/80 shadow-2xl p-6 sm:p-7 space-y-5 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Ambient Modal Glow */}
             <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 bg-brand/10 rounded-full blur-2xl" />
@@ -861,7 +868,7 @@ export function TenantQuotaManagerView() {
               </div>
             </form>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

@@ -1,9 +1,16 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, X, Plus, Minus, Store, Truck, QrCode } from 'lucide-react';
 import { ShopProduct } from './ShopProductGrid';
+import { Portal } from '@/components/ui/Portal';
 
 export interface CartItem {
   product: ShopProduct;
@@ -56,9 +63,9 @@ export const ShopCartDrawer: React.FC<ShopCartDrawerProps> = ({
   onSubmitCheckout,
 }) => {
   return (
-    <AnimatePresence>
+    <Portal><AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex justify-end">
+        <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex justify-end">
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -237,6 +244,6 @@ export const ShopCartDrawer: React.FC<ShopCartDrawerProps> = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 };

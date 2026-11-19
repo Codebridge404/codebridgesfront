@@ -42,6 +42,7 @@ interface CrossTenantUsersTableProps {
   onToggleActive: (id: string | number, currentActive: boolean | number) => void;
   onDeleteUser?: (id: string | number, name: string) => void;
   onViewUser?: (user: CrossTenantUser) => void;
+  currentUserId?: string | number | null;
 }
 
 export function CrossTenantUsersTable({
@@ -57,6 +58,7 @@ export function CrossTenantUsersTable({
   onToggleActive,
   onDeleteUser,
   onViewUser,
+  currentUserId,
 }: CrossTenantUsersTableProps) {
   if (loading) {
     return (
@@ -159,6 +161,7 @@ export function CrossTenantUsersTable({
         <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
           {users.map((u) => {
             const isSelected = selectedIds.includes(u.id);
+            const isSelf = currentUserId != null && String(u.id) === String(currentUserId);
             return (
               <tr
                 key={u.id}
@@ -260,20 +263,22 @@ export function CrossTenantUsersTable({
                       <Key className="w-3 h-3 text-slate-500" />
                       <span>Reset</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => onToggleActive(u.id, u.is_active)}
-                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs hover:shadow-xs active:scale-95 ${
-                        u.is_active
-                          ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
-                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
-                      }`}
-                      title={u.is_active ? 'Suspend Account (Revoke Sign-in Access)' : 'Activate Account (Grant Sign-in Access)'}
-                    >
-                      {u.is_active ? <Ban className="w-3 h-3 text-amber-600" /> : <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                      <span>{u.is_active ? 'Suspend' : 'Activate'}</span>
-                    </button>
-                    {onDeleteUser && (
+                    {!isSelf && (
+                      <button
+                        type="button"
+                        onClick={() => onToggleActive(u.id, u.is_active)}
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1 shadow-2xs hover:shadow-xs active:scale-95 ${
+                          u.is_active
+                            ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        }`}
+                        title={u.is_active ? 'Suspend Account (Revoke Sign-in Access)' : 'Activate Account (Grant Sign-in Access)'}
+                      >
+                        {u.is_active ? <Ban className="w-3 h-3 text-amber-600" /> : <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                        <span>{u.is_active ? 'Suspend' : 'Activate'}</span>
+                      </button>
+                    )}
+                    {onDeleteUser && !isSelf && (
                       <button
                         type="button"
                         onClick={() => onDeleteUser(u.id, u.name)}
@@ -283,6 +288,14 @@ export function CrossTenantUsersTable({
                         <Trash2 className="w-3 h-3 text-rose-600" />
                         <span>Delete</span>
                       </button>
+                    )}
+                    {isSelf && (
+                      <span
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 text-[10px] font-bold select-none"
+                        title="Your current active Super Admin session cannot be suspended or deleted"
+                      >
+                        Current Session
+                      </span>
                     )}
                   </div>
                 </td>

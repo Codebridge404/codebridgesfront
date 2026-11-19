@@ -27,6 +27,7 @@ import {
   createNotificationProviderApi,
   updateNotificationProviderApi,
 } from '@/lib/api/notificationProviders';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateNotificationProviderModalProps {
   isOpen: boolean;
@@ -265,7 +266,7 @@ export function CreateNotificationProviderModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans animate-fade-in">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans animate-fade-in">
       <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200/90 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
@@ -639,7 +640,7 @@ export function CreateNotificationProviderModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }
 

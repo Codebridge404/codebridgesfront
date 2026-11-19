@@ -31,6 +31,7 @@ import {
   deleteUserApi,
   getSuperAdminTenantsApi,
   getAuthToken,
+  getAuthUser,
   apiFetch,
 } from '@/lib/api';
 import { CrossTenantUser } from './types';
@@ -42,6 +43,7 @@ import { appleSpring } from '@/lib/animations';
 
 export function SuperAdminPlatformUsersView() {
   const confirm = useConfirm();
+  const currentUserId = useMemo(() => getAuthUser()?.id ?? null, []);
   const [users, setUsers] = useState<CrossTenantUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -256,16 +258,20 @@ export function SuperAdminPlatformUsersView() {
   };
 
   const handleBulkSuspend = async () => {
-    if (selectedUserIds.length === 0) return;
+    const targetIds = selectedUserIds.filter((id) => currentUserId == null || String(id) !== String(currentUserId));
+    if (targetIds.length === 0) {
+      showToast('You cannot suspend your own active Super Admin account.');
+      return;
+    }
     setBulkActionLoading(true);
     try {
       await Promise.allSettled(
-        selectedUserIds.map((id) => updateUserApi(id, { is_active: false }))
+        targetIds.map((id) => updateUserApi(id, { is_active: false }))
       );
       setUsers((prev) =>
-        prev.map((u) => (selectedUserIds.includes(u.id) ? { ...u, is_active: false } : u))
+        prev.map((u) => (targetIds.includes(u.id) ? { ...u, is_active: false } : u))
       );
-      showToast(`Suspended ${selectedUserIds.length} user accounts successfully.`);
+      showToast(`Suspended ${targetIds.length} user accounts successfully.`);
       setSelectedUserIds([]);
     } catch {
       showToast('Bulk suspension encountered an error.');
@@ -275,10 +281,14 @@ export function SuperAdminPlatformUsersView() {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedUserIds.length === 0) return;
+    const targetIds = selectedUserIds.filter((id) => currentUserId == null || String(id) !== String(currentUserId));
+    if (targetIds.length === 0) {
+      showToast('You cannot delete your own active Super Admin account.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Bulk Delete Users',
-      description: `Are you sure you want to permanently delete ${selectedUserIds.length} selected user accounts? They will be removed from the database and all organizations. This cannot be undone.`,
+      description: `Are you sure you want to permanently delete ${targetIds.length} selected user accounts? They will be removed from the database and all organizations. This cannot be undone.`,
       confirmText: 'Delete Selected',
       variant: 'danger',
     });
@@ -287,10 +297,10 @@ export function SuperAdminPlatformUsersView() {
     setBulkActionLoading(true);
     try {
       const results = await Promise.allSettled(
-        selectedUserIds.map((id) => deleteUserApi(id))
+        targetIds.map((id) => deleteUserApi(id))
       );
       const successCount = results.filter((r) => r.status === 'fulfilled').length;
-      setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
+      setUsers((prev) => prev.filter((u) => !targetIds.includes(u.id)));
       showToast(`Permanently deleted ${successCount} user accounts.`);
       setSelectedUserIds([]);
     } catch {
@@ -301,6 +311,10 @@ export function SuperAdminPlatformUsersView() {
   };
 
   const handleDeleteUser = async (id: string | number, name: string) => {
+    if (currentUserId != null && String(id) === String(currentUserId)) {
+      showToast('You cannot delete your own active Super Admin account.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Delete User Account',
       description: `Are you sure you want to permanently delete "${name}"? This account will be completely removed from the database and all organizations. This action cannot be undone.`,
@@ -402,7 +416,7 @@ export function SuperAdminPlatformUsersView() {
             loadRealUsers();
           }}
           disabled={refreshing || loading}
-          className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-sm flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+          className="px-4 py-2.5 rounded-2xl bg-brand hover:bg-brand-hover-hover text-white font-extrabold text-xs shadow-sm flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing || loading ? 'animate-spin' : ''}`} />
           <span>{refreshing || loading ? 'Querying API...' : 'Refresh Users'}</span>
@@ -632,6 +646,7 @@ export function SuperAdminPlatformUsersView() {
           onToggleActive={handleToggleActive}
           onDeleteUser={handleDeleteUser}
           onViewUser={(u) => setViewingUser(u)}
+          currentUserId={currentUserId}
         />
       </div>
 
@@ -639,6 +654,7 @@ export function SuperAdminPlatformUsersView() {
       {viewingUser && (
         <UserDetailModal
           user={viewingUser}
+          currentUserId={currentUserId}
           onClose={() => setViewingUser(null)}
           onResetPassword={(u) => {
             handleResetPassword(u.email, u.id);

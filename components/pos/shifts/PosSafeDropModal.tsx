@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -12,6 +18,7 @@ import {
   AlertTriangle,
   Key,
 } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosSafeDropModalProps {
   isOpen: boolean;
@@ -64,7 +71,7 @@ export function PosSafeDropModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -179,6 +186,6 @@ export function PosSafeDropModal({
           </div>
         </form>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }

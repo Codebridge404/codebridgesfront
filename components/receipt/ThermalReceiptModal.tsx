@@ -11,6 +11,7 @@ import { Printer, X, CheckCircle2, Mail } from 'lucide-react';
 import { ThermalReceiptPaper } from './ThermalReceiptPaper';
 import { getPosReceiptSettings, mergeReceiptOutlet } from '@/lib/posReceiptUtils';
 import { PosDigitalReceiptModal } from '@/components/pos/terminal/PosDigitalReceiptModal';
+import { Portal } from '@/components/ui/Portal';
 
 interface ThermalReceiptModalProps {
   receiptData?: {
@@ -88,7 +89,7 @@ export function ThermalReceiptModal({
     : new Date().toLocaleString();
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
       {/* Printable CSS Rules for Thermal 80mm Roll */}
       <style jsx global>{`
         @media print {
@@ -124,14 +125,14 @@ export function ThermalReceiptModal({
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col max-h-[90vh]"
       >
         {/* Modal Top Bar (Screen Only) */}
-        <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between no-print shrink-0">
+        <div className="px-5 py-3.5 bg-slate-50/70 border-b border-slate-100 text-slate-900 flex items-center justify-between no-print shrink-0">
           <div className="flex items-center gap-2">
             <Printer className="w-4 h-4 text-brand" />
             <h3 className="font-bold text-xs">Customer Sales Receipt</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -225,7 +226,7 @@ export function ThermalReceiptModal({
         outlet={outlet}
         onPrintThermal={handlePrint}
       />
-    </div>
+    </div></Portal>
   );
 }
 

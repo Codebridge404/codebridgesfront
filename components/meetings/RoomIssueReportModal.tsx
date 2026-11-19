@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,6 +13,7 @@ import {
   reportMeetingIssuePublicApi,
 } from '@/lib/api/meetings';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface RoomIssueReportModalProps {
   isOpen: boolean;
@@ -88,7 +95,7 @@ export function RoomIssueReportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop animate-in fade-in duration-150">
       <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
@@ -195,6 +202,6 @@ export function RoomIssueReportModal({
           </form>
         )}
       </div>
-    </div>
+    </div></Portal>
   );
 }

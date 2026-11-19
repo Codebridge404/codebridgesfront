@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -17,6 +23,7 @@ import {
 } from 'lucide-react';
 import { splitBillApi, SplitBillPayload } from '@/lib/api';
 import { posAudio } from '@/hooks/usePosAudio';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosSplitBillModalProps {
   table: {
@@ -91,7 +98,7 @@ export function PosSplitBillModal({ table, onClose, onSuccess }: PosSplitBillMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 select-none font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 select-none font-sans">
       <div className="bg-white w-full max-w-xl rounded-3xl p-6 shadow-2xl border border-slate-200/90 space-y-5 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -304,6 +311,6 @@ export function PosSplitBillModal({ table, onClose, onSuccess }: PosSplitBillMod
           </div>
         )}
       </div>
-    </div>
+    </div></Portal>
   );
 }

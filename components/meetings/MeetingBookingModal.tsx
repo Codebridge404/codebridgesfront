@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -34,6 +40,7 @@ import {
   RecurringPreviewItem,
 } from '@/lib/api/meetings';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface MeetingBookingModalProps {
   isOpen: boolean;
@@ -297,7 +304,7 @@ export function MeetingBookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 cb-modal-backdrop animate-in fade-in duration-150">
       <div className="w-full max-w-2xl max-h-[92vh] rounded-3xl bg-white border border-slate-200/90 shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Wizard Header & Stepper */}
         <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
@@ -862,6 +869,6 @@ export function MeetingBookingModal({
           </div>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

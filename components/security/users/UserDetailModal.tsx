@@ -1,7 +1,7 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-05
- * Task: BD-0146
+ * Date: 2026-11-19
+ * Task: Super Admin Profile Modal Theme & Self-Delete Guard
  */
 
 'use client';
@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveMediaUrl } from '@/lib/mediaUtils';
+import { getAuthUser } from '@/lib/api';
 import {
   X,
   User,
@@ -42,6 +43,7 @@ export interface UserDetailModalProps {
   onDelete?: (user: any) => void;
   tenantName?: string;
   readOnly?: boolean;
+  currentUserId?: string | number | null;
 }
 
 export function UserDetailModal({
@@ -53,6 +55,7 @@ export function UserDetailModal({
   onDelete,
   tenantName,
   readOnly = false,
+  currentUserId,
 }: UserDetailModalProps) {
   const [mounted, setMounted] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -62,6 +65,9 @@ export function UserDetailModal({
   }, []);
 
   if (!user || !mounted) return null;
+
+  const activeUserId = currentUserId !== undefined ? currentUserId : getAuthUser()?.id;
+  const isSelf = activeUserId != null && String(user.id) === String(activeUserId);
 
   const isActive =
     user.is_active === 1 ||
@@ -104,7 +110,7 @@ export function UserDetailModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto transition-all"
+      className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto transition-all"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -117,18 +123,18 @@ export function UserDetailModal({
         className="w-full max-w-xl rounded-3xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden font-sans my-8 relative z-10"
       >
         {/* Header with Avatar & Identity */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-brand-hover p-6 text-white relative">
+        <div className="bg-slate-50/70 border-b border-slate-100 p-6 text-slate-900 relative">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
             title="Close"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-4">
-            <div className="relative w-16 h-16 rounded-2xl bg-white/20 border border-white/30 backdrop-blur-md text-white font-black text-xl flex items-center justify-center shadow-inner uppercase overflow-hidden shrink-0 select-none">
+            <div className="relative w-16 h-16 rounded-2xl bg-brand-subtle border border-brand-border text-brand font-black text-xl flex items-center justify-center shadow-xs uppercase overflow-hidden shrink-0 select-none">
               <span>{displayName.slice(0, 2).toUpperCase()}</span>
               {avatarUrl && (
                 <img
@@ -143,32 +149,37 @@ export function UserDetailModal({
               )}
             </div>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pr-8">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-xl font-black tracking-tight truncate">{displayName}</h3>
+                <h3 className="text-xl font-black tracking-tight text-slate-900 truncate">{displayName}</h3>
+                {isSelf && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-subtle text-brand border border-brand-border">
+                    You (Active Session)
+                  </span>
+                )}
                 {isActive ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Active Account
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-400/30 inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                     Suspended
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-slate-300 font-mono">
+              <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-slate-500 font-mono">
                 <span>User ID: #{user.id}</span>
                 {user.uuid && <span>· {user.uuid.slice(0, 8)}...</span>}
                 <button
                   type="button"
                   onClick={(e) => handleCopy(String(user.uuid || user.id), 'id', e)}
-                  className="p-1 rounded-md hover:bg-white/10 text-slate-300 transition-colors"
+                  className="p-1 rounded-md hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                   title="Copy User ID"
                 >
-                  {copiedKey === 'id' ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3" />}
+                  {copiedKey === 'id' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                 </button>
               </div>
             </div>
@@ -314,7 +325,7 @@ export function UserDetailModal({
             {hasWriteActions ? (
               <>
                 <div className="flex items-center gap-2">
-                  {onToggleStatus && (
+                  {onToggleStatus && !isSelf && (
                     <button
                       type="button"
                       onClick={() => {
@@ -333,7 +344,7 @@ export function UserDetailModal({
                     </button>
                   )}
 
-                  {onDelete && (
+                  {onDelete && !isSelf && (
                     <button
                       type="button"
                       onClick={() => {
@@ -388,7 +399,7 @@ export function UserDetailModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
                 >
                   Close Profile
                 </button>

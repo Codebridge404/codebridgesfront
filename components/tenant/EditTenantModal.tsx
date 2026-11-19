@@ -1,9 +1,16 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit, X, UserCheck } from 'lucide-react';
 import { Tenant } from './types';
+import { Portal } from '@/components/ui/Portal';
 
 interface EditTenantModalProps {
   isOpen: boolean;
@@ -27,8 +34,8 @@ export function EditTenantModal({
   if (!isOpen || !selectedTenant) return null;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 cb-modal-backdrop z-[9999] flex items-center justify-center p-4 font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -210,6 +217,6 @@ export function EditTenantModal({
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

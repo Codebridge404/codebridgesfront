@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,6 +11,7 @@ import { Search, UserPlus, X, Check, Star, Wallet, Loader2, User, QrCode } from 
 import { getCustomersApi, createCustomerApi } from '@/lib/api';
 import { PosCustomer } from './usePosCustomerAndTable';
 import { PosLoyaltyQrScannerModal } from './PosLoyaltyQrScannerModal';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosCustomerSelectorModalProps {
   isOpen: boolean;
@@ -74,7 +81,7 @@ export function PosCustomerSelectorModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 sm:p-4 font-sans">
       <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -267,6 +274,6 @@ export function PosCustomerSelectorModal({
           onClose();
         }}
       />
-    </div>
+    </div></Portal>
   );
 }

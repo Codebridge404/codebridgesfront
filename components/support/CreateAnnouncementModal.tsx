@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Megaphone, Send, AlertTriangle, Info, AlertOctagon, Loader2 } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateAnnouncementModalProps {
   isOpen: boolean;
@@ -43,8 +50,8 @@ export function CreateAnnouncementModal({ isOpen, onClose, onSubmit }: CreateAnn
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -179,6 +186,6 @@ export function CreateAnnouncementModal({ isOpen, onClose, onSubmit }: CreateAnn
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

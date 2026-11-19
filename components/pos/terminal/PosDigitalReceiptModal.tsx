@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,6 +24,7 @@ import {
 } from 'lucide-react';
 import { sendDigitalReceiptApi, getReceiptHtmlUrl } from '@/lib/api/sales';
 import { getPosReceiptSettings } from '@/lib/posReceiptUtils';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosDigitalReceiptModalProps {
   isOpen: boolean;
@@ -107,7 +114,7 @@ export function PosDigitalReceiptModal({
   const publicReceiptUrl = saleId ? getReceiptHtmlUrl(saleId) : '#';
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -115,19 +122,19 @@ export function PosDigitalReceiptModal({
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col"
       >
         {/* Top Header */}
-        <div className="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-slate-50/70 border-b border-slate-100 text-slate-900 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+            <div className="w-8 h-8 rounded-xl bg-brand-subtle text-brand flex items-center justify-center border border-brand-border">
               <Receipt className="w-4 h-4" />
             </div>
             <div>
               <h3 className="font-bold text-sm">Send Digital E-Receipt</h3>
-              <p className="text-[11px] text-slate-400">Slip #{receiptNumber}</p>
+              <p className="text-[11px] text-slate-500">Slip #{receiptNumber}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -188,7 +195,7 @@ export function PosDigitalReceiptModal({
                       onPrintThermal();
                       onClose();
                     }}
-                    className="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all"
+                    className="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-brand hover:bg-brand-hover-hover text-white text-xs font-bold transition-all"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     Also Print Thermal Paper (${getPosReceiptSettings().paperWidth || '80mm'})
@@ -337,7 +344,7 @@ export function PosDigitalReceiptModal({
           )}
         </div>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }
 

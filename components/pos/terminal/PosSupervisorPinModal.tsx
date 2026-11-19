@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, X, Delete, Lock, AlertCircle } from 'lucide-react';
 import { posAudio } from '@/hooks/usePosAudio';
 import { appleSpring, pressSpring } from '@/lib/animations';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosSupervisorPinModalProps {
   actionName: string;
@@ -69,7 +76,7 @@ export function PosSupervisorPinModal({
   }, [pin]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 select-none font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -107,7 +114,7 @@ export function PosSupervisorPinModal({
                 transition={appleSpring}
                 className={`w-4 h-4 rounded-full border-2 transition-colors ${
                   idx < pin.length
-                    ? 'bg-slate-900 border-slate-900'
+                    ? 'bg-brand border-brand'
                     : 'bg-slate-100/80 border-slate-300'
                 }`}
               />
@@ -165,12 +172,12 @@ export function PosSupervisorPinModal({
           type="button"
           onClick={handleVerify}
           disabled={pin.length < 4}
-          className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-brand active:scale-[0.97] text-white text-xs font-black shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+          className="w-full py-3 rounded-2xl bg-brand hover:bg-brand-hover active:scale-[0.97] text-white text-xs font-black shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
         >
           <Lock className="w-4 h-4" />
           <span>Authorize Override</span>
         </button>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }

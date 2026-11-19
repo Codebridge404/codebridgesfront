@@ -30,6 +30,7 @@ import {
   OfflineSyncConflictItem,
 } from '@/lib/api/sales';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface OfflineSyncConflictModalProps {
   isOpen: boolean;
@@ -140,7 +141,7 @@ export function OfflineSyncConflictModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 sm:p-5 overflow-y-auto font-sans">
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col max-h-[90vh] overflow-hidden">
         {/* Modal Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
@@ -239,7 +240,7 @@ export function OfflineSyncConflictModal({
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 statusFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-xs'
+                  ? 'bg-brand text-white shadow-xs'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
               }`}
             >
@@ -407,7 +408,7 @@ export function OfflineSyncConflictModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors cursor-pointer shadow-xs"
+            className="px-4 py-2 rounded-xl bg-brand text-white font-bold text-xs hover:bg-brand-hover-hover transition-colors cursor-pointer shadow-xs"
           >
             Close Center
           </button>
@@ -416,7 +417,7 @@ export function OfflineSyncConflictModal({
 
       {/* Resolution Action Sub-Modal */}
       {selectedConflict && (
-        <div className="fixed inset-0 z-60 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 cb-modal-backdrop flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -541,7 +542,7 @@ export function OfflineSyncConflictModal({
           </div>
         </div>
       )}
-    </div>
+    </div></Portal>
   );
 }
 

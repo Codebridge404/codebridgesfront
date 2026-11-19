@@ -18,6 +18,7 @@ import {
   Code2,
 } from 'lucide-react';
 import { ApiClientItem } from '@/lib/api/apiClients';
+import { Portal } from '@/components/ui/Portal';
 
 interface RevealClientKeyModalProps {
   client: ApiClientItem | null;
@@ -62,7 +63,7 @@ const api = axios.create({
 });`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -150,13 +151,13 @@ const api = axios.create({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+            className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs"
           >
             Done
           </button>
         </div>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }
 

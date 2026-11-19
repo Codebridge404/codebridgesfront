@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { ShieldCheck, X } from 'lucide-react';
 import { ReconciliationException } from './types';
+import { Portal } from '@/components/ui/Portal';
 
 interface ReconciliationResolveModalProps {
   selectedException: ReconciliationException | null;
@@ -24,7 +31,7 @@ export function ReconciliationResolveModal({
   if (!selectedException) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl space-y-4 border border-slate-200">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
@@ -86,6 +93,6 @@ export function ReconciliationResolveModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -9,6 +15,7 @@ import {
   Loader2,
   Building2,
 } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface ImpersonateModalProps {
   tenant: any | null;
@@ -48,8 +55,8 @@ export function ImpersonateModal({
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -139,6 +146,6 @@ export function ImpersonateModal({
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -10,6 +16,7 @@ import { buttonStyles } from '@/lib/theme';
 import { SubscriptionCapacityTab } from './subscription-hub/SubscriptionCapacityTab';
 import { SubscriptionPlansTab } from './subscription-hub/SubscriptionPlansTab';
 import { SubscriptionInvoicesTab } from './subscription-hub/SubscriptionInvoicesTab';
+import { Portal } from '@/components/ui/Portal';
 
 interface SubscriptionHubModalProps {
   isOpen: boolean;
@@ -59,8 +66,8 @@ export function SubscriptionHubModal({
     ) || plans[1] || plans[0];
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/40 backdrop-blur-md">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 cb-modal-backdrop">
         <motion.div
           variants={modalBackdrop}
           initial="hidden"
@@ -166,6 +173,6 @@ export function SubscriptionHubModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

@@ -399,7 +399,7 @@ export function KitchenDisplayView() {
             onClick={() => setStatusFilter(st)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-black capitalize transition-all cursor-pointer ${
               statusFilter === st
-                ? 'bg-slate-900 text-white shadow-xs'
+                ? 'bg-brand text-white shadow-xs'
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >

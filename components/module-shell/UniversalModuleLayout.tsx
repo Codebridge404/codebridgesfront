@@ -172,7 +172,7 @@ export function UniversalModuleLayout({
                 <div className="pt-2 flex items-center justify-center">
                   <Link
                     href="/launchpad"
-                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs transition-colors text-center cursor-pointer shadow-sm"
                   >
                     Return to Launchpad
                   </Link>

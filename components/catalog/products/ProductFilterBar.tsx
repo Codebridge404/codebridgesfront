@@ -132,7 +132,7 @@ export function ProductFilterBar({
             onClick={() => setSelectedCategory('')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === ''
-                ? 'bg-slate-900 text-white shadow-xs'
+                ? 'bg-brand text-white shadow-xs'
                 : 'bg-transparent border border-slate-300/80 text-slate-600 hover:bg-slate-200/50'
             }`}
           >

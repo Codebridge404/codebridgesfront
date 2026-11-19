@@ -26,6 +26,7 @@ import {
   getDownloadExportUrl,
 } from '@/lib/api/sales';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface AsyncExportQueueDrawerProps {
   isOpen: boolean;
@@ -159,7 +160,7 @@ export function AsyncExportQueueDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-end font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-end font-sans">
       <div className="w-full max-w-md h-full bg-white shadow-2xl border-l border-slate-200 flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
@@ -321,7 +322,7 @@ export function AsyncExportQueueDrawer({
           </button>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }
 

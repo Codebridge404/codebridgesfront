@@ -1,9 +1,16 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { createPlatformAnnouncementApi } from '@/lib/api/support';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateBroadcastModalProps {
   isOpen: boolean;
@@ -56,7 +63,7 @@ export function CreateBroadcastModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop font-sans">
       <div className="w-full max-w-lg bg-white rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-4">
         <h3 className="font-black text-base text-slate-900">Create Merchant Broadcast</h3>
 
@@ -128,6 +135,6 @@ export function CreateBroadcastModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

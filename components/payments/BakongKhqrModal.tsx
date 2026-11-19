@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +17,7 @@ import {
   getTenantProfileApi,
 } from '@/lib/api';
 import { BakongKhqrCard } from './BakongKhqrCard';
+import { Portal } from '@/components/ui/Portal';
 
 interface BakongKhqrModalProps {
   isOpen: boolean;
@@ -195,7 +202,7 @@ export function BakongKhqrModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -314,7 +321,7 @@ export function BakongKhqrModal({
           )}
         </div>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }
 

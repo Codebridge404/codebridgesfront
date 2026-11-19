@@ -186,7 +186,7 @@ export function CreateOrgModal({
             animate="animate"
             exit="exit"
             onClick={handleClose}
-            className="fixed inset-0 bg-slate-950/45 backdrop-blur-md"
+            className="fixed inset-0 cb-modal-backdrop"
           />
 
           {/* Modal Dialog Card */}

@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { SlidersHorizontal, Plus, Minus, X, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { adjustStockApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface ProductStockAdjustModalProps {
   isOpen: boolean;
@@ -60,7 +67,7 @@ export function ProductStockAdjustModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -195,6 +202,6 @@ export function ProductStockAdjustModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

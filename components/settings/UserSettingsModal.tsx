@@ -25,6 +25,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { appleSpring, pressSpring } from '@/lib/animations';
+import { Portal } from '@/components/ui/Portal';
 
 export interface UserThemePreferences {
   theme: 'light' | 'dark' | 'system';
@@ -36,7 +37,7 @@ export interface UserThemePreferences {
   highContrast: boolean;
 }
 
-const DEFAULT_PREFERENCES: UserThemePreferences = {
+export const DEFAULT_PREFERENCES: UserThemePreferences = {
   theme: 'light',
   fontSize: 'standard',
   accentColor: '#2563EB',
@@ -46,14 +47,14 @@ const DEFAULT_PREFERENCES: UserThemePreferences = {
   highContrast: false,
 };
 
-const LIGHT_BG_COLORS = [
+export const LIGHT_BG_COLORS = [
   { name: 'Aurora Ice', hex: '#F8FAFD', desc: 'Default' },
   { name: 'Enterprise Gray', hex: '#EAEBED', desc: 'RGB(234, 235, 237)' },
   { name: 'Soft Sky', hex: '#F0F6FF', desc: 'Cool tint' },
   { name: 'Pure White', hex: '#FFFFFF', desc: 'Clean paper' },
 ];
 
-const ACCENT_COLORS = [
+export const ACCENT_COLORS = [
   { name: 'Royal Sapphire', hex: '#2563EB', hover: '#1D4ED8', subtle: '#EFF6FF', border: '#BFDBFE' },
   { name: 'Emerald Mint', hex: '#059669', hover: '#047857', subtle: '#ECFDF5', border: '#A7F3D0' },
   { name: 'Electric Violet', hex: '#7C3AED', hover: '#6D28D9', subtle: '#F5F3FF', border: '#DDD6FE' },
@@ -167,343 +168,403 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
 
   if (!isOpen) return null;
 
+  const isDarkPreview =
+    prefs.theme === 'dark' ||
+    (prefs.theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+
+  const previewSurfaceBg = isDarkPreview ? '#090d16' : prefs.lightBgColor || '#F8FAFD';
+
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={appleSpring}
-          className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden font-sans text-slate-800 dark:text-slate-100 divide-y divide-slate-100 dark:divide-slate-800/80"
+    <Portal>
+      <AnimatePresence>
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 cb-modal-backdrop animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
         >
-          {/* Modal Header */}
-          <div className="px-6 py-4.5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-brand/10 dark:bg-brand/20 text-brand flex items-center justify-center shadow-2xs">
-                <Settings className="w-5 h-5" />
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={appleSpring}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden font-sans text-slate-800 dark:text-slate-100 flex flex-col max-h-[88vh]"
+          >
+            {/* Unified Modal Header (matches Modal.tsx) */}
+            <div className="px-4 py-3.5 flex items-center justify-between bg-slate-50/40 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-brand-subtle text-brand border border-brand-border flex items-center justify-center">
+                  <Settings className="w-3.5 h-3.5" />
+                </div>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                  Display Preferences
+                </h3>
+                {savedBadge && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" />
+                    Saved
+                  </span>
+                )}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                    Display &amp; Experience Preferences
-                  </h3>
-                  {savedBadge && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 animate-in fade-in zoom-in">
-                      Saved
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body - Compact Single-Screen Layout */}
+            <div className="p-4 overflow-y-auto flex-1 space-y-3.5">
+              {/* Top Row: Compact Preview + Theme */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
+                {/* Mini Workspace Preview */}
+                <div className="sm:col-span-5 rounded-xl border border-slate-200/80 dark:border-slate-800 p-2.5 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col justify-between gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-brand" />
+                      Preview
                     </span>
+                    <span className="text-[10px] font-mono font-bold text-slate-400">
+                      {prefs.fontSize === 'compact' ? '14px' : prefs.fontSize === 'large' ? '18px' : '16px'}
+                    </span>
+                  </div>
+
+                  <div
+                    className="relative rounded-lg border border-slate-200/90 dark:border-slate-700/80 p-2 overflow-hidden h-16 flex flex-col justify-between transition-colors"
+                    style={{ backgroundColor: previewSurfaceBg }}
+                  >
+                    {prefs.canvasStyle === 'mesh' && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle at 10% 15%, ${prefs.accentColor}26, transparent 55%), radial-gradient(circle at 90% 85%, #8B5CF622, transparent 55%)`,
+                        }}
+                      />
+                    )}
+                    {prefs.canvasStyle === 'grid' && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${prefs.accentColor}22 1px, transparent 1px), linear-gradient(to bottom, ${prefs.accentColor}22 1px, transparent 1px)`,
+                          backgroundSize: '10px 10px',
+                        }}
+                      />
+                    )}
+                    <div className="relative z-10 flex items-center justify-between">
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: prefs.accentColor }}
+                      />
+                      <span
+                        className="px-1.5 py-0.5 rounded text-[8px] font-extrabold text-white"
+                        style={{ backgroundColor: prefs.accentColor }}
+                      >
+                        Active
+                      </span>
+                    </div>
+                    <div
+                      className={`relative z-10 rounded-md px-2 py-1 border flex items-center justify-between ${
+                        isDarkPreview
+                          ? 'bg-slate-900/85 border-slate-700/80'
+                          : 'bg-white/90 border-slate-200/90'
+                      }`}
+                    >
+                      <div className="h-1.5 w-10 rounded-full bg-current opacity-20" />
+                      <span
+                        className="w-4 h-2.5 rounded-xs"
+                        style={{ backgroundColor: prefs.accentColor }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Appearance Theme Selector */}
+                <div className="sm:col-span-7 space-y-1.5 flex flex-col justify-between">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Sun className="w-3 h-3 text-brand" />
+                    <span>Theme</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    {[
+                      { id: 'light', label: 'Light', icon: Sun },
+                      { id: 'dark', label: 'Dark', icon: Moon },
+                      { id: 'system', label: 'System', icon: Monitor },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const active = prefs.theme === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => updatePreference('theme', item.id as any)}
+                          className={`p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+                            active
+                              ? 'border-brand bg-brand-subtle/50 dark:bg-brand/15 shadow-xs ring-1 ring-brand'
+                              : 'border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
+                          }`}
+                        >
+                          <div
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                              active
+                                ? 'bg-brand text-white shadow-2xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                            }`}
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <span
+                            className={`text-[11px] font-extrabold ${
+                              active ? 'text-brand' : 'text-slate-700 dark:text-slate-200'
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle Row: Accent Swatches + Text Size */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 items-center">
+                {/* Accent Swatches */}
+                <div className="sm:col-span-6 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Palette className="w-3 h-3 text-brand" />
+                    <span>Accent Color</span>
+                  </label>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {ACCENT_COLORS.map((c) => {
+                      const active = prefs.accentColor.toLowerCase() === c.hex.toLowerCase();
+                      return (
+                        <button
+                          key={c.hex}
+                          type="button"
+                          title={c.name}
+                          onClick={() => updatePreference('accentColor', c.hex)}
+                          className={`w-6 h-6 rounded-full transition-all cursor-pointer flex items-center justify-center ${
+                            active
+                              ? 'ring-2 ring-offset-2 ring-brand dark:ring-offset-slate-900 scale-110 shadow-xs'
+                              : 'hover:scale-105 opacity-90 hover:opacity-100'
+                          }`}
+                          style={{ backgroundColor: c.hex }}
+                        >
+                          {active && <Check className="w-3 h-3 text-white" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Text Size */}
+                <div className="sm:col-span-6 space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Type className="w-3 h-3 text-brand" />
+                    <span>Text Size</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+                    {[
+                      { id: 'compact', label: 'Small', scale: '14px' },
+                      { id: 'standard', label: 'Default', scale: '16px' },
+                      { id: 'large', label: 'Large', scale: '18px' },
+                    ].map((item) => {
+                      const active = prefs.fontSize === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          title={item.scale}
+                          onClick={() => updatePreference('fontSize', item.id as any)}
+                          className={`py-1.5 px-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer flex items-center justify-center ${
+                            active
+                              ? 'bg-brand text-white shadow-2xs'
+                              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Canvas Surface & Light Tint */}
+              <div className="space-y-2 pt-2.5 border-t border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Layout className="w-3 h-3 text-brand" />
+                    <span>Canvas Surface</span>
+                  </label>
+                  {prefs.theme !== 'dark' && (
+                    <div className="flex items-center gap-1.5">
+                      {LIGHT_BG_COLORS.map((bg) => {
+                        const active = (prefs.lightBgColor || '#F8FAFD').toLowerCase() === bg.hex.toLowerCase();
+                        return (
+                          <button
+                            key={bg.hex}
+                            type="button"
+                            onClick={() => updatePreference('lightBgColor', bg.hex)}
+                            title={bg.name}
+                            className={`w-4.5 h-4.5 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
+                              active ? 'border-brand ring-2 ring-brand/40 scale-110' : 'border-slate-300 hover:scale-105'
+                            }`}
+                            style={{ backgroundColor: bg.hex }}
+                          >
+                            {active && <Check className="w-2.5 h-2.5 text-brand" />}
+                          </button>
+                        );
+                      })}
+                      <input
+                        type="color"
+                        title="Custom Background Tint"
+                        value={prefs.lightBgColor || '#F8FAFD'}
+                        onChange={(e) => updatePreference('lightBgColor', e.target.value.toUpperCase())}
+                        className="w-4.5 h-4.5 rounded-full border border-slate-300 cursor-pointer p-0 bg-transparent"
+                      />
+                    </div>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Custom themes, font size, and UI styles for your account.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
 
-          {/* Modal Body - Scrollable */}
-          <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-            {/* 1. Theme Mode */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Sun className="w-3.5 h-3.5" />
-                <span>Appearance Theme</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { id: 'light', label: 'Light Mode', icon: Sun, desc: 'Clean bright canvas' },
-                  { id: 'dark', label: 'Dark Mode', icon: Moon, desc: 'Obsidian deep contrast' },
-                  { id: 'system', label: 'System Default', icon: Monitor, desc: 'Sync with OS setting' },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const active = prefs.theme === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => updatePreference('theme', item.id as any)}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative ${
-                        active
-                          ? 'border-brand bg-brand/5 dark:bg-brand/10 shadow-xs ring-1 ring-brand'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <Icon className={`w-4 h-4 ${active ? 'text-brand' : 'text-slate-400'}`} />
-                        {active && <Check className="w-3.5 h-3.5 text-brand" />}
-                      </div>
-                      <p className={`text-xs font-black ${active ? 'text-brand' : 'text-slate-800 dark:text-slate-200'}`}>
-                        {item.label}
-                      </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1">{item.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 2. Font Size Scaling */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Type className="w-3.5 h-3.5" />
-                <span>Interface Font Scaling</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { id: 'compact', label: 'Compact (85%)', scale: '14px', desc: 'Dense ERP tables' },
-                  { id: 'standard', label: 'Standard (100%)', scale: '16px', desc: 'Balanced layout' },
-                  { id: 'large', label: 'Comfortable (115%)', scale: '18px', desc: 'High readability' },
-                ].map((item) => {
-                  const active = prefs.fontSize === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => updatePreference('fontSize', item.id as any)}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        active
-                          ? 'border-brand bg-brand/5 dark:bg-brand/10 shadow-xs ring-1 ring-brand'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-mono text-[11px] font-bold text-slate-400">{item.scale}</span>
-                        {active && <Check className="w-3.5 h-3.5 text-brand" />}
-                      </div>
-                      <p className={`text-xs font-black ${active ? 'text-brand' : 'text-slate-800 dark:text-slate-200'}`}>
-                        {item.label}
-                      </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{item.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 3. Primary Accent / Brand Color */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5" />
-                <span>Brand &amp; Accent Palette</span>
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {ACCENT_COLORS.map((c) => {
-                  const active = prefs.accentColor.toLowerCase() === c.hex.toLowerCase();
-                  return (
-                    <button
-                      key={c.hex}
-                      type="button"
-                      onClick={() => updatePreference('accentColor', c.hex)}
-                      className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all cursor-pointer ${
-                        active
-                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800 shadow-xs ring-1 ring-slate-900 dark:ring-white'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                      }`}
-                    >
-                      <span
-                        className="w-4 h-4 rounded-full shrink-0 shadow-xs flex items-center justify-center"
-                        style={{ backgroundColor: c.hex }}
-                      >
-                        {active && <Check className="w-2.5 h-2.5 text-white" />}
-                      </span>
-                      <span className="text-xs font-extrabold truncate text-slate-800 dark:text-slate-200">
-                        {c.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 3b. Light Mode Background Color */}
-            {prefs.theme !== 'dark' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                    <Sun className="w-3.5 h-3.5" />
-                    <span>Light Mode Background Color</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500 cursor-pointer">
-                    <span>Custom:</span>
-                    <input
-                      type="color"
-                      value={prefs.lightBgColor || '#F8FAFD'}
-                      onChange={(e) => updatePreference('lightBgColor', e.target.value.toUpperCase())}
-                      className="w-6 h-6 rounded-lg border border-slate-300 cursor-pointer p-0 bg-transparent"
-                    />
-                  </label>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {LIGHT_BG_COLORS.map((bg) => {
-                    const active = (prefs.lightBgColor || '#F8FAFD').toLowerCase() === bg.hex.toLowerCase();
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'flat', label: 'Flat' },
+                    { id: 'mesh', label: 'Mesh' },
+                    { id: 'grid', label: 'Grid' },
+                  ].map((item) => {
+                    const active = prefs.canvasStyle === item.id;
                     return (
                       <button
-                        key={bg.hex}
+                        key={item.id}
                         type="button"
-                        onClick={() => updatePreference('lightBgColor', bg.hex)}
-                        className={`flex items-center gap-2 p-2.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                        onClick={() => updatePreference('canvasStyle', item.id as UserThemePreferences['canvasStyle'])}
+                        className={`p-1.5 rounded-xl border text-center transition-all cursor-pointer ${
                           active
-                            ? 'border-brand bg-brand/5 shadow-xs ring-1 ring-brand'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                            ? 'border-brand bg-brand-subtle/40 dark:bg-brand/15 shadow-xs ring-1 ring-brand'
+                            : 'border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                         }`}
                       >
-                        <span
-                          className="w-5 h-5 rounded-lg shrink-0 border border-slate-300 flex items-center justify-center shadow-2xs"
-                          style={{ backgroundColor: bg.hex }}
+                        <div
+                          className="relative h-7 w-full rounded-lg mb-1 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden"
+                          style={{ backgroundColor: previewSurfaceBg }}
                         >
-                          {active && <Check className="w-3 h-3 text-brand" />}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-extrabold truncate text-slate-800 dark:text-slate-200">
-                            {bg.name}
-                          </p>
-                          <p className="text-[9px] text-slate-400 truncate">{bg.desc}</p>
+                          {item.id === 'mesh' && (
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: `radial-gradient(circle at 15% 20%, ${prefs.accentColor}35, transparent 55%), radial-gradient(circle at 85% 80%, rgba(139,92,246,0.22), transparent 55%)`,
+                              }}
+                            />
+                          )}
+                          {item.id === 'grid' && (
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                backgroundImage: `linear-gradient(to right, ${prefs.accentColor}28 1px, transparent 1px), linear-gradient(to bottom, ${prefs.accentColor}28 1px, transparent 1px)`,
+                                backgroundSize: '8px 8px',
+                              }}
+                            />
+                          )}
+                          {active && (
+                            <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-brand text-white flex items-center justify-center shadow-2xs">
+                              <Check className="w-2 h-2" />
+                            </span>
+                          )}
                         </div>
+                        <span className={`text-[11px] font-extrabold ${active ? 'text-brand' : 'text-slate-700 dark:text-slate-200'}`}>
+                          {item.label}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-            )}
 
-            {/* 4. Canvas Background Surface with Live Mini-Previews */}
-            <div className="space-y-2.5">
-              <label className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Layout className="w-3.5 h-3.5" />
-                <span>Canvas Background Surface</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { id: 'flat', label: 'Minimal Flat', desc: 'Pure solid color' },
-                  { id: 'mesh', label: 'Aurora Mesh', desc: 'Soft ambient glow' },
-                  { id: 'grid', label: 'Technical Grid', desc: 'Engineering grid' },
-                ].map((item) => {
-                  const active = prefs.canvasStyle === item.id;
-                  const previewBg = prefs.theme === 'dark' ? '#090d16' : (prefs.lightBgColor || '#F8FAFD');
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => updatePreference('canvasStyle', item.id as UserThemePreferences['canvasStyle'])}
-                      className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                        active
-                          ? 'border-brand bg-brand/5 dark:bg-brand/10 shadow-xs ring-1 ring-brand'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
-                      }`}
-                    >
-                      <div
-                        className="relative h-10 w-full rounded-xl mb-2 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden"
-                        style={{ backgroundColor: previewBg }}
-                      >
-                        {item.id === 'mesh' && (
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              background:
-                                'radial-gradient(circle at 15% 20%, rgba(37,99,235,0.22), transparent 55%), radial-gradient(circle at 85% 80%, rgba(139,92,246,0.18), transparent 55%)',
-                            }}
-                          />
-                        )}
-                        {item.id === 'grid' && (
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              backgroundImage:
-                                'linear-gradient(to right, rgba(37,99,235,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(37,99,235,0.18) 1px, transparent 1px)',
-                              backgroundSize: '10px 10px',
-                            }}
-                          />
-                        )}
-                        {active && (
-                          <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand text-white flex items-center justify-center shadow-xs">
-                            <Check className="w-2.5 h-2.5" />
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-xs font-black ${active ? 'text-brand' : 'text-slate-800 dark:text-slate-200'}`}>
-                        {item.label}
-                      </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{item.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 5. Audio & Ergonomics Toggles */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                    {prefs.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Interactive Sound Chimes</p>
-                    <p className="text-[10px] text-slate-400">Play confirmation chimes on barcode scans and tenders</p>
-                  </div>
-                </div>
+              {/* Compact Icon Toggles */}
+              <div className="grid grid-cols-2 gap-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => updatePreference('soundEnabled', !prefs.soundEnabled)}
-                  className={`w-11 h-6 rounded-full transition-colors p-1 cursor-pointer flex items-center ${
-                    prefs.soundEnabled ? 'bg-brand justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                  title="Toggle interactive sound chimes"
+                  className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                    prefs.soundEnabled
+                      ? 'border-brand/40 bg-brand-subtle/30 dark:bg-brand/10'
+                      : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/30'
                   }`}
                 >
-                  <span className="w-4 h-4 rounded-full bg-white shadow-2xs block" />
+                  <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                      prefs.soundEnabled ? 'bg-brand text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-500'
+                    }`}>
+                      {prefs.soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Sound</span>
+                  </div>
+                  <span className={`w-8 h-4.5 rounded-full transition-colors p-0.5 flex items-center ${
+                    prefs.soundEnabled ? 'bg-brand justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                  }`}>
+                    <span className="w-3.5 h-3.5 rounded-full bg-white shadow-2xs block" />
+                  </span>
                 </button>
-              </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                    <Eye className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">High-Contrast Outlines</p>
-                    <p className="text-[10px] text-slate-400">Enhance borders and boundaries for high-glare environments</p>
-                  </div>
-                </div>
                 <button
                   type="button"
                   onClick={() => updatePreference('highContrast', !prefs.highContrast)}
-                  className={`w-11 h-6 rounded-full transition-colors p-1 cursor-pointer flex items-center ${
-                    prefs.highContrast ? 'bg-brand justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                  title="Toggle high-contrast borders"
+                  className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                    prefs.highContrast
+                      ? 'border-brand/40 bg-brand-subtle/30 dark:bg-brand/10'
+                      : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/30'
                   }`}
                 >
-                  <span className="w-4 h-4 rounded-full bg-white shadow-2xs block" />
+                  <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                      prefs.highContrast ? 'bg-brand text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-500'
+                    }`}>
+                      <Eye className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">High Contrast</span>
+                  </div>
+                  <span className={`w-8 h-4.5 rounded-full transition-colors p-0.5 flex items-center ${
+                    prefs.highContrast ? 'bg-brand justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                  }`}>
+                    <span className="w-3.5 h-3.5 rounded-full bg-white shadow-2xs block" />
+                  </span>
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Modal Footer */}
-          <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handleResetDefaults}
-              className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to Defaults</span>
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-brand text-white text-xs font-extrabold hover:bg-brand-hover shadow-xs transition-colors cursor-pointer"
-            >
-              Done
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+            {/* Unified Modal Footer (matches Modal.tsx) */}
+            <div className="px-4 py-3 bg-slate-50/60 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <button
+                type="button"
+                onClick={handleResetDefaults}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    </Portal>
   );
 }
 

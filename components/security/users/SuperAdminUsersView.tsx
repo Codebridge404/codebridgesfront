@@ -9,12 +9,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   getUsersApi,
   getRolesApi,
-  getRolePermissionsApi,
   createUserApi,
   updateUserApi,
   resetUserPasswordApi,
   deleteUserApi,
   getSuperAdminTenantsApi,
+  getAuthUser,
 } from '@/lib/api';
 import {
   UserStatsHeader,
@@ -24,7 +24,6 @@ import {
   UserFormData,
   UserDetailModal,
   ResetPasswordModal,
-  PermissionsMatrixModal,
 } from './index';
 import { useConfirm, useToast } from '@/components/common';
 
@@ -44,6 +43,7 @@ const INITIAL_FORM: UserFormData = {
 export function SuperAdminUsersView() {
   const confirm = useConfirm();
   const toast = useToast();
+  const currentUserId = useMemo(() => getAuthUser()?.id ?? null, []);
 
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
@@ -69,9 +69,6 @@ export function SuperAdminUsersView() {
 
   const [selectedUserForReset, setSelectedUserForReset] = useState<any | null>(null);
   const [newPassword, setNewPassword] = useState('');
-
-  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
-  const [permissionsMatrix, setPermissionsMatrix] = useState<any>(null);
 
   // Fetch initial data
   const fetchData = useCallback(async (isSilentRefresh = false) => {
@@ -221,10 +218,14 @@ export function SuperAdminUsersView() {
 
   // Bulk Deactivate / Suspend
   const handleBulkDeactivate = async () => {
-    if (selectedUserIds.length === 0) return;
+    const targetIds = selectedUserIds.filter((id) => currentUserId == null || String(id) !== String(currentUserId));
+    if (targetIds.length === 0) {
+      toast.warning('You cannot suspend your own active account.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Bulk Suspend Users',
-      description: `Are you sure you want to suspend ${selectedUserIds.length} selected user accounts? Their active sessions and sign-in abilities will be revoked.`,
+      description: `Are you sure you want to suspend ${targetIds.length} selected user accounts? Their active sessions and sign-in abilities will be revoked.`,
       confirmText: 'Suspend Selected',
       variant: 'warning',
     });
@@ -232,7 +233,7 @@ export function SuperAdminUsersView() {
 
     try {
       const results = await Promise.allSettled(
-        selectedUserIds.map((id) => updateUserApi(id, { is_active: false }))
+        targetIds.map((id) => updateUserApi(id, { is_active: false }))
       );
       const successful = results.filter((r) => r.status === 'fulfilled').length;
       toast.success(`Successfully suspended ${successful} user accounts`);
@@ -245,10 +246,14 @@ export function SuperAdminUsersView() {
 
   // Bulk Delete
   const handleBulkDelete = async () => {
-    if (selectedUserIds.length === 0) return;
+    const targetIds = selectedUserIds.filter((id) => currentUserId == null || String(id) !== String(currentUserId));
+    if (targetIds.length === 0) {
+      toast.warning('You cannot delete your own active account.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Bulk Delete Users',
-      description: `Are you sure you want to permanently delete ${selectedUserIds.length} selected user accounts? This action cannot be undone.`,
+      description: `Are you sure you want to permanently delete ${targetIds.length} selected user accounts? This action cannot be undone.`,
       confirmText: 'Delete Selected',
       variant: 'danger',
     });
@@ -256,11 +261,11 @@ export function SuperAdminUsersView() {
 
     try {
       const results = await Promise.allSettled(
-        selectedUserIds.map((id) => deleteUserApi(id))
+        targetIds.map((id) => deleteUserApi(id))
       );
       const successful = results.filter((r) => r.status === 'fulfilled').length;
       toast.success(`Successfully deleted ${successful} user accounts`);
-      setUsers((prev) => prev.filter((u) => !selectedUserIds.includes(u.id)));
+      setUsers((prev) => prev.filter((u) => !targetIds.includes(u.id)));
       setSelectedUserIds([]);
       fetchData(true);
     } catch {
@@ -377,6 +382,10 @@ export function SuperAdminUsersView() {
 
   // Delete User with Permanent Removal & Confirmation
   const handleDeleteUser = async (id: number | string, name: string) => {
+    if (currentUserId != null && String(id) === String(currentUserId)) {
+      toast.warning('You cannot delete your own active account.');
+      return;
+    }
     const confirmed = await confirm({
       title: 'Delete User Account',
       description: `Are you sure you want to permanently delete "${name}"? This account will be removed from the platform and linked workspaces. This action cannot be undone.`,
@@ -411,17 +420,6 @@ export function SuperAdminUsersView() {
           setEditingUser(null);
           setFormData(INITIAL_FORM);
           setShowCreateModal(true);
-        }}
-        onOpenPermissionsModal={async () => {
-          if (!permissionsMatrix) {
-            try {
-              const res = await getRolePermissionsApi();
-              setPermissionsMatrix(res?.data || res?.matrix || {});
-            } catch {
-              setPermissionsMatrix({});
-            }
-          }
-          setShowPermissionsModal(true);
         }}
       />
 
@@ -465,6 +463,7 @@ export function SuperAdminUsersView() {
         onToggleStatus={handleToggleStatus}
         onDeleteUser={handleDeleteUser}
         tenantMap={tenantMap}
+        currentUserId={currentUserId}
       />
 
       {/* Create / Edit User Modal */}
@@ -487,6 +486,7 @@ export function SuperAdminUsersView() {
       {/* User Detail Modal */}
       <UserDetailModal
         user={viewingUser}
+        currentUserId={currentUserId}
         onClose={() => setViewingUser(null)}
         onEdit={(u) => {
           setViewingUser(null);
@@ -509,13 +509,6 @@ export function SuperAdminUsersView() {
         onClose={() => setSelectedUserForReset(null)}
         onSubmit={handleResetPassword}
         saving={saving}
-      />
-
-      {/* RBAC Permissions Matrix Modal */}
-      <PermissionsMatrixModal
-        isOpen={showPermissionsModal}
-        permissionsMatrix={permissionsMatrix}
-        onClose={() => setShowPermissionsModal(false)}
       />
     </div>
   );

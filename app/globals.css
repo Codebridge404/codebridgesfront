@@ -651,5 +651,19 @@ html.dark.high-contrast * {
   --color-card-border: rgba(248, 250, 252, 0.35);
 }
 
+/* Unified Full-Screen Popup / Modal / Drawer Backdrop */
+.cb-modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.dark .cb-modal-backdrop {
+  background-color: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+
 
 

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -14,6 +20,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { getAuditLogsApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export interface AuditLogItem {
   id: number | string;
@@ -240,7 +247,7 @@ export const SuperAdminAuditLogsView: React.FC = () => {
 
       {/* Payload Inspection Modal */}
       {selectedPayload && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div className="w-full max-w-xl bg-slate-900 text-slate-100 rounded-2xl p-6 shadow-2xl space-y-3 font-mono text-xs border border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold text-brand flex items-center gap-2 text-sm font-sans">
@@ -285,7 +292,7 @@ export const SuperAdminAuditLogsView: React.FC = () => {
               Close Inspector
             </button>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

@@ -47,6 +47,7 @@ import {
   ThreatDefenseSettings,
 } from '@/lib/api/securityEvents';
 import { useToast, useConfirm } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 export function SecurityEventsStudioView() {
   const toast = useToast();
@@ -401,7 +402,7 @@ export function SecurityEventsStudioView() {
             onClick={() => setActiveTab('incidents')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'incidents'
-                ? 'bg-slate-900 text-white shadow-xs font-black'
+                ? 'bg-brand text-white shadow-xs font-black'
                 : 'text-slate-600 hover:bg-slate-200/60'
             }`}
           >
@@ -414,7 +415,7 @@ export function SecurityEventsStudioView() {
             onClick={() => setActiveTab('banned')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'banned'
-                ? 'bg-slate-900 text-white shadow-xs font-black'
+                ? 'bg-brand text-white shadow-xs font-black'
                 : 'text-slate-600 hover:bg-slate-200/60'
             }`}
           >
@@ -432,7 +433,7 @@ export function SecurityEventsStudioView() {
             onClick={() => setActiveTab('settings')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'settings'
-                ? 'bg-slate-900 text-white shadow-xs font-black'
+                ? 'bg-brand text-white shadow-xs font-black'
                 : 'text-slate-600 hover:bg-slate-200/60'
             }`}
           >
@@ -481,7 +482,7 @@ export function SecurityEventsStudioView() {
                         ? 'bg-orange-500 text-white'
                         : sev === 'medium'
                         ? 'bg-amber-500 text-white'
-                        : 'bg-slate-900 text-white'
+                        : 'bg-brand text-white'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -504,7 +505,7 @@ export function SecurityEventsStudioView() {
                     outcomeFilter === out
                       ? out === 'blocked'
                         ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-900 text-white'
+                        : 'bg-brand text-white'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -895,9 +896,9 @@ export function SecurityEventsStudioView() {
       )}
 
       {/* 7. Forensic Event Inspector Drawer Modal */}
-      <AnimatePresence>
+      <Portal><AnimatePresence>
         {inspectingEvent && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -992,7 +993,7 @@ export function SecurityEventsStudioView() {
                 <button
                   type="button"
                   onClick={() => setInspectingEvent(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+                  className="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs"
                 >
                   Close
                 </button>
@@ -1000,12 +1001,12 @@ export function SecurityEventsStudioView() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence></Portal>
 
       {/* 8. Manual Ban IP Modal */}
-      <AnimatePresence>
+      <Portal><AnimatePresence>
         {showBanModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1089,7 +1090,7 @@ export function SecurityEventsStudioView() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence></Portal>
     </div>
   );
 }

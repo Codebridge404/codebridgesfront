@@ -92,7 +92,7 @@ export function PosReportsTaxCard({ startDate, endDate }: PosReportsTaxCardProps
             type="button"
             disabled={downloading}
             onClick={handleDownloadTaxCsv}
-            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-black text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             <span>Export Tax Ledger CSV</span>

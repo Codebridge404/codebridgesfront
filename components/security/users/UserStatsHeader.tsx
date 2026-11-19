@@ -8,7 +8,7 @@ interface UserStatsHeaderProps {
   totalUsers: number;
   activeUsersCount: number;
   superAdminsCount: number;
-  onOpenPermissionsModal: () => void;
+  onOpenPermissionsModal?: () => void;
   onOpenCreateModal: () => void;
   onOpenInviteModal?: () => void;
 }
@@ -43,16 +43,6 @@ export function UserStatsHeader({
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onOpenPermissionsModal}
-            className="px-3.5 py-2.5 rounded-xl bg-transparent border border-slate-300/80 text-slate-700 hover:bg-slate-200/50 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors backdrop-blur-sm"
-          >
-            <Grid className="w-4 h-4 text-brand" />
-            Permissions Matrix
-          </motion.button>
-
           {onOpenInviteModal && (
             <motion.button
               whileHover={{ scale: 1.02 }}

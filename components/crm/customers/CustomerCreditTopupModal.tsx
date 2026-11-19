@@ -132,7 +132,7 @@ export function CustomerCreditTopupModal({
   const currentBalance = parseFloat(customer?.store_credit || customer?.store_credit_balance || '0');
 
   const content = (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col max-h-[92vh] overflow-hidden font-sans">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
@@ -229,7 +229,7 @@ export function CustomerCreditTopupModal({
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
                 >
                   <Printer className="w-4 h-4" />
                   <span>Print Tax Invoice</span>

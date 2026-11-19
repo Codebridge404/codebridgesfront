@@ -74,7 +74,7 @@ export function SuperAdminReportsView() {
 
         <button
           onClick={handleExportCsv}
-          className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-brand hover:bg-brand-hover-hover text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
         >
           <Download className="w-4 h-4 text-brand" />
           Export {activeTab.toUpperCase()} Report (CSV)

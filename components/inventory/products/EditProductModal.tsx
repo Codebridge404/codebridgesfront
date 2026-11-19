@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Save, X, AlertCircle, Loader2, Plus, Camera } from 'lucide-react';
 import { updateProductApi, createCategoryApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -139,7 +146,7 @@ export function EditProductModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
@@ -388,6 +395,6 @@ export function EditProductModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

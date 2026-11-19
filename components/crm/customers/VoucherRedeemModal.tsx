@@ -95,7 +95,7 @@ export function VoucherRedeemModal({
   };
 
   const content = (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden font-sans">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
@@ -143,7 +143,7 @@ export function VoucherRedeemModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors cursor-pointer shadow-sm"
+                  className="w-full py-2.5 rounded-xl bg-brand text-white font-bold text-xs hover:bg-brand-hover-hover transition-colors cursor-pointer shadow-sm"
                 >
                   Done
                 </button>

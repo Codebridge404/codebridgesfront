@@ -174,7 +174,7 @@ export function PosReportsManagementView() {
           onClick={() => setActiveTab('executive')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'executive'
-              ? 'bg-slate-900 text-white shadow-xs'
+              ? 'bg-brand text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -186,7 +186,7 @@ export function PosReportsManagementView() {
           onClick={() => setActiveTab('tax')}
           className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'tax'
-              ? 'bg-slate-900 text-white shadow-xs'
+              ? 'bg-brand text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >

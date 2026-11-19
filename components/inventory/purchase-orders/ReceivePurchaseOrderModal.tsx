@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Warehouse, Loader2, PackageCheck } from 'lucide-react';
 import { receivePurchaseOrderApi, getOutletsApi, getProductsApi } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 interface ReceivePurchaseOrderModalProps {
   isOpen: boolean;
@@ -58,7 +65,7 @@ export function ReceivePurchaseOrderModal({ isOpen, onClose, po, onSuccess }: Re
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans select-none">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans select-none">
       <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -159,7 +166,7 @@ export function ReceivePurchaseOrderModal({ isOpen, onClose, po, onSuccess }: Re
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }
 

@@ -123,7 +123,7 @@ export function PosBusinessProfileModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={() => !isActivating && onClose()}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+            className="fixed inset-0 cb-modal-backdrop"
           />
 
           {/* Modal Content Dialog Card */}

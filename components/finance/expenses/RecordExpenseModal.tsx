@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { DollarSign, X, Loader2 } from 'lucide-react';
 import { ExpenseFormData, EXPENSE_CATEGORIES } from './types';
+import { Portal } from '@/components/ui/Portal';
 
 interface RecordExpenseModalProps {
   showModal: boolean;
@@ -24,7 +31,7 @@ export function RecordExpenseModal({
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl space-y-4 border border-slate-100">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
@@ -113,6 +120,6 @@ export function RecordExpenseModal({
           </div>
         </form>
       </div>
-    </div>
+    </div></Portal>
   );
 }

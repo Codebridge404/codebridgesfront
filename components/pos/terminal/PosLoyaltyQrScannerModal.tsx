@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -5,6 +11,7 @@ import { Camera, X, QrCode, Search, AlertCircle, CheckCircle2, Loader2, Sparkles
 import { getCustomersApi } from '@/lib/api';
 import { posAudio } from '@/hooks/usePosAudio';
 import { PosCustomer } from './usePosCustomerAndTable';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosLoyaltyQrScannerModalProps {
   isOpen: boolean;
@@ -154,7 +161,7 @@ export function PosLoyaltyQrScannerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-3 sm:p-4 font-sans">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
@@ -270,6 +277,6 @@ export function PosLoyaltyQrScannerModal({
           </div>
         </div>
       </div>
-    </div>
+    </div></Portal>
   );
 }

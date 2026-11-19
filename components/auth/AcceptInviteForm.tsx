@@ -125,7 +125,7 @@ export function AcceptInviteForm() {
         </div>
         <button
           onClick={() => router.push('/login')}
-          className="w-full py-3 bg-slate-900 hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+          className="w-full py-3 bg-brand hover:bg-brand-hover-hover text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
         >
           Return to Sign In
         </button>

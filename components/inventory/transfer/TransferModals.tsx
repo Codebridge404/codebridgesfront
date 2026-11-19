@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightLeft, Plus, X, Package, Trash2, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface TransferModalsProps {
   isCreateModalOpen: boolean;
@@ -67,7 +74,7 @@ export const TransferModals: React.FC<TransferModalsProps> = ({
     <>
       {/* --- Create Stock Transfer Modal --- */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -191,12 +198,12 @@ export const TransferModals: React.FC<TransferModalsProps> = ({
               </div>
             </form>
           </motion.div>
-        </div>
+        </div></Portal>
       )}
 
       {/* --- View Transfer Details Modal --- */}
       {isDetailModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -271,7 +278,7 @@ export const TransferModals: React.FC<TransferModalsProps> = ({
               ) : null}
             </div>
           </motion.div>
-        </div>
+        </div></Portal>
       )}
     </>
   );

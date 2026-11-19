@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { getCrmActivitiesApi, createCrmActivityApi, CrmActivity } from '@/lib/api';
+import { Portal } from '@/components/ui/Portal';
 
 export function CrmActivityTimeline() {
   const [activities, setActivities] = useState<CrmActivity[]>([]);
@@ -129,7 +136,7 @@ export function CrmActivityTimeline() {
 
       {/* Log Activity Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-black text-base text-slate-900 flex items-center gap-2">
@@ -213,7 +220,7 @@ export function CrmActivityTimeline() {
               </div>
             </form>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );

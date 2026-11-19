@@ -35,6 +35,7 @@ import { WorkspaceStaffDirectory } from '@/components/launchpad/staff/WorkspaceS
 import { WorkspaceStaffInviteSearch } from '@/components/launchpad/staff/WorkspaceStaffInviteSearch';
 import { WorkspaceStaffCreateForm, AVAILABLE_ROLES } from '@/components/launchpad/staff/WorkspaceStaffCreateForm';
 import { PendingInvitationsCard } from '@/components/organization/staff/PendingInvitationsCard';
+import { Portal } from '@/components/ui/Portal';
 
 export default function OrganizationStaffPage() {
   const confirm = useConfirm();
@@ -270,7 +271,7 @@ export default function OrganizationStaffPage() {
 
       {/* Add Staff Popup Screen (Modal with 2 Options) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+        <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop animate-fade-in">
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scale-up">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -343,7 +344,7 @@ export default function OrganizationStaffPage() {
               )}
             </div>
           </div>
-        </div>
+        </div></Portal>
       )}
 
       {/* 1. Header Banner */}

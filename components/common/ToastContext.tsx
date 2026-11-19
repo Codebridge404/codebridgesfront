@@ -86,7 +86,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {/* Global Floating Toast Container */}
       <div
         aria-live="polite"
-        className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
+        className="fixed top-5 right-5 z-[100000] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
       >
         <AnimatePresence>
           {toasts.map((t) => (

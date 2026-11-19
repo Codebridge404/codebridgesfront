@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,6 +19,7 @@ import {
 } from 'lucide-react';
 import { getReturnQuoteApi, processRefundApi } from '@/lib/api';
 import { ReturnLineItemsTable } from './ReturnLineItemsTable';
+import { Portal } from '@/components/ui/Portal';
 
 interface SalesReturnModalProps {
   isOpen: boolean;
@@ -137,7 +144,7 @@ export function SalesReturnModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 overflow-y-auto font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -145,17 +152,17 @@ export function SalesReturnModal({
         className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 bg-slate-50/70 border-b border-slate-100 text-slate-900 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-brand" />
             <div>
               <h3 className="font-bold text-sm">Sales Return &amp; Customer Refund</h3>
-              <p className="text-[10px] text-slate-400">Lookup original receipt and restock returned items</p>
+              <p className="text-[11px] text-slate-500">Lookup original receipt and restock returned items</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -349,7 +356,7 @@ export function SalesReturnModal({
           )}
         </div>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }
 

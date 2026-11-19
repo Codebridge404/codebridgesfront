@@ -47,6 +47,7 @@ interface UserTableProps {
   onToggleStatus: (user: any) => void;
   onDeleteUser: (id: number | string, name: string) => void;
   tenantMap?: Map<string, string>;
+  currentUserId?: number | string | null;
 }
 
 export function UserTable({
@@ -65,6 +66,7 @@ export function UserTable({
   onToggleStatus,
   onDeleteUser,
   tenantMap,
+  currentUserId,
 }: UserTableProps) {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
@@ -248,6 +250,7 @@ export function UserTable({
               {users.map((user, idx) => {
                 const isActive = user.is_active === 1 || user.is_active === true;
                 const isSelected = selectedUserIds.includes(user.id);
+                const isSelf = currentUserId != null && String(user.id) === String(currentUserId);
                 const orgName =
                   user.tenant_name ||
                   (tenantMap && user.tenant_id ? tenantMap.get(String(user.tenant_id)) : null) ||
@@ -384,14 +387,23 @@ export function UserTable({
                         </button>
 
                         {/* Delete User */}
-                        <button
-                          type="button"
-                          onClick={() => onDeleteUser(user.id, user.name)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Permanently Delete User Account"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {isSelf ? (
+                          <span
+                            className="p-1.5 rounded-lg text-slate-300 cursor-not-allowed"
+                            title="You cannot delete your own active account"
+                          >
+                            <Lock className="w-4 h-4" />
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onDeleteUser(user.id, user.name)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                            title="Permanently Delete User Account"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
 

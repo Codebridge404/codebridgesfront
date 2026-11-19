@@ -43,7 +43,7 @@ export function TicketsTab({
               onClick={() => onSelectStatus(st.id)}
               className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                 selectedStatus === st.id
-                  ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                  ? 'bg-brand text-white shadow-2xs font-extrabold'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >

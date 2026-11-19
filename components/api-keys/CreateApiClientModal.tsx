@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ApiClientType } from '@/lib/api/apiClients';
+import { Portal } from '@/components/ui/Portal';
 
 interface CreateApiClientModalProps {
   isOpen: boolean;
@@ -85,7 +86,7 @@ export function CreateApiClientModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-sans">
+    <Portal><div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 cb-modal-backdrop animate-fade-in font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -195,7 +196,7 @@ export function CreateApiClientModal({
           </div>
         </form>
       </motion.div>
-    </div>
+    </div></Portal>
   );
 }
 

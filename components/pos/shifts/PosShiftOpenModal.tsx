@@ -1,8 +1,15 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Plus, X, Banknote } from 'lucide-react';
+import { Portal } from '@/components/ui/Portal';
 
 interface PosShiftOpenModalProps {
   isOpen: boolean;
@@ -43,12 +50,12 @@ export function PosShiftOpenModal({
   const quickFloats = [50, 100, 150, 200];
 
   return (
-    <AnimatePresence>
+    <Portal><AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4"
       >
         <motion.div
           initial={{ scale: 0.95, y: 15 }}
@@ -140,6 +147,6 @@ export function PosShiftOpenModal({
           </form>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

@@ -1,3 +1,9 @@
+/**
+ * Author: Antigravity Team
+ * Date: 2026-11-19
+ * Task: Full-Screen Popup Backdrop Audit
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -22,6 +28,7 @@ import { apiFetch } from '@/lib/api';
 import { getPlatformModulesApi, PlatformModuleRecord } from '@/lib/api/modules';
 import { ICON_MAP } from '@/components/platform/modules/PlatformModuleModal';
 import { canonicalModuleId } from '@/lib/modules';
+import { Portal } from '@/components/ui/Portal';
 
 interface TenantDetailDrawerProps {
   tenant: any | null;
@@ -102,15 +109,15 @@ export function TenantDetailDrawer({
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden flex justify-end font-sans">
+    <Portal><AnimatePresence>
+      <div className="fixed inset-0 z-[9999] overflow-hidden flex justify-end font-sans">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs"
+          className="absolute inset-0 cb-modal-backdrop"
         />
 
         {/* Drawer Panel */}
@@ -292,6 +299,6 @@ export function TenantDetailDrawer({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence></Portal>
   );
 }

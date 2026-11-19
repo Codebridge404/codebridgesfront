@@ -29,6 +29,7 @@ import {
   issueDigitalVoucherApi,
 } from '@/lib/api';
 import { useToast } from '@/components/common';
+import { Portal } from '@/components/ui/Portal';
 
 export const SuperAdminGiftCardsView: React.FC = () => {
   const toast = useToast();
@@ -307,7 +308,7 @@ export const SuperAdminGiftCardsView: React.FC = () => {
 
       {/* Gift Card Issue Modal */}
       {showCardModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-black text-base text-slate-900">Issue Gift Card</h3>
@@ -354,12 +355,12 @@ export const SuperAdminGiftCardsView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div></Portal>
       )}
 
       {/* Digital Voucher Issue Modal */}
       {showVoucherModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+        <Portal><div className="fixed inset-0 z-[9999] cb-modal-backdrop flex items-center justify-center p-4 font-sans">
           <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -443,7 +444,7 @@ export const SuperAdminGiftCardsView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   );
