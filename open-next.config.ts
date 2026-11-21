@@ -1,8 +1,13 @@
 /**
  * Author: Antigravity Team
- * Date: 2026-11-18
+ * Date: 2026-11-21
  * Task: BD-0173 - OpenNext Cloudflare Workers Adapter Configuration
  */
 import { defineCloudflareConfig } from '@opennextjs/cloudflare';
 
-export default defineCloudflareConfig({});
+const openNextConfig = {
+  ...defineCloudflareConfig({}),
+  buildCommand: 'npm run build:next',
+};
+
+export default openNextConfig;
